@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/organization.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/organization.json",
   "title": "Organization",
   "description": "The primary multi-tenant boundary in MIP. All configuration resources are scoped to an organization.",
   "type": "object",

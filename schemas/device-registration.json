@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/device-registration.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/device-registration.json",
   "title": "DeviceRegistration",
   "description": "User device record for push notification delivery and challenge-response authentication",
   "type": "object",

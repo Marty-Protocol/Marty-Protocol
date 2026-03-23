@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/applicant.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/applicant.json",
   "title": "Applicant",
   "description": "A person or entity that has applied for a credential through an application-approval flow. Applicants are a first-class entity with a lifecycle that terminates in credential issuance, rejection, or withdrawal.",
   "type": "object",

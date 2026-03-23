@@ -45,7 +45,7 @@
       "auth_required": false,
       "discoverable": true,
       "standard_ref": "OpenID for Verifiable Credential Issuance §11.2.3",
-      "response_schema_ref": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/oid4vci-issuer-metadata.json"
+      "response_schema_ref": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/oid4vci-issuer-metadata.json"
     },
     {
       "rel": "token",

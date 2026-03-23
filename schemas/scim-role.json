@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/scim-role.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/scim-role.json",
   "title": "MIP SCIM Role (Group Extension)",
   "description": "MIP extension attributes for SCIM 2.0 Group resources representing roles. Schema URI: urn:mip:scim:schemas:extension:Organization:2.0:Role",
   "type": "object",

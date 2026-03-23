@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/revocation-check-modes.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/revocation-check-modes.json",
   "title": "RevocationCheckMode",
   "description": "Behaviour when performing a revocation check during credential verification. Used in TrustProfile.revocation_policy.check_mode and OrganizationTrustProfile.revocation_policy.check_mode.",
   "type": "string",

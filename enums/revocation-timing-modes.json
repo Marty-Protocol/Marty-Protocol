@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/revocation-timing-modes.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/revocation-timing-modes.json",
   "title": "RevocationTimingMode",
   "description": "Check-timing behavior for revocation during credential verification. Used in RevocationProfile.check_mode. Distinct from RevocationCheckMode (revocation-check-modes.json) which governs failure behavior in TrustProfile.",
   "type": "string",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/scim-user-extension.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/scim-user-extension.json",
   "title": "MIP SCIM User Extension",
   "description": "MIP extension attributes for SCIM 2.0 User resources. Schema URI: urn:mip:scim:schemas:extension:Organization:2.0:User",
   "type": "object",

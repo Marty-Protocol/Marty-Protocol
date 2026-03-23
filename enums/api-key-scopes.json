@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/api-key-scopes.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/api-key-scopes.json",
   "title": "ApiKeyScope",
   "description": "Formal permission scope strings for MIP API keys. Scopes follow the pattern '{resource}:{action}'. Organization-scoped keys may hold any of these scopes. Deployment-scoped keys are restricted to a subset appropriate for a single deployment profile.",
   "type": "string",

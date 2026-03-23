@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/webhook.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/webhook.json",
   "title": "Webhook",
   "description": "A persistent webhook subscription that delivers signed HTTP POST callbacks to an operator-controlled endpoint when specified identity lifecycle events occur. Managed via /v1/organizations/{org_id}/webhooks.",
   "type": "object",

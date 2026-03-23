@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/trust-framework.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/trust-framework.json",
   "title": "TrustFramework",
   "description": "System-managed trust framework definition for ICAO, AAMVA, EUDI, or custom identity ecosystems. Immutable at the system level; organisations reference frameworks via OrganizationTrustProfile.",
   "type": "object",

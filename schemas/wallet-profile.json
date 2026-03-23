@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/wallet-profile.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/wallet-profile.json",
   "title": "WalletProfile",
   "description": "Wallet compatibility record for a credential format × protocol × compliance combination. The canonical wallet profile set is auto-derived from CredentialTemplate configuration via the derivation key (credential_format, issuance_protocol, compliance_profile_code). Organizations MAY store override entries at /v1/wallet-registry to extend or customise the derived profile for their specific deployment. GET /v1/wallet-registry returns merged results: derived profiles supplemented (or overridden) by stored entries.",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/reviewer-lock.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/reviewer-lock.json",
   "title": "ReviewerLock",
   "description": "A time-bounded exclusive lock that prevents two reviewers from acting on the same applicant simultaneously. A lock MUST be acquired before transitioning an applicant out of SUBMITTED or UNDER_REVIEW. Locks expire automatically; the default TTL is 1800 seconds (30 minutes).",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/revocation-reasons.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/revocation-reasons.json",
   "title": "RevocationReason",
   "description": "Standard reasons for revoking a credential or trust anchor. Aligned with RFC 5280 CRL reason codes and X.509 CRLReason extension.",
   "type": "string",

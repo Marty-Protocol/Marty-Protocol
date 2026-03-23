@@ -24,7 +24,7 @@ SCHEMAS_DIR = REPO_ROOT / "schemas"
 ENUMS_DIR = REPO_ROOT / "enums"
 
 # Base URI used by the protocol schemas' $id fields.
-_BASE_URI = "https://raw.githubusercontent.com/did-report/marty-protocol/main/"
+_BASE_URI = "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/"
 
 
 def _build_registry() -> Registry:
@@ -71,7 +71,7 @@ def validate_instance(schema_path: pathlib.Path, instance: object) -> None:
     """Validate *instance* against the schema at *schema_path*.
 
     Uses the module-level REGISTRY so that all local ``$ref`` values resolve
-    correctly against the raw.githubusercontent.com/did-report/marty-protocol namespace.
+    correctly against the raw.githubusercontent.com/marty-protocol/marty-protocol namespace.
 
     Raises ``jsonschema.ValidationError`` on failure.
     """

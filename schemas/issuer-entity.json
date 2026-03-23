@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/issuer-entity.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuer-entity.json",
   "title": "IssuerEntity",
   "description": "An organisation or authority that issues credentials. Separate from Trust Anchors (cryptographic roots). An issuer may be backed by one or more trust anchors. Supports full lifecycle: accreditation, suspension, and revocation.",
   "type": "object",

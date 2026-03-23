@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/flow.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/flow.json",
   "title": "Flow",
   "description": "End-to-end identity lifecycle orchestration. Each flow_type maps to a fixed protocol step sequence defined by OID4VCI, OID4VP, mDL ISO 18013-5, or application-approval workflows.",
   "type": "object",

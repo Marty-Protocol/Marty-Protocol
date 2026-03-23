@@ -20,7 +20,7 @@ This section will be populated when the 0.1.0 final specification is ratified.
 
 No breaking changes are expected between 0.1.0-draft and 0.1.0. The draft-to-final transition is expected to include:
 
-- Finalized `$id` URLs in JSON Schemas (currently using `https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/`)
+- Finalized `$id` URLs in JSON Schemas (currently using `https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/`)
 - Any field renames or type changes identified during implementation review
 - Conformance test additions
 

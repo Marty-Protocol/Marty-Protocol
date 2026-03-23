@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/trust-registry-sync.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/trust-registry-sync.json",
   "title": "TrustRegistrySync",
   "description": "Delta-sync resource for mobile wallet trust registry updates. Provides CSCA/DSC anchor data from the /v1/trust-registry endpoints so wallets can sync incrementally rather than downloading the full trust store on every launch.",
   "type": "object",

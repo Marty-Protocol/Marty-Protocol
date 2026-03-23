@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/zk-circuits.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/zk-circuits.json",
   "title": "ZkCircuitSystem",
   "description": "Registry of zero-knowledge circuit systems and their circuit identifiers accepted in PredicateSpec.supported_circuits. Each system defines a proof scheme, a circuit identification method, and the set of supported credential formats and predicate types.",
   "type": "string",

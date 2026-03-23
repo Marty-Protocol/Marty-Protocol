@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/policy-set.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/policy-set.json",
   "title": "PolicySet",
   "description": "A named collection of Cedar policies that governs authorization decisions within the MIP platform. PolicySets are referenced by ApplicationTemplate (approval_rules), TrustProfile (issuer trust), ComplianceProfile (verification rules), and the API gateway (access control). Each PolicySet contains one or more Cedar policy statements evaluated using deny-by-default semantics: at least one permit must match and zero forbid policies may match for the request to be authorized.",
   "type": "object",

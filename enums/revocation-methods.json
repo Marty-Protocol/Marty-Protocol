@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/revocation-methods.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/revocation-methods.json",
   "title": "RevocationMechanism",
   "description": "Supported cryptographic credential revocation mechanisms",
   "type": "string",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/presentation-policy.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/presentation-policy.json",
   "title": "PresentationPolicy",
   "description": "Minimum disclosure requirements, predicates, and holder binding for credential verification",
   "type": "object",

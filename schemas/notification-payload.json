@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/notification-payload.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/notification-payload.json",
   "title": "NotificationPayload",
   "description": "Message content and routing metadata for multi-channel identity event notification",
   "type": "object",

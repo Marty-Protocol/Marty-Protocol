@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/revocation-batch.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/revocation-batch.json",
   "title": "RevocationBatch",
   "description": "Privacy-preserving batched revocation. Instead of publishing status list updates immediately (which enables timing-correlation attacks), the system batches revocations and publishes at configurable intervals. Interval options: 1h, 6h, 24h.",
   "type": "object",

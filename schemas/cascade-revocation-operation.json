@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/cascade-revocation-operation.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/cascade-revocation-operation.json",
   "title": "CascadeRevocationOperation",
   "description": "Tracks the cascade from a trust anchor or issuer revocation to dependent credentials. Provides circuit-breaker protection (pauses when affected_credential_count >= circuit_breaker_threshold), rollback support, and manual confirmation for high-impact operations.",
   "type": "object",

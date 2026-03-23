@@ -162,7 +162,7 @@ marty-protocol/
 
 The canonical normative document is [SPECIFICATION.md](SPECIFICATION.md).
 
-> **Note on schema URIs:** All JSON Schema `$id` fields use `https://raw.githubusercontent.com/did-report/marty-protocol/main/` as the base URI, which resolves directly once the repository is public. For local development, use the registry in [tests/helpers.py](tests/helpers.py) or the reference implementation validators in `reference/`.
+> **Note on schema URIs:** All JSON Schema `$id` fields use `https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/` as the base URI, which resolves directly once the repository is public. For local development, use the registry in [tests/helpers.py](tests/helpers.py) or the reference implementation validators in `reference/`.
 
 ---
 

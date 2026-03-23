@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/vetting-check.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/vetting-check.json",
   "title": "VettingCheck",
   "description": "A discrete identity or document verification check performed as part of the applicant review process. Each check corresponds to a single automated or manual verification step.",
   "type": "object",

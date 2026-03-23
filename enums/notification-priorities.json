@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/notification-priorities.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/notification-priorities.json",
   "title": "NotificationPriority",
   "description": "Priority levels for notification delivery routing and FCM/APNs configuration",
   "type": "string",
