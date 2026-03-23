@@ -1,0 +1,44 @@
+{
+  "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "organization_id": "a3e4f5d6-7890-4abc-def0-123456789012",
+  "name": "Employee Badge Application",
+  "approval_strategy": "MANUAL",
+  "status": "ACTIVE",
+  "description": "Application for corporate employee badge credential",
+  "evidence_requirements": [
+    {
+      "evidence_id": "ev-photo",
+      "evidence_type": "SELFIE",
+      "description": "Passport-style headshot",
+      "required": true
+    },
+    {
+      "evidence_id": "ev-govt-id",
+      "evidence_type": "DOCUMENT_SCAN",
+      "description": "Government-issued photo ID scan",
+      "required": true
+    }
+  ],
+  "form_fields": [
+    {
+      "field_id": "full_name",
+      "label": "Full Legal Name",
+      "field_type": "TEXT",
+      "required": true
+    },
+    {
+      "field_id": "department",
+      "label": "Department",
+      "field_type": "SELECT",
+      "required": true,
+      "options": ["Engineering", "Sales", "HR", "Finance"]
+    }
+  ],
+  "claim_collection_rules": [],
+  "ui_config": {
+    "theme": "corporate",
+    "welcome_message": "Apply for your employee badge"
+  },
+  "created_at": "2026-01-15T10:00:00Z",
+  "updated_at": "2026-01-15T10:00:00Z"
+}

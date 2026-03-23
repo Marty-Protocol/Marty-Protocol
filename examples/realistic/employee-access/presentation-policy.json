@@ -1,0 +1,48 @@
+{
+  "id": "pp-employee-secure-zone-example",
+  "organization_id": "org-enterprise-example",
+  "name": "Secure Zone Employee Access Policy",
+  "description": "Verifies employee has clearance level ≥ 3 and the requested zone is in their access_zones list. Selectively discloses employee_id and clearance_level only — department and name are not requested.",
+  "required_claims": [
+    {
+      "claim_name": "employee_id",
+      "credential_type": "EmployeeAccessBadge"
+    },
+    {
+      "claim_name": "clearance_level",
+      "credential_type": "EmployeeAccessBadge",
+      "predicate_spec": {
+        "predicate_type": "RANGE_PROOF",
+        "params": {"threshold": 3, "comparison": "GTE"},
+        "fallback_policy": "DENY"
+      }
+    },
+    {
+      "claim_name": "access_zones",
+      "credential_type": "EmployeeAccessBadge"
+    },
+    {
+      "claim_name": "employment_status",
+      "credential_type": "EmployeeAccessBadge",
+      "predicate_spec": {
+        "predicate_type": "EQUALITY",
+        "params": {"value": "ACTIVE"},
+        "fallback_policy": "DENY"
+      }
+    }
+  ],
+  "accepted_credential_types": ["EmployeeAccessBadge"],
+  "trust_profile_id": "tp-enterprise-sd-jwt-example",
+  "holder_binding": {
+    "required": true,
+    "binding_methods": ["NONCE"],
+    "nonce_required": true
+  },
+  "freshness": {
+    "max_age_seconds": 28800,
+    "require_not_revoked": true,
+    "revocation_grace_seconds": 0
+  },
+  "prefer_predicates": true,
+  "created_at": "2026-03-11T00:00:00Z"
+}

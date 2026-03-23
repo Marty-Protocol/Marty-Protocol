@@ -1,0 +1,83 @@
+{
+  "id": "cp-enterprise-vc",
+  "name": "Enterprise Verifiable Credential",
+  "compliance_code": "ENTERPRISE_VC",
+  "version": "1.0.0",
+  "credential_format": "SD_JWT_VC",
+  "description": "General-purpose compliance profile for enterprise SD-JWT-VC credentials. No mandatory claim set — claim schema is defined by the Credential Template. Designed for internal enterprise use cases such as employee badges, access credentials, and loyalty programs.",
+  "specification_reference": "IETF SD-JWT-VC draft-ietf-oauth-sd-jwt-vc",
+  "required_claims": [],
+  "supported_algorithms": ["ES256", "ES384", "ES512", "EdDSA"],
+  "key_requirements": {
+    "min_key_size_bits": 256,
+    "key_modes": ["SOFTWARE", "HSM"],
+    "key_algorithm_families": ["EC", "OKP"]
+  },
+  "revocation_methods": ["BITSTRING_STATUS_LIST", "TOKEN_STATUS_LIST", "STATUS_LIST_2021"],
+  "revocation_required": false,
+  "allow_skip_revocation": true,
+  "trust_source_types": ["PINNED_ISSUER", "TRUST_LIST", "ROOT_CA"],
+  "holder_binding_required": false,
+  "selective_disclosure_required": false,
+  "api_surface": [
+    {
+      "rel": "openid-credential-issuer-metadata",
+      "path_template": "/.well-known/openid-credential-issuer",
+      "org_scoped_path": "/org/{org_id}/.well-known/openid-credential-issuer",
+      "method": "GET",
+      "auth_required": false,
+      "discoverable": true,
+      "standard_ref": "OpenID for Verifiable Credential Issuance §11.2.3",
+      "response_schema_ref": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/oid4vci-issuer-metadata.json"
+    },
+    {
+      "rel": "token",
+      "path_template": "/v1/issuance/token",
+      "org_scoped_path": "/org/{org_id}/v1/issuance/token",
+      "method": "POST",
+      "auth_required": false,
+      "discoverable": true,
+      "standard_ref": "RFC 6749 §3.2 / OID4VCI §6"
+    },
+    {
+      "rel": "credential",
+      "path_template": "/v1/issuance/credential",
+      "org_scoped_path": "/org/{org_id}/v1/issuance/credential",
+      "method": "POST",
+      "auth_required": true,
+      "discoverable": true,
+      "standard_ref": "OpenID for Verifiable Credential Issuance §7"
+    },
+    {
+      "rel": "nonce",
+      "path_template": "/v1/issuance/nonce",
+      "org_scoped_path": "/org/{org_id}/v1/issuance/nonce",
+      "method": "POST",
+      "auth_required": false,
+      "discoverable": true,
+      "standard_ref": "OpenID for Verifiable Credential Issuance §8"
+    },
+    {
+      "rel": "deferred-credential",
+      "path_template": "/v1/issuance/deferred-credential",
+      "org_scoped_path": "/org/{org_id}/v1/issuance/deferred-credential",
+      "method": "POST",
+      "auth_required": true,
+      "discoverable": true,
+      "standard_ref": "OpenID for Verifiable Credential Issuance §9"
+    },
+    {
+      "rel": "status-list",
+      "path_template": "/v1/issuance/status-list",
+      "org_scoped_path": "/org/{org_id}/v1/issuance/status-list",
+      "method": "GET",
+      "auth_required": false,
+      "discoverable": true,
+      "standard_ref": "IETF Token Status List draft-ietf-oauth-status-list"
+    }
+  ],
+  "is_system": true,
+  "immutable": true,
+  "status": "ACTIVE",
+  "created_at": "2026-01-01T00:00:00Z"
+}

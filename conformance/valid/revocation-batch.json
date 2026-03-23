@@ -1,0 +1,14 @@
+{
+  "id": "f3a4b5c6-d7e8-4901-2345-678901abcdef",
+  "organization_id": "f1e2d3c4-b5a6-4978-9012-345678901234",
+  "credential_format": "SD_JWT_VC",
+  "batch_interval": "24h",
+  "status": "PUBLISHED",
+  "pending_credential_ids": [],
+  "published_credential_count": 15,
+  "status_list_uri": "https://status.example.com/lists/batch-f3a4b5c6",
+  "scheduled_publish_at": "2026-03-16T00:00:00Z",
+  "published_at": "2026-03-16T00:01:30Z",
+  "created_at": "2026-03-15T00:00:00Z",
+  "updated_at": "2026-03-16T00:01:30Z"
+}

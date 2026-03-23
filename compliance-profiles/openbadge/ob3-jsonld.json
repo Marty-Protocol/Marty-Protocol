@@ -1,0 +1,90 @@
+{
+  "id": "cp-ob3-jsonld",
+  "name": "Open Badges v3 (JSON-LD Linked Data Proof)",
+  "compliance_code": "OB3_JSONLD",
+  "version": "1.0.0",
+  "credential_format": "JSON_LD",
+  "description": "Compliance profile for 1EdTech Open Badges v3.0 credentials encoded as W3C Verifiable Credentials with JSON-LD Linked Data Proofs. Uses the OB3 JSON-LD context and supports Data Integrity / Ed25519Signature2020 proof types.",
+  "specification_reference": "1EdTech Open Badges Specification v3.0; W3C Verifiable Credentials Data Model v2.0; W3C Data Integrity 1.0",
+  "required_claims": [
+    {"name": "type",              "description": "MUST include OpenBadgeCredential", "required": true},
+    {"name": "name",              "description": "Human-readable name of the achievement", "required": true},
+    {"name": "issuer",            "description": "Profile of the issuing organization (with id and type)", "required": true},
+    {"name": "validFrom",         "description": "ISO 8601 issuance date", "required": true},
+    {"name": "credentialSubject", "description": "Subject including achievement details (ActivityAchievement)", "required": true},
+    {"name": "proof",             "description": "Linked Data Proof (Ed25519Signature2020 or DataIntegrityProof)", "required": true}
+  ],
+  "optional_claims": [
+    {"name": "validUntil",        "description": "ISO 8601 expiry date", "required": false},
+    {"name": "evidence",          "description": "Supporting evidence", "required": false},
+    {"name": "endorsement",       "description": "Third-party endorsement credential", "required": false}
+  ],
+  "required_contexts": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.3.json"
+  ],
+  "supported_proof_types": ["Ed25519Signature2020", "DataIntegrityProof"],
+  "supported_algorithms": ["EdDSA", "ES256"],
+  "key_requirements": {
+    "min_key_size_bits": 256,
+    "key_modes": ["SOFTWARE", "HSM"],
+    "key_algorithm_families": ["EC", "OKP"]
+  },
+  "revocation_methods": ["StatusList2021", "BITSTRING_STATUS_LIST"],
+  "revocation_required": false,
+  "allow_skip_revocation": true,
+  "trust_source_types": ["PINNED_ISSUER"],
+  "holder_binding_required": false,
+  "selective_disclosure_required": false,
+  "is_system": true,
+  "immutable": true,
+  "status": "ACTIVE",
+  "discoverable": true,
+  "conformance_tests": [
+    {
+      "suite": "openbadge-ob3",
+      "module": "OB3JSONLDConformanceTest",
+      "spec_ref": "1EdTech OB3 §8.2 — JSON-LD Linked Data Proof profile",
+      "test_file": "marty-integration-tests/tests/integration/test_openbadge_conformance.py"
+    }
+  ],
+  "api_surface": [
+    {
+      "rel": "openid-credential-issuer-metadata",
+      "path_template": "/.well-known/openid-credential-issuer",
+      "org_scoped_path": "/org/{org_id}/.well-known/openid-credential-issuer",
+      "method": "GET",
+      "auth_required": false,
+      "discoverable": true,
+      "standard_ref": "OID4VCI 1.0 Final §12.2.3"
+    },
+    {
+      "rel": "token",
+      "path_template": "/v1/issuance/token",
+      "org_scoped_path": "/org/{org_id}/v1/issuance/token",
+      "method": "POST",
+      "auth_required": false,
+      "discoverable": true,
+      "standard_ref": "RFC 6749 §3.2 / OID4VCI §6"
+    },
+    {
+      "rel": "credential",
+      "path_template": "/v1/issuance/credential",
+      "org_scoped_path": "/org/{org_id}/v1/issuance/credential",
+      "method": "POST",
+      "auth_required": true,
+      "discoverable": true,
+      "standard_ref": "OID4VCI 1.0 Final §8"
+    },
+    {
+      "rel": "nonce",
+      "path_template": "/v1/issuance/nonce",
+      "org_scoped_path": "/org/{org_id}/v1/issuance/nonce",
+      "method": "POST",
+      "auth_required": false,
+      "discoverable": true,
+      "standard_ref": "OID4VCI 1.0 Final §7"
+    }
+  ],
+  "created_at": "2026-03-12T00:00:00Z"
+}

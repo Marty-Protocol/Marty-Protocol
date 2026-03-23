@@ -1,0 +1,10 @@
+{
+  "id": "cpf-minimal",
+  "organization_id": "org-example",
+  "name": "Minimal Compliance Profile",
+  "compliance_code": "ENTERPRISE_VC",
+  "credential_format": "SD_JWT_VC",
+  "description": "Minimal enterprise SD-JWT-VC compliance profile",
+  "is_system": false,
+  "created_at": "2026-03-11T00:00:00Z"
+}

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/revocation-profile.json",
+  "title": "RevocationProfile",
+  "description": "Format-agnostic revocation configuration for issuers and verifiers",
+  "type": "object",
+  "required": ["id", "organization_id", "name", "revocation_mechanism", "check_mode", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "revocation_mechanism": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["OCSP", "CRL", "STATUS_LIST_2021", "BITSTRING_STATUS_LIST", "TOKEN_STATUS_LIST"]
+      }
+    },
+    "mechanism_priority": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["OCSP", "CRL", "STATUS_LIST_2021", "BITSTRING_STATUS_LIST", "TOKEN_STATUS_LIST"]
+      }
+    },
+    "check_mode": {
+      "$ref": "../enums/revocation-timing-modes.json",
+      "description": "Check-timing behavior: how frequently revocation is verified. See RevocationTimingMode enum."
+    },
+    "cache_ttl_seconds": {"type": "integer", "minimum": 1},
+    "offline_grace_seconds": {"type": "integer", "minimum": 1},
+    "issuer_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "auto_allocate_index": {"type": "boolean", "default": true},
+        "batch_update_interval_seconds": {"type": "integer", "minimum": 1},
+        "list_size": {"type": "integer", "minimum": 1, "default": 131072},
+        "uri_template": {"type": "string"}
+      }
+    },
+    "status_list_url": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"check_mode": {"const": "CACHED"}}},
+      "then": {"required": ["cache_ttl_seconds"]}
+    },
+    {
+      "if": {"properties": {"check_mode": {"const": "OFFLINE_GRACE"}}},
+      "then": {"required": ["offline_grace_seconds"]}
+    }
+  ]
+}

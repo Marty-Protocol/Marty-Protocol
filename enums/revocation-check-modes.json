@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/revocation-check-modes.json",
+  "title": "RevocationCheckMode",
+  "description": "Behaviour when performing a revocation check during credential verification. Used in TrustProfile.revocation_policy.check_mode and OrganizationTrustProfile.revocation_policy.check_mode.",
+  "type": "string",
+  "enum": ["HARD_FAIL", "SOFT_FAIL", "SKIP"],
+  "$defs": {
+    "values": {
+      "HARD_FAIL": {
+        "description": "Reject the credential if the revocation check fails for any reason (network error, parse failure, timeout). This is the safest mode and is required for ICAO and AAMVA high-assurance use cases.",
+        "security": "high",
+        "use_case": "Border control, age verification for regulated access, financial credentials"
+      },
+      "SOFT_FAIL": {
+        "description": "Accept the credential with a warning flag if the revocation check is unavailable (e.g. network unreachable, endpoint timeout). The credential is accepted but the verification result includes a revocation_check_skipped flag.",
+        "security": "medium",
+        "use_case": "Offline kiosk scenarios, low-assurance verifications, degraded network environments"
+      },
+      "SKIP": {
+        "description": "Bypass revocation checking entirely. Credential is accepted regardless of its revocation status. Should only be used in development/test environments.",
+        "security": "low",
+        "use_case": "Development, testing, scenarios where credentials have no revocation endpoint"
+      }
+    }
+  }
+}

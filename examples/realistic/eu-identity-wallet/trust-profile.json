@@ -1,0 +1,23 @@
+{
+  "id": "b5000001-0003-4000-8000-000000000003",
+  "organization_id": "b5000001-0000-4000-8000-000000000000",
+  "name": "EU Identity Wallet Trust Profile",
+  "description": "Shared EUDI trust profile that provides trust anchors for both PID (SD-JWT-VC) and mDL (mDoc) credentials via the EU List of Trusted Lists. A single registry serves both compliance codes.",
+  "profile_type": "EUDI",
+  "trust_sources": [
+    {
+      "source_type": "TRUST_LIST",
+      "url": "https://ec.europa.eu/tools/lotl/eu-lotl.xml",
+      "description": "EU List of Trusted Lists — eIDAS 2.0 trust framework"
+    }
+  ],
+  "allowed_algorithms": ["ES256", "ES384", "PS256"],
+  "supported_formats": ["MDOC", "SD_JWT_VC"],
+  "compatible_compliance_codes": ["EUDI_PID", "EUDI_MDL"],
+  "compliance_status": "COMPLIANT",
+  "time_policy": {
+    "clock_skew_seconds": 300,
+    "require_freshness": false
+  },
+  "created_at": "2026-03-11T00:00:00Z"
+}

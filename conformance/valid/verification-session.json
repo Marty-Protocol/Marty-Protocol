@@ -1,0 +1,15 @@
+{
+  "id": "d4e5f6a7-b890-4cde-f012-345678901234",
+  "flow_id": "a1b2c3d4-e5f6-4789-0abc-def012345678",
+  "presentation_policy_id": "c3d4e5f6-a7b8-4901-2345-678901234567",
+  "status": "PENDING",
+  "verifier_nonce": "dGhpcyBpcyBhIHNhZmUgbm9uY2UgdmFsdWUh",
+  "holder_id": null,
+  "deployment_profile_id": "e5f6a7b8-c9d0-4e12-3456-789012345678",
+  "result": null,
+  "expires_at": "2026-03-15T15:00:00Z",
+  "completed_at": null,
+  "error": null,
+  "created_at": "2026-03-15T14:00:00Z",
+  "updated_at": "2026-03-15T14:00:00Z"
+}

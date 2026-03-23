@@ -1,0 +1,10 @@
+{
+  "name": "SD-JWT-VC OID4VCI Pre-Auth Wallet Profile",
+  "credential_format": "SD_JWT_VC",
+  "issuance_protocol": "OID4VCI_PRE_AUTH",
+  "description": "Derived wallet profile for OID4VCI pre-authorized code flow with SD-JWT-VC. Query GET /v1/wallet-registry?credential_format=SD_JWT_VC&issuance_protocol=OID4VCI_PRE_AUTH to retrieve derived compatibility data.",
+  "compliance_profile_code": "ENTERPRISE_VC",
+  "wallet_apps": ["Google Wallet", "Apple Wallet", "Microsoft Authenticator"],
+  "supported_platforms": ["ios", "android", "web"],
+  "created_at": "2026-03-11T00:00:00Z"
+}

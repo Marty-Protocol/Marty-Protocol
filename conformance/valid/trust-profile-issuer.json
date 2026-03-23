@@ -1,0 +1,11 @@
+{
+  "id": "c1d2e3f4-a5b6-4789-cdef-012345678901",
+  "trust_profile_id": "d2e3f4a5-b6c7-4890-def0-123456789012",
+  "issuer_id": "e3f4a5b6-c7d8-4901-ef01-234567890123",
+  "trust_level": 85,
+  "relationship_status": "TRUSTED",
+  "cascade_revocation_policy": "NOTIFY_ONLY",
+  "metadata": {},
+  "created_at": "2025-06-01T00:00:00Z",
+  "updated_at": "2025-06-01T00:00:00Z"
+}

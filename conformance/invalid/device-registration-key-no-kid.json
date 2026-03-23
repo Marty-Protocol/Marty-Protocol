@@ -1,0 +1,12 @@
+{
+  "id": "dr-invalid-001",
+  "user_id": "user-conformance-001",
+  "device_id": "device-invalid-001",
+  "platform": "ios",
+  "fcm_token": "APA91bConformanceTestFCMToken==",
+  "app_version": "1.0.0",
+  "public_key_der": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAexamplebase64derkey==",
+  "is_active": true,
+  "created_at": "2026-01-01T00:00:00Z",
+  "updated_at": "2026-01-01T00:00:00Z"
+}

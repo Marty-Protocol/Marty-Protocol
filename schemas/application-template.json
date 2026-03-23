@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/application-template.json",
+  "title": "ApplicationTemplate",
+  "description": "User-facing credential application workflow with form fields, evidence, and approval config",
+  "type": "object",
+  "required": ["id", "organization_id", "name", "approval_strategy", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string", "maxLength": 1024},
+    "form_fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field_id", "label", "field_type", "required"],
+        "additionalProperties": false,
+        "properties": {
+          "field_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "label": {"type": "string", "minLength": 1, "maxLength": 256},
+          "field_type": {"type": "string", "enum": ["TEXT", "DATE", "SELECT", "FILE_UPLOAD", "BOOLEAN"]},
+          "required": {"type": "boolean"},
+          "claim_mapping": {"type": "string"},
+          "validation_pattern": {"type": "string"},
+          "options": {"type": "array", "items": {"type": "string"}},
+          "placeholder": {"type": "string"},
+          "hint": {"type": "string"}
+        }
+      }
+    },
+    "evidence_requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "evidence_type", "description", "required"],
+        "additionalProperties": false,
+        "properties": {
+          "evidence_id": {"type": "string"},
+          "evidence_type": {"type": "string", "enum": ["DOCUMENT_SCAN", "BIOMETRIC", "SELFIE", "THIRD_PARTY_VERIFICATION"]},
+          "description": {"type": "string"},
+          "required": {"type": "boolean"},
+          "accepted_formats": {"type": "array", "items": {"type": "string"}},
+          "max_file_size_bytes": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "claim_collection_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["claim_name", "source"],
+        "properties": {
+          "claim_name": {"type": "string"},
+          "source": {"type": "string", "enum": ["FORM_FIELD", "EVIDENCE_EXTRACTION", "EXTERNAL_API", "SYSTEM"]},
+          "source_config": {"type": "object"}
+        }
+      }
+    },
+    "approval_strategy": {
+      "type": "string",
+      "enum": ["AUTO", "MANUAL", "RULES_BASED", "EXTERNAL"]
+    },
+    "approval_rules": {
+      "type": "object",
+      "description": "DEPRECATED: Use approval_policy_set_id with Cedar policies instead. Legacy opaque rules object for RULES_BASED approval."
+    },
+    "approval_policy_set_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Reference to a PolicySet (policy_type=APPROVAL_RULES) containing Cedar policies that govern auto-approval, manual review triggers, and denial rules. Required when approval_strategy = RULES_BASED. When set, takes precedence over legacy approval_rules."
+    },
+    "notification_config": {"type": "object"},
+    "ui_config": {"type": "object"},
+    "status": {"type": "string", "enum": ["DRAFT", "ACTIVE", "DEPRECATED"]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

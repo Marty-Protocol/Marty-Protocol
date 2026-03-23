@@ -1,0 +1,29 @@
+{
+  "id": "pp-loyalty-member-example",
+  "organization_id": "org-issuer-example",
+  "name": "Loyalty Member Verification Policy",
+  "description": "Verifies that the presenter holds an active loyalty membership. Requests tier and member_id only — no personal information.",
+  "required_claims": [
+    {
+      "claim_name": "member_id",
+      "credential_type": "LoyaltyProgramMembership"
+    },
+    {
+      "claim_name": "tier",
+      "credential_type": "LoyaltyProgramMembership"
+    }
+  ],
+  "accepted_credential_types": ["LoyaltyProgramMembership"],
+  "trust_profile_id": "tp-oid4vci-issuer-example",
+  "holder_binding": {
+    "required": false,
+    "binding_methods": ["NONCE"],
+    "nonce_required": false
+  },
+  "freshness": {
+    "require_not_revoked": true,
+    "revocation_grace_seconds": 300
+  },
+  "prefer_predicates": false,
+  "created_at": "2026-03-11T00:00:00Z"
+}

@@ -1,0 +1,153 @@
+{
+  "id": "cp-oid4vc",
+  "name": "OpenID for Verifiable Credentials (Generic Interop)",
+  "compliance_code": "OID4VC",
+  "version": "1.0.0",
+  "credential_format": "SD_JWT_VC",
+  "description": "Generic interoperability profile covering OpenID for Verifiable Credential Issuance (OID4VCI) 1.0 Final and OpenID for Verifiable Presentations (OID4VP) 1.0 Final. Used as the base protocol target for OIDF certification-level conformance testing. Supports dc+sd-jwt, jwt_vc_json, and mso_mdoc credential format identifiers. Implements both pre-authorized and authorization-code issuance grant types.",
+  "specification_reference": "OpenID for Verifiable Credential Issuance 1.0 Final (openid-4-verifiable-credential-issuance-1_0); OpenID for Verifiable Presentations 1.0 Final (openid-4-verifiable-presentations-1_0)",
+  "required_claims": [],
+  "oid4vci_features": {
+    "grant_types": ["urn:ietf:params:oauth:grant-type:pre-authorized_code", "authorization_code"],
+    "credential_format_ids": ["dc+sd-jwt", "jwt_vc_json", "mso_mdoc"],
+    "proof_types": ["jwt"],
+    "nonce_endpoint_required": true,
+    "deferred_credential_supported": true,
+    "notification_supported": true,
+    "batch_credential_supported": false
+  },
+  "oid4vp_features": {
+    "request_uri_supported": true,
+    "response_types": ["vp_token"],
+    "response_modes": ["direct_post", "direct_post.jwt"],
+    "presentation_definition_supported": true,
+    "dcql_query_supported": true
+  },
+  "supported_algorithms": ["ES256", "ES384", "EdDSA", "PS256"],
+  "key_requirements": {
+    "min_key_size_bits": 256,
+    "key_modes": ["SOFTWARE", "HSM"],
+    "key_algorithm_families": ["EC", "OKP", "RSA"]
+  },
+  "revocation_methods": ["TOKEN_STATUS_LIST", "BITSTRING_STATUS_LIST", "STATUS_LIST_2021"],
+  "revocation_required": false,
+  "allow_skip_revocation": true,
+  "trust_source_types": ["ROOT_CA", "PINNED_ISSUER"],
+  "holder_binding_required": true,
+  "selective_disclosure_required": false,
+  "is_system": true,
+  "immutable": true,
+  "status": "ACTIVE",
+  "discoverable": true,
+  "conformance_tests": [
+    {
+      "suite": "oid4vc",
+      "module": "VCIIssuerHappyFlow",
+      "spec_ref": "OID4VCI 1.0 Final §8.3",
+      "test_file": "marty-integration-tests/tests/integration/test_oid4vci_issuer_conformance.py"
+    },
+    {
+      "suite": "oid4vc",
+      "module": "VCIIssuerMetadataTest",
+      "spec_ref": "OID4VCI 1.0 Final §12.2.3",
+      "test_file": "marty-integration-tests/tests/integration/test_oid4vci_issuer_conformance.py"
+    },
+    {
+      "suite": "oid4vc",
+      "module": "OID4VPVerifierHappyFlow",
+      "spec_ref": "OID4VP 1.0 Final §6",
+      "test_file": "marty-integration-tests/tests/integration/test_oid4vp_verifier_conformance.py"
+    }
+  ],
+  "api_surface": [
+    {
+      "rel": "openid-credential-issuer-metadata",
+      "path_template": "/.well-known/openid-credential-issuer",
+      "org_scoped_path": "/org/{org_id}/.well-known/openid-credential-issuer",
+      "method": "GET",
+      "auth_required": false,
+      "discoverable": true,
+      "standard_ref": "OID4VCI 1.0 Final §12.2.3"
+    },
+    {
+      "rel": "oauth-authorization-server",
+      "path_template": "/.well-known/oauth-authorization-server",
+      "org_scoped_path": "/org/{org_id}/.well-known/oauth-authorization-server",
+      "method": "GET",
+      "auth_required": false,
+      "discoverable": true,
+      "standard_ref": "RFC 8414"
+    },
+    {
+      "rel": "authorization",
+      "path_template": "/v1/auth/authorize",
+      "org_scoped_path": "/org/{org_id}/v1/auth/authorize",
+      "method": "GET",
+      "auth_required": false,
+      "discoverable": true,
+      "standard_ref": "OID4VCI 1.0 Final §5.1 / RFC 6749 §3.1"
+    },
+    {
+      "rel": "token",
+      "path_template": "/v1/issuance/token",
+      "org_scoped_path": "/org/{org_id}/v1/issuance/token",
+      "method": "POST",
+      "auth_required": false,
+      "discoverable": true,
+      "standard_ref": "OID4VCI 1.0 Final §6 / RFC 6749 §3.2"
+    },
+    {
+      "rel": "nonce",
+      "path_template": "/v1/issuance/nonce",
+      "org_scoped_path": "/org/{org_id}/v1/issuance/nonce",
+      "method": "POST",
+      "auth_required": false,
+      "discoverable": true,
+      "standard_ref": "OID4VCI 1.0 Final §7"
+    },
+    {
+      "rel": "credential",
+      "path_template": "/v1/issuance/credential",
+      "org_scoped_path": "/org/{org_id}/v1/issuance/credential",
+      "method": "POST",
+      "auth_required": true,
+      "discoverable": true,
+      "standard_ref": "OID4VCI 1.0 Final §8"
+    },
+    {
+      "rel": "deferred-credential",
+      "path_template": "/v1/issuance/deferred-credential",
+      "org_scoped_path": "/org/{org_id}/v1/issuance/deferred-credential",
+      "method": "POST",
+      "auth_required": true,
+      "discoverable": true,
+      "standard_ref": "OID4VCI 1.0 Final §9"
+    },
+    {
+      "rel": "notification",
+      "path_template": "/v1/issuance/notification",
+      "org_scoped_path": "/org/{org_id}/v1/issuance/notification",
+      "method": "POST",
+      "auth_required": true,
+      "discoverable": true,
+      "standard_ref": "OID4VCI 1.0 Final §10"
+    },
+    {
+      "rel": "oid4vp-request",
+      "path_template": "/v1/flows/instances/{id}/request",
+      "method": "GET",
+      "auth_required": false,
+      "discoverable": false,
+      "standard_ref": "OID4VP 1.0 Final §5 — Authorization Request Object"
+    },
+    {
+      "rel": "oid4vp-submit",
+      "path_template": "/v1/flows/instances/{id}/submit",
+      "method": "POST",
+      "auth_required": false,
+      "discoverable": false,
+      "standard_ref": "OID4VP 1.0 Final §6 — VP Token submission"
+    }
+  ],
+  "created_at": "2026-03-12T00:00:00Z"
+}

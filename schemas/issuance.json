@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/issuance.json",
+  "title": "IssuanceRecord",
+  "description": "Record of a credential issuance event",
+  "type": "object",
+  "required": ["id", "flow_id", "credential_template_id", "holder_id", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "flow_id": {"type": "string", "format": "uuid"},
+    "flow_execution_id": {"type": ["string", "null"], "format": "uuid", "description": "References FlowExecution.id"},
+    "application_id": {"type": ["string", "null"], "format": "uuid"},
+    "credential_template_id": {"type": "string", "format": "uuid"},
+    "holder_id": {"type": "string"},
+    "credential_id": {"type": ["string", "null"]},
+    "credential_format": {
+      "type": "string",
+      "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]
+    },
+    "offer_uri": {"type": ["string", "null"], "format": "uri"},
+    "offer_expires_at": {"type": ["string", "null"], "format": "date-time"},
+    "status": {
+      "type": "string",
+      "enum": ["PENDING", "OFFER_SENT", "CLAIMED", "EXPIRED", "FAILED", "REVOKED"]
+    },
+    "revocation_index": {"type": ["integer", "null"], "minimum": 0},
+    "valid_from": {"type": ["string", "null"], "format": "date-time"},
+    "valid_until": {"type": ["string", "null"], "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "claimed_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

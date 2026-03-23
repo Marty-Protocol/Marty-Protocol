@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/compliance-profile.json",
+  "title": "ComplianceProfile",
+  "description": "Abstraction of credential format complexity behind compliance-oriented identifiers",
+  "type": "object",
+  "required": ["id", "compliance_code", "name", "credential_format", "is_system", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": ["string", "null"], "format": "uuid"},
+    "compliance_code": {
+      "type": "string",
+      "enum": ["ICAO_DTC", "ICAO_MRZ", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "OB2_COMPATIBILITY", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
+    },
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string", "maxLength": 1024},
+    "credential_format": {
+      "type": "string",
+      "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD", "ZK_MDOC"]
+    },
+    "issuance_protocol": {
+      "type": "string",
+      "enum": ["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT"]
+    },
+    "issuer_artifact_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requires_x509_cert": {"type": "boolean"},
+        "requires_did": {"type": "boolean"},
+        "requires_jwk": {"type": "boolean"},
+        "cert_key_usage": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "recommended_algorithms": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "default_verification_rules": {
+      "type": "object",
+      "description": "DEPRECATED: Use verification_policy_set_id with Cedar policies instead. Legacy opaque verification rules object."
+    },
+    "verification_policy_set_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Reference to a PolicySet (policy_type=CREDENTIAL_VERIFICATION) containing Cedar policies that define default verification constraints for this compliance profile (e.g., required formats, holder binding, algorithm restrictions)."
+    },
+    "trust_profile_constraints": {
+      "type": "object",
+      "description": "Declares which Trust Profile configurations are compatible with this compliance code. Implementations use these constraints to validate that a CredentialTemplate pairs a compatible ComplianceProfile and TrustProfile.",
+      "additionalProperties": false,
+      "properties": {
+        "compatible_profile_types": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "enum": ["ICAO", "AAMVA", "EUDI", "CUSTOM"]},
+          "uniqueItems": true,
+          "description": "The TrustProfile.profile_type values that provide a trust registry suitable for this compliance code. Example: AAMVA_MDL requires ['AAMVA', 'CUSTOM']; EUDI_PID and EUDI_MDL both accept ['EUDI', 'CUSTOM']. CUSTOM is always a valid fallback."
+        },
+        "required_source_types": {
+          "type": "array",
+          "items": {"type": "string", "enum": ["TRUST_LIST", "PINNED_ISSUER", "ROOT_CA", "PKD_URL"]},
+          "uniqueItems": true,
+          "description": "TrustSource.source_type values that MUST appear in the linked TrustProfile. Example: ICAO_DTC requires at least one PKD_URL or ROOT_CA source."
+        },
+        "required_formats": {
+          "type": "array",
+          "items": {"type": "string", "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]},
+          "uniqueItems": true,
+          "description": "Credential formats that MUST appear in TrustProfile.supported_formats for compatibility."
+        }
+      }
+    },
+    "api_surface": {
+      "type": "array",
+      "description": "Runtime API endpoints that implementations MUST expose when this compliance profile is active. Allows standards-specific APIs (OID4VCI well-known, mDL device engagement) to be declared by the profile rather than hardcoded.",
+      "items": {
+        "type": "object",
+        "required": ["rel", "path_template", "method", "auth_required"],
+        "additionalProperties": false,
+        "properties": {
+          "rel": {
+            "type": "string",
+            "description": "IANA link relation or MIP-defined endpoint identifier (e.g., openid-credential-issuer, oauth-authorization-server, mdl-device-engagement)"
+          },
+          "path_template": {
+            "type": "string",
+            "description": "Path template using {org_id} and {deployment_id} tokens. May be a well-known path."
+          },
+          "org_scoped_path": {
+            "type": "string",
+            "description": "Org-specific variant of path_template (e.g., /org/{org_id}/.well-known/openid-credential-issuer)"
+          },
+          "method": {
+            "type": "string",
+            "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"]
+          },
+          "auth_required": {
+            "type": "boolean",
+            "description": "Whether this endpoint requires authentication. Wallet-facing endpoints are typically false."
+          },
+          "response_schema_ref": {
+            "type": "string",
+            "description": "JSON Schema $id of the expected response schema"
+          },
+          "standard_ref": {
+            "type": "string",
+            "description": "Standards citation for this endpoint (e.g., OID4VCI §11.2.2, ISO 18013-5 §8.3.1)"
+          }
+        }
+      }
+    },
+    "discoverable": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this compliance profile appears in /.well-known/mip-configuration"
+    },
+    "is_system": {"type": "boolean"},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/revocation-timing-modes.json",
+  "title": "RevocationTimingMode",
+  "description": "Check-timing behavior for revocation during credential verification. Used in RevocationProfile.check_mode. Distinct from RevocationCheckMode (revocation-check-modes.json) which governs failure behavior in TrustProfile.",
+  "type": "string",
+  "enum": ["ALWAYS", "CACHED", "OFFLINE_GRACE", "DISABLED"],
+  "$defs": {
+    "values": {
+      "ALWAYS": {
+        "description": "Live revocation check required on every verification. No caching permitted.",
+        "required_supplemental_fields": []
+      },
+      "CACHED": {
+        "description": "Accept cached revocation result within cache_ttl_seconds. A live check is performed when the cache entry expires.",
+        "required_supplemental_fields": ["cache_ttl_seconds"]
+      },
+      "OFFLINE_GRACE": {
+        "description": "Accept last known revocation status within offline_grace_seconds. Used for offline/proximity scenarios.",
+        "required_supplemental_fields": ["offline_grace_seconds"]
+      },
+      "DISABLED": {
+        "description": "Revocation not configured for this profile. No revocation check is performed. MUST NOT be used for credentials with compliance_code ICAO_DTC, AAMVA_MDL, or EUDI_PID. Distinct from RevocationCheckMode.SKIP (revocation-check-modes.json) which governs failure behavior during a check — DISABLED means no check is attempted.",
+        "required_supplemental_fields": []
+      }
+    }
+  }
+}

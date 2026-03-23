@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/policy-set.json",
+  "title": "PolicySet",
+  "description": "A named collection of Cedar policies that governs authorization decisions within the MIP platform. PolicySets are referenced by ApplicationTemplate (approval_rules), TrustProfile (issuer trust), ComplianceProfile (verification rules), and the API gateway (access control). Each PolicySet contains one or more Cedar policy statements evaluated using deny-by-default semantics: at least one permit must match and zero forbid policies may match for the request to be authorized.",
+  "type": "object",
+  "required": ["id", "organization_id", "name", "policy_type", "cedar_policies", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string", "maxLength": 1024},
+    "policy_type": {
+      "type": "string",
+      "enum": ["ACCESS_CONTROL", "CREDENTIAL_VERIFICATION", "APPROVAL_RULES", "CUSTOM"],
+      "description": "ACCESS_CONTROL: API authorization (principal → action → resource). CREDENTIAL_VERIFICATION: trust evaluation during credential presentation. APPROVAL_RULES: application auto-approval / denial logic. CUSTOM: organization-defined policy domain."
+    },
+    "cedar_policies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["policy_id", "effect", "cedar_text"],
+        "additionalProperties": false,
+        "properties": {
+          "policy_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "maxLength": 128,
+            "description": "Unique identifier for this policy within the set. Used as the @id annotation in the Cedar text."
+          },
+          "effect": {
+            "type": "string",
+            "enum": ["permit", "forbid"],
+            "description": "The Cedar effect of this policy. Must match the effect keyword in cedar_text."
+          },
+          "cedar_text": {
+            "type": "string",
+            "minLength": 10,
+            "description": "The full Cedar policy statement including scope, conditions, and annotations. Must be valid Cedar syntax that validates against the MIP Cedar schema (cedar/mip.cedarschema)."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Human-readable explanation of what this policy does."
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Disabled policies are excluded from evaluation."
+          }
+        }
+      }
+    },
+    "cedar_schema_version": {
+      "type": "string",
+      "default": "MIP/1.0",
+      "description": "Version of the MIP Cedar schema these policies validate against."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "ACTIVE", "ARCHIVED"],
+      "description": "DRAFT: not yet enforced. ACTIVE: evaluated on every matching request. ARCHIVED: retained for audit but not evaluated."
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

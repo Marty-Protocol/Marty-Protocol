@@ -1,0 +1,16 @@
+{
+  "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "organization_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "name": "Valid Trust Profile — TRUST_LIST source",
+  "profile_type": "CUSTOM",
+  "trust_sources": [
+    {
+      "source_type": "TRUST_LIST",
+      "url": "https://trust.example.com/list.json"
+    }
+  ],
+  "allowed_algorithms": ["ES256"],
+  "supported_formats": ["SD_JWT_VC"],
+  "compliance_status": "COMPLIANT",
+  "created_at": "2026-01-01T00:00:00Z"
+}

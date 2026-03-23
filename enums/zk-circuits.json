@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/zk-circuits.json",
+  "title": "ZkCircuitSystem",
+  "description": "Registry of zero-knowledge circuit systems and their circuit identifiers accepted in PredicateSpec.supported_circuits. Each system defines a proof scheme, a circuit identification method, and the set of supported credential formats and predicate types.",
+  "type": "string",
+  "enum": ["longfellow-libzk-v1"],
+  "$defs": {
+    "values": {
+      "longfellow-libzk-v1": {
+        "description": "Longfellow ZK proof system — succinct non-interactive zero-knowledge argument based on the Ligero commitment scheme. CRS-free (no trusted setup); security relies only on collision-resistant hash functions.",
+        "spec": "IETF draft-google-cfrg-libzk-01",
+        "proof_scheme": "Ligero + public-coin interactive protocol",
+        "credential_format": "MDOC",
+        "security_parameters": {
+          "v7": {"ligero_rate": 7, "ligero_n_req": 132, "statistical_security_bits": 109},
+          "v6": {"ligero_rate": 4, "ligero_n_req": 128, "statistical_security_bits": 86},
+          "v5": {"ligero_rate": 4, "ligero_n_req": 128, "statistical_security_bits": 86}
+        },
+        "supported_predicate_types": ["EQUALITY"],
+        "supported_namespaces": [
+          "org.iso.18013.5.1",
+          "org.iso.18013.5.1.aamva",
+          "eu.europa.ec.av.1",
+          "eu.europa.ec.eudi.pid.1",
+          "org.iso.23220.1",
+          "org.iso.23220.photoID.1",
+          "org.iso.23220.dtc.1",
+          "in.gov.uidai.aadhaar.1"
+        ],
+        "max_disclosed_attributes": 4,
+        "issuer_signature_algorithm": "ES256"
+      }
+    },
+    "circuit_identification": {
+      "description": "Individual circuits within a system are identified by their circuit hash — the SHA-256 digest of the compressed circuit binary. The supported_circuits array in PredicateSpec uses entries in the format '{system}:{circuit_hash}', e.g. 'longfellow-libzk-v1:8d079211715200ff06c5109639245502bfe94aa869908d31176aae4016182121'.",
+      "format": "{system_name}:{circuit_hash_hex}",
+      "circuit_hash_algorithm": "SHA-256",
+      "circuit_hash_input": "Compressed circuit binary as produced by the system's circuit generator"
+    },
+    "active_circuits": {
+      "longfellow-libzk-v1": [
+        {"circuit_hash": "8d079211715200ff06c5109639245502bfe94aa869908d31176aae4016182121", "num_attrs": 1, "version": 7},
+        {"circuit_hash": "6a5810683e62b6d7766ebd0d7ca72518a2b8325418142adcadb10d51dbbcd5ad", "num_attrs": 2, "version": 7},
+        {"circuit_hash": "8ee4849ae1293ae6fe5f9082ce3e5e15c4f198f2998c682fa1b727237d6d252f", "num_attrs": 3, "version": 7},
+        {"circuit_hash": "5aebdaaafe17296a3ef3ca6c80c6e7505e09291897c39700410a365fb278e460", "num_attrs": 4, "version": 7},
+        {"circuit_hash": "137e5a75ce72735a37c8a72da1a8a0a5df8d13365c2ae3d2c2bd6a0e7197c7c6", "num_attrs": 1, "version": 6},
+        {"circuit_hash": "b4bb6f01b7043f4f51d8302a30b36e3d4d2d0efc3c24557ab9212ad524a9764e", "num_attrs": 2, "version": 6},
+        {"circuit_hash": "b2211223b954b34a1081e3fbf71b8ea2de28efc888b4be510f532d6ba76c2010", "num_attrs": 3, "version": 6},
+        {"circuit_hash": "c70b5f44a1365c53847eb8948ad5b4fdc224251a2bc02d958c84c862823c49d6", "num_attrs": 4, "version": 6},
+        {"circuit_hash": "f88a39e561ec0be02bb3dfe38fb609ad154e98decbbe632887d850fc612fea6f", "num_attrs": 1, "version": 5},
+        {"circuit_hash": "f51b7248b364462854d306326abded169854697d752d3bb6d9a9446ff7605ddb", "num_attrs": 2, "version": 5},
+        {"circuit_hash": "c27195e03e22c9ab4efe9e1dabd2c33aa8b2429cc4e86410c6f12542d3c5e0a1", "num_attrs": 3, "version": 5},
+        {"circuit_hash": "fa5fadfb2a916d3b71144e9b412eff78f71fd6a6d4607eac10de66b195868b7a", "num_attrs": 4, "version": 5}
+      ]
+    },
+    "extensibility": {
+      "description": "New ZK circuit systems MAY be registered by adding entries to this enum. Each system MUST define: a unique system name, a circuit identification scheme, the credential formats it operates on, the predicate types it supports, and its security parameters. Systems MUST be CRS-free or document their trusted setup requirements."
+    }
+  }
+}

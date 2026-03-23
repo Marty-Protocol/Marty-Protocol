@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/organization.json",
+  "title": "Organization",
+  "description": "The primary multi-tenant boundary in MIP. All configuration resources are scoped to an organization.",
+  "type": "object",
+  "required": ["id", "name", "display_name", "visibility", "owner_id", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "name": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "description": "Machine-friendly slug. Must be globally unique (case-insensitive)."
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "description": {"type": "string", "maxLength": 1024},
+    "join_code": {
+      "type": ["string", "null"],
+      "minLength": 6,
+      "maxLength": 16,
+      "pattern": "^[A-Z0-9]{6,16}$",
+      "description": "Alphanumeric code for joining PUBLIC organizations. Must be globally unique if set."
+    },
+    "visibility": {
+      "type": "string",
+      "enum": ["PUBLIC", "PRIVATE"],
+      "description": "PUBLIC: discoverable and joinable via join_code. PRIVATE: invite-only."
+    },
+    "owner_id": {
+      "type": "string",
+      "description": "User ID of the current organization owner. Must be an active member."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "SUSPENDED", "DELETED"]
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

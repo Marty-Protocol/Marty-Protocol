@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/revocation-batch.json",
+  "title": "RevocationBatch",
+  "description": "Privacy-preserving batched revocation. Instead of publishing status list updates immediately (which enables timing-correlation attacks), the system batches revocations and publishes at configurable intervals. Interval options: 1h, 6h, 24h.",
+  "type": "object",
+  "required": ["id", "organization_id", "credential_format", "batch_interval", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "credential_format": {
+      "type": "string",
+      "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"],
+      "description": "Format determines status list type: MDOC uses TSL (Token Status List), SD_JWT_VC uses Bitstring Status List"
+    },
+    "batch_interval": {
+      "type": "string",
+      "enum": ["1h", "6h", "24h"],
+      "description": "How frequently this batch is published. Lower intervals reduce revocation latency; higher intervals provide stronger timing-correlation resistance."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["PENDING", "PUBLISHING", "PUBLISHED", "FAILED"]
+    },
+    "pending_credential_ids": {
+      "type": "array",
+      "items": {"type": "string", "format": "uuid"},
+      "description": "Credentials queued in this batch, not yet published"
+    },
+    "published_credential_count": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0
+    },
+    "status_list_uri": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "URI of the published status list after publication"
+    },
+    "scheduled_publish_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When this batch is scheduled to publish"
+    },
+    "published_at": {"type": ["string", "null"], "format": "date-time"},
+    "error_message": {"type": ["string", "null"]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

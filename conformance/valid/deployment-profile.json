@@ -1,0 +1,11 @@
+{
+  "id": "c4b3d3e4-1234-4abc-8def-9a8b7c6d5e4f",
+  "organization_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "name": "Valid Deployment Profile",
+  "trust_profile_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "presentation_policy_ids": ["0fa85f64-5717-4562-b3fc-2c963f66afa6"],
+  "credential_template_ids": ["1fa85f64-5717-4562-b3fc-2c963f66afa6"],
+  "default_policy_id": "0fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "network_mode": "ONLINE",
+  "created_at": "2026-01-01T00:00:00Z"
+}

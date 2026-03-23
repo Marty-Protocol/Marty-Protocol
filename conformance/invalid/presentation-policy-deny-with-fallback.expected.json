@@ -1,0 +1,5 @@
+{
+  "pointer": "/required_claims/0",
+  "error_code": "SEMANTIC_CONFLICT",
+  "message": "fallback_claim_name 'birth_date' is specified but fallback_policy is 'DENY'. When fallback_policy is DENY, no fallback claim will ever be requested. Remove fallback_claim_name or change fallback_policy to ACCEPT_RAW."
+}

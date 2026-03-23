@@ -1,0 +1,18 @@
+[project]
+name = "marty-protocol-tests"
+version = "0.1.0"
+description = "Local validation scripts for the Marty Identity Protocol schema suite"
+requires-python = ">=3.11"
+dependencies = [
+    "jsonschema[format]>=4.23",
+    "referencing>=0.35",
+    "pytest>=8.3",
+    "pytest-sugar>=1.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "validate_*.py"]
+
+[tool.uv]
+dev-dependencies = []

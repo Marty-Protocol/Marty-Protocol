@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/trust-source-types.json",
+  "title": "TrustSourceType",
+  "description": "Types of cryptographic trust material sources",
+  "type": "string",
+  "enum": ["TRUST_LIST", "PINNED_ISSUER", "ROOT_CA", "PKD_URL"],
+  "$defs": {
+    "values": {
+      "TRUST_LIST": {
+        "description": "A published list of trusted issuer certificates (e.g., AAMVA IACA trust list, EU Trusted List)",
+        "requires": ["url"],
+        "examples": ["https://trust-list.aamva.org/current", "https://ec.europa.eu/tools/lotl/eu-lotl.xml"]
+      },
+      "PINNED_ISSUER": {
+        "description": "A specific issuer certificate pinned directly in the Trust Profile",
+        "requires": ["certificate_pem or url"],
+        "use_case": "Single known issuer; test environments"
+      },
+      "ROOT_CA": {
+        "description": "A root Certificate Authority certificate from which issuer trust is derived",
+        "requires": ["certificate_pem"],
+        "use_case": "ICAO CSCA roots, private enterprise CA"
+      },
+      "PKD_URL": {
+        "description": "ICAO Public Key Directory URL for automatic CSCA/Document Signer fetching",
+        "requires": ["url"],
+        "examples": ["https://pkddownloadsg.icao.int/download"]
+      }
+    }
+  }
+}

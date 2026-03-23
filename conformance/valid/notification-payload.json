@@ -1,0 +1,18 @@
+{
+  "id": "a8b9c0d1-e2f3-4456-89ab-cdef01234567",
+  "title": "Credential Issued",
+  "body": "Your Employee Badge credential has been issued successfully.",
+  "event_type": "credential.issued",
+  "priority": "NORMAL",
+  "target": {
+    "channels": ["FCM"],
+    "user_id": "e5f6a7b8-c9d0-4123-ef01-234567890123",
+    "device_tokens": ["ExponentPushToken[xxxxxxxxxxxx]"]
+  },
+  "data": {
+    "credential_id": "c4d5e6f7-a8b9-4012-cdef-012345678901"
+  },
+  "ttl_seconds": 86400,
+  "collapse_key": "credential_issued",
+  "created_at": "2026-03-15T14:00:00Z"
+}

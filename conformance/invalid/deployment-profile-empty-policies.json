@@ -1,0 +1,9 @@
+{
+  "id": "d1e2f3a4-0000-4000-8000-000000000002",
+  "organization_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "name": "Invalid Deployment Profile — empty presentation_policy_ids",
+  "trust_profile_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "presentation_policy_ids": [],
+  "network_mode": "ONLINE",
+  "created_at": "2026-01-01T00:00:00Z"
+}

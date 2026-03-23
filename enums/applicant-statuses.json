@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/applicant-statuses.json",
+  "title": "ApplicantStatus",
+  "description": "Lifecycle status of an Applicant. Terminal states: REJECTED, WITHDRAWN, CREDENTIALED, SUSPENDED.",
+  "type": "string",
+  "enum": [
+    "DRAFT",
+    "SUBMITTED",
+    "UNDER_REVIEW",
+    "PENDING_INFORMATION",
+    "APPROVED",
+    "REJECTED",
+    "WITHDRAWN",
+    "CREDENTIALED",
+    "SUSPENDED"
+  ],
+  "$defs": {
+    "values": {
+      "DRAFT": {"description": "Applicant record created but not yet submitted for review.", "terminal": false},
+      "SUBMITTED": {"description": "Applicant or related application has been submitted for review.", "terminal": false},
+      "UNDER_REVIEW": {"description": "A reviewer is actively evaluating the applicant.", "terminal": false},
+      "PENDING_INFORMATION": {"description": "Additional information or evidence is required from the applicant.", "terminal": false},
+      "APPROVED": {"description": "Applicant is approved and ready for credential issuance.", "terminal": false},
+      "REJECTED": {"description": "Applicant was rejected.", "terminal": true},
+      "WITHDRAWN": {"description": "Applicant was withdrawn by requester or administrator.", "terminal": true},
+      "CREDENTIALED": {"description": "Credential issuance completed for the applicant.", "terminal": true},
+      "SUSPENDED": {"description": "Applicant is suspended pending remediation or investigation.", "terminal": true}
+    },
+    "transitions": {
+      "DRAFT": ["SUBMITTED", "WITHDRAWN"],
+      "SUBMITTED": ["UNDER_REVIEW", "PENDING_INFORMATION", "WITHDRAWN"],
+      "UNDER_REVIEW": ["APPROVED", "REJECTED", "PENDING_INFORMATION", "SUSPENDED"],
+      "PENDING_INFORMATION": ["SUBMITTED", "UNDER_REVIEW", "WITHDRAWN"],
+      "APPROVED": ["CREDENTIALED", "SUSPENDED"],
+      "REJECTED": [],
+      "WITHDRAWN": [],
+      "CREDENTIALED": [],
+      "SUSPENDED": ["UNDER_REVIEW", "APPROVED", "CREDENTIALED"]
+    },
+    "terminal_states": ["REJECTED", "WITHDRAWN", "CREDENTIALED", "SUSPENDED"]
+  }
+}

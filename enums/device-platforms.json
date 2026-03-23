@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/device-platforms.json",
+  "title": "DevicePlatform",
+  "description": "Supported device platforms for Device Registration",
+  "type": "string",
+  "enum": ["ios", "android", "web"],
+  "$defs": {
+    "values": {
+      "ios": {
+        "description": "Apple iOS device (iPhone, iPad)",
+        "push_channel": "FCM",
+        "token_type": "FCM registration token",
+        "capabilities": ["push_notifications", "secure_enclave", "face_id", "touch_id"]
+      },
+      "android": {
+        "description": "Android device",
+        "push_channel": "FCM",
+        "token_type": "FCM registration token",
+        "capabilities": ["push_notifications", "keystore", "biometrics"]
+      },
+      "web": {
+        "description": "Web browser client",
+        "push_channel": "SSE",
+        "token_type": "SSE subscriber connection ID",
+        "capabilities": ["server_sent_events", "web_crypto_api"]
+      }
+    }
+  }
+}

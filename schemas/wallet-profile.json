@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/wallet-profile.json",
+  "title": "WalletProfile",
+  "description": "Wallet compatibility record for a credential format × protocol × compliance combination. The canonical wallet profile set is auto-derived from CredentialTemplate configuration via the derivation key (credential_format, issuance_protocol, compliance_profile_code). Organizations MAY store override entries at /v1/wallet-registry to extend or customise the derived profile for their specific deployment. GET /v1/wallet-registry returns merged results: derived profiles supplemented (or overridden) by stored entries.",
+  "type": "object",
+  "required": ["name", "credential_format", "issuance_protocol", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier. Present on stored override entries; absent on derived profiles returned inline."
+    },
+    "organization_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Organization that owns this override entry. Null on system-derived profiles."
+    },
+    "is_override": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this record is a stored organisation override rather than a system-derived profile. Stored overrides require id and organization_id."
+    },
+    "override_precedence": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 50,
+      "description": "Merge priority for stored overrides relative to the derived profile. Higher values take precedence. Default 50. System-derived entries have effective precedence 0."
+    },
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string"},
+    "credential_format": {
+      "type": "string",
+      "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]
+    },
+    "issuance_protocol": {
+      "type": "string",
+      "enum": ["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT"]
+    },
+    "compliance_profile_code": {"type": ["string", "null"]},
+    "wallet_apps": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Compatible wallet application names. In merged results, override entries append to (or replace) the derived list depending on merge_strategy."
+    },
+    "merge_strategy": {
+      "type": "string",
+      "enum": ["APPEND", "REPLACE"],
+      "default": "APPEND",
+      "description": "How the wallet_apps and specifications arrays from this override are merged with the derived profile. APPEND adds entries; REPLACE substitutes the entire array."
+    },
+    "specifications": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "supported_platforms": {
+      "type": "array",
+      "items": {"type": "string", "enum": ["ios", "android", "web"]}
+    },
+    "deep_link_pattern": {"type": "string"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "if": {
+    "properties": {"is_override": {"const": true}},
+    "required": ["is_override"]
+  },
+  "then": {
+    "required": ["id", "organization_id"],
+    "properties": {
+      "organization_id": {"type": "string"}
+    }
+  }
+}

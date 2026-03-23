@@ -1,0 +1,10 @@
+{
+  "id": "f6a7b8c9-d0e1-4234-f012-345678901234",
+  "name": "Express Lane",
+  "deployment_profile_id": "a7b8c9d0-e1f2-4345-0123-456789abcdef",
+  "default_policy_id": "b8c9d0e1-f2a3-4456-1234-567890abcdef",
+  "device_ids": ["kiosk-001", "kiosk-002"],
+  "metadata": {
+    "location": "Building A - Main Entrance"
+  }
+}

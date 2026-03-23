@@ -1,0 +1,79 @@
+{
+  "id": "cp-icao-dtc",
+  "name": "ICAO Digital Travel Credential",
+  "compliance_code": "ICAO_DTC",
+  "version": "1.0.0",
+  "credential_format": "MDOC",
+  "description": "Compliance profile for ICAO Digital Travel Credentials (DTC). Implements ICAO Doc 9303 Part 13 requirements for machine-readable travel document credentials in mDoc/ISO 18013-5 format.",
+  "specification_reference": "ICAO Doc 9303 Part 13 — Digital Travel Document Specifications for Electronic Identity Cards",
+  "required_claims": [
+    {"name": "com.icao.dtc.data_group_1", "description": "Machine Readable Zone mirror data", "required": true},
+    {"name": "com.icao.dtc.data_group_2", "description": "Facial biometric encoded data", "required": true},
+    {"name": "com.icao.dtc.data_group_11", "description": "Additional personal details", "required": false},
+    {"name": "com.icao.dtc.data_group_12", "description": "Optional details", "required": false},
+    {"name": "com.icao.dtc.sod", "description": "Document Security Object (digital signature)", "required": true}
+  ],
+  "required_namespaces": ["com.icao.dtc"],
+  "supported_algorithms": ["ES256", "ES384", "ES512", "PS256", "PS384"],
+  "key_requirements": {
+    "min_key_size_bits": 256,
+    "key_modes": ["HSM"],
+    "key_algorithm_families": ["EC", "RSA"]
+  },
+  "revocation_methods": ["OCSP", "CRL"],
+  "revocation_required": true,
+  "allow_skip_revocation": false,
+  "trust_source_types": ["PKD_URL", "TRUST_LIST"],
+  "holder_binding_required": true,
+  "is_system": true,
+  "immutable": true,
+  "status": "ACTIVE",
+  "discoverable": true,
+  "api_surface": [
+    {
+      "rel": "openid-credential-issuer",
+      "path_template": "/.well-known/openid-credential-issuer",
+      "org_scoped_path": "/org/{org_id}/.well-known/openid-credential-issuer",
+      "method": "GET",
+      "auth_required": false,
+      "standard_ref": "OID4VCI \u00a711.2.2"
+    },
+    {
+      "rel": "oauth-authorization-server",
+      "path_template": "/.well-known/oauth-authorization-server",
+      "org_scoped_path": "/org/{org_id}/.well-known/oauth-authorization-server",
+      "method": "GET",
+      "auth_required": false,
+      "standard_ref": "RFC 8414"
+    },
+    {
+      "rel": "oid4vci-credential-offer",
+      "path_template": "/v1/issuance/offers/{tx_id}",
+      "method": "GET",
+      "auth_required": false,
+      "standard_ref": "OID4VCI \u00a75.1"
+    },
+    {
+      "rel": "oid4vci-token",
+      "path_template": "/v1/issuance/token",
+      "method": "POST",
+      "auth_required": false,
+      "standard_ref": "OID4VCI \u00a76.1"
+    },
+    {
+      "rel": "oid4vci-credential",
+      "path_template": "/v1/issuance/credential",
+      "method": "POST",
+      "auth_required": false,
+      "standard_ref": "OID4VCI \u00a78"
+    },
+    {
+      "rel": "oid4vci-nonce",
+      "path_template": "/v1/issuance/nonce",
+      "method": "POST",
+      "auth_required": false,
+      "standard_ref": "OID4VCI \u00a78.3"
+    }
+  ],
+  "created_at": "2026-01-01T00:00:00Z"
+}

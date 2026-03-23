@@ -1,0 +1,38 @@
+{
+  "id": "pp-pre-boarding-example",
+  "organization_id": "org-airline-example",
+  "name": "Pre-Boarding Gate Verification",
+  "description": "Verifies passenger identity and boarding eligibility. Checks name, flight, and departure date. Allows selective disclosure of seat number.",
+  "required_claims": [
+    {
+      "claim_name": "passenger_name",
+      "credential_type": "PreBoardingClearance"
+    },
+    {
+      "claim_name": "flight_number",
+      "credential_type": "PreBoardingClearance"
+    },
+    {
+      "claim_name": "departure_date",
+      "credential_type": "PreBoardingClearance"
+    },
+    {
+      "claim_name": "cleared_at",
+      "credential_type": "PreBoardingClearance"
+    }
+  ],
+  "accepted_credential_types": ["PreBoardingClearance"],
+  "trust_profile_id": "tp-icao-dtc-example",
+  "holder_binding": {
+    "required": true,
+    "binding_methods": ["NONCE"],
+    "nonce_required": true
+  },
+  "freshness": {
+    "max_age_seconds": 86400,
+    "require_not_revoked": true,
+    "revocation_grace_seconds": 3600
+  },
+  "prefer_predicates": false,
+  "created_at": "2026-03-11T00:00:00Z"
+}

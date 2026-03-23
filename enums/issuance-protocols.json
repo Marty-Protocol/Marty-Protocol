@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/issuance-protocols.json",
+  "title": "IssuanceProtocol",
+  "description": "Protocols used to deliver credentials from issuer to holder",
+  "type": "string",
+  "enum": ["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT"],
+  "$defs": {
+    "values": {
+      "OID4VCI_PRE_AUTH": {
+        "description": "OpenID for Verifiable Credential Issuance — Pre-Authorized Code Flow",
+        "standard": "OpenID for VCI (OID4VCI) Draft",
+        "flow": "Issuer generates a pre-authorized code. Holder wallet exchanges code for credential without prior user authentication at issuer.",
+        "use_case": "Default for most mobile and web credential delivery; airline credentials, government IDs",
+        "holder_auth_required": false
+      },
+      "OID4VCI_AUTH_CODE": {
+        "description": "OpenID for Verifiable Credential Issuance — Authorization Code Flow",
+        "standard": "OpenID for VCI (OID4VCI) Draft",
+        "flow": "Holder authenticates with issuer via OAuth authorization code flow before receiving credential.",
+        "use_case": "High-assurance issuance where holder identity must be re-confirmed at wallet",
+        "holder_auth_required": true
+      },
+      "DIRECT": {
+        "description": "Direct API-based credential delivery (non-OID4VCI)",
+        "flow": "Issuer pushes credential directly to holder via API; no OID4VCI offer URI.",
+        "use_case": "Server-to-server batch issuance, legacy integrations"
+      }
+    }
+  }
+}

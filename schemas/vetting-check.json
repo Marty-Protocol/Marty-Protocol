@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/vetting-check.json",
+  "title": "VettingCheck",
+  "description": "A discrete identity or document verification check performed as part of the applicant review process. Each check corresponds to a single automated or manual verification step.",
+  "type": "object",
+  "required": ["id", "applicant_id", "organization_id", "check_type", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "applicant_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "organization_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "check_type": {
+      "type": "string",
+      "enum": [
+        "DOCUMENT_AUTHENTICITY",
+        "DOCUMENT_EXPIRY",
+        "FACIAL_MATCH",
+        "LIVENESS_DETECTION",
+        "IDENTITY_DATABASE",
+        "WATCHLIST_SCREENING",
+        "ADDRESS_VERIFICATION",
+        "EMAIL_VERIFICATION",
+        "PHONE_VERIFICATION",
+        "BACKGROUND_CHECK",
+        "MANUAL_REVIEW",
+        "CUSTOM"
+      ],
+      "description": "Category of identity or document verification check"
+    },
+    "provider": {
+      "type": ["string", "null"],
+      "maxLength": 128,
+      "description": "Name of the third-party service or integration that performed this check, if applicable"
+    },
+    "provider_reference_id": {
+      "type": ["string", "null"],
+      "maxLength": 512,
+      "description": "External reference identifier returned by the provider"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "IN_PROGRESS",
+        "PASSED",
+        "FAILED",
+        "INCONCLUSIVE",
+        "SKIPPED",
+        "EXPIRED"
+      ]
+    },
+    "score": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Normalised confidence score in range [0, 1]. Provider-dependent semantics."
+    },
+    "threshold": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Minimum score required for PASSED status on this check"
+    },
+    "failure_reason": {
+      "type": ["string", "null"],
+      "maxLength": 1024,
+      "description": "Machine-readable or human-readable reason for FAILED or INCONCLUSIVE status"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "description": "References to stored evidence artefacts (e.g., document capture image hashes)",
+      "items": {
+        "type": "object",
+        "required": ["ref_type", "ref_id"],
+        "additionalProperties": false,
+        "properties": {
+          "ref_type": {
+            "type": "string",
+            "enum": ["DOCUMENT_CAPTURE", "SELFIE_CAPTURE", "BIOMETRIC_ENROLLMENT", "AUDIT_RECORD"]
+          },
+          "ref_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      }
+    },
+    "performed_by": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "User ID of the reviewer who performed this check, if manual"
+    },
+    "started_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Point at which this check result becomes stale and must be re-run"
+    },
+    "raw_result": {
+      "type": ["object", "null"],
+      "description": "Provider-specific result payload. Stored opaquely. MUST NOT contain biometric raw data.",
+      "additionalProperties": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

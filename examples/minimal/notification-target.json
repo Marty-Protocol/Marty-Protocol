@@ -1,0 +1,5 @@
+{
+  "user_id": "user-example-001",
+  "device_tokens": ["APA91bExampleFCMToken=="],
+  "channels": ["FCM"]
+}

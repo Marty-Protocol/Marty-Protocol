@@ -1,0 +1,9 @@
+{
+  "id": "a1b2c3d4-0004-4000-8000-000000000004",
+  "organization_id": "a1b2c3d4-0000-4000-8000-000000000000",
+  "name": "Minimal Deployment Profile",
+  "trust_profile_id": "a1b2c3d4-0001-4000-8000-000000000001",
+  "presentation_policy_ids": ["a1b2c3d4-0002-4000-8000-000000000002"],
+  "network_mode": "ONLINE",
+  "created_at": "2026-03-11T00:00:00Z"
+}

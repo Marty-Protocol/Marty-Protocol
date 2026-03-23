@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/subscription.json",
+  "title": "Subscription",
+  "description": "Event subscription that routes identity lifecycle events to a configured delivery target (webhook, email, or SSE channel). Managed via /v1/subscriptions.",
+  "type": "object",
+  "required": ["id", "organization_id", "name", "event_types", "delivery", "enabled", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string", "maxLength": 1024},
+    "event_types": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "description": "e.g. credential.issued, credential.revoked, flow.completed, application.submitted, trust_anchor.revoked"
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "required": ["channel"],
+      "additionalProperties": false,
+      "properties": {
+        "channel": {
+          "type": "string",
+          "enum": ["WEBHOOK", "EMAIL", "SSE"],
+          "description": "Delivery channel. WEBHOOK: HTTP POST to url. EMAIL: email to address. SSE: Server-Sent Events stream."
+        },
+        "url": {"type": "string", "format": "uri", "description": "Required for WEBHOOK channel"},
+        "address": {"type": "string", "format": "email", "description": "Required for EMAIL channel"},
+        "secret": {"type": "string", "description": "HMAC-SHA256 signing secret for WEBHOOK payloads (write-only)"},
+        "headers": {
+          "type": "object",
+          "additionalProperties": {"type": "string"},
+          "description": "Additional HTTP headers for WEBHOOK requests"
+        }
+      }
+    },
+    "filter": {
+      "type": "object",
+      "description": "Optional filter criteria to narrow which events are delivered",
+      "additionalProperties": false,
+      "properties": {
+        "credential_types": {"type": "array", "items": {"type": "string"}},
+        "flow_ids": {"type": "array", "items": {"type": "string", "format": "uuid"}},
+        "deployment_profile_ids": {"type": "array", "items": {"type": "string", "format": "uuid"}}
+      }
+    },
+    "enabled": {"type": "boolean", "default": true},
+    "retry_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_attempts": {"type": "integer", "minimum": 1, "maximum": 10, "default": 3},
+        "backoff_seconds": {"type": "integer", "minimum": 1, "default": 30}
+      }
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

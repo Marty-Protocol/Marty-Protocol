@@ -1,0 +1,17 @@
+{
+  "id": "at-minimal",
+  "organization_id": "org-example",
+  "name": "Minimal Application Template",
+  "form_fields": [
+    {
+      "field_id": "subject_id",
+      "label": "Subject ID",
+      "field_type": "TEXT",
+      "required": true,
+      "claim_mapping": "subject_id"
+    }
+  ],
+  "approval_strategy": "AUTO",
+  "status": "ACTIVE",
+  "created_at": "2026-03-11T00:00:00Z"
+}

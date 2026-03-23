@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/applicant.json",
+  "title": "Applicant",
+  "description": "A person or entity that has applied for a credential through an application-approval flow. Applicants are a first-class entity with a lifecycle that terminates in credential issuance, rejection, or withdrawal.",
+  "type": "object",
+  "required": ["id", "organization_id", "flow_id", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique applicant identifier"
+    },
+    "organization_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Organization that owns this applicant record"
+    },
+    "flow_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The application_approval_issuance flow that governs this applicant"
+    },
+    "credential_template_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Credential template to be issued upon approval. Resolved from the flow unless overridden."
+    },
+    "user_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Platform user account associated with this applicant, if one exists. May be null for applicants who have not yet created an account."
+    },
+    "external_id": {
+      "type": ["string", "null"],
+      "maxLength": 256,
+      "description": "Caller-supplied external identifier (e.g., HR system ID, case number)"
+    },
+    "given_name": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "family_name": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "email": {
+      "type": ["string", "null"],
+      "format": "email",
+      "description": "Contact email address for notifications"
+    },
+    "phone": {
+      "type": ["string", "null"],
+      "pattern": "^\\+[1-9]\\d{6,14}$",
+      "description": "E.164 phone number"
+    },
+    "status": {
+      "$ref": "../enums/applicant-statuses.json",
+      "description": "Applicant lifecycle state. Transitions: DRAFT→SUBMITTED→UNDER_REVIEW→APPROVED→CREDENTIALED or REJECTED. See protocol/applicant/SPECIFICATION.md for full FSM."
+    },
+    "reviewer_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "User ID of the currently assigned reviewer. Set when a ReviewerLock is acquired."
+    },
+    "reviewer_lock_expires_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Expiry time of the current reviewer lock. Null if no lock is held."
+    },
+    "submitted_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "reviewed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "approved_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "credentialed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "rejection_reason": {
+      "type": ["string", "null"],
+      "maxLength": 2048,
+      "description": "Human-readable rejection reason, set when status = REJECTED"
+    },
+    "rejection_code": {
+      "type": ["string", "null"],
+      "enum": [
+        "IDENTITY_UNVERIFIABLE",
+        "DOCUMENT_INVALID",
+        "DOCUMENT_EXPIRED",
+        "BIOMETRIC_MISMATCH",
+        "POLICY_VIOLATION",
+        "INCOMPLETE_APPLICATION",
+        "DUPLICATE_APPLICATION",
+        "OTHER",
+        null
+      ]
+    },
+    "application_data": {
+      "type": "object",
+      "description": "Applicant-supplied form data corresponding to the application_template fields. Keys match field names from the ApplicationTemplate.",
+      "additionalProperties": true
+    },
+    "vetting_checks": {
+      "type": "array",
+      "description": "References to VettingCheck sub-resources. Read-only from the applicant schema perspective.",
+      "items": {
+        "type": "object",
+        "required": ["id", "check_type", "status"],
+        "properties": {
+          "id": {"type": "string", "format": "uuid"},
+          "check_type": {"type": "string"},
+          "status": {"type": "string"}
+        }
+      }
+    },
+    "issued_credential_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "ID of the issued credential record when status = CREDENTIALED"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Reviewer-supplied freeform notes and tags",
+      "additionalProperties": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

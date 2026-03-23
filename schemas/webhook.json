@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/webhook.json",
+  "title": "Webhook",
+  "description": "A persistent webhook subscription that delivers signed HTTP POST callbacks to an operator-controlled endpoint when specified identity lifecycle events occur. Managed via /v1/organizations/{org_id}/webhooks.",
+  "type": "object",
+  "required": ["id", "organization_id", "name", "endpoint_url", "events", "enabled", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "organization_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 512
+    },
+    "endpoint_url": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://",
+      "description": "HTTPS endpoint that will receive webhook POST requests. HTTP endpoints MUST be rejected."
+    },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "description": "Event type filter. Use '*' to subscribe to all events, or specific dot-notation event types (e.g. 'credential.issued', 'application.approved')."
+      },
+      "description": "Event types this webhook subscription is active for. See standard event types in protocol/notification-target/SPECIFICATION.md for allowed values."
+    },
+    "signing_secret": {
+      "type": ["string", "null"],
+      "description": "Shared secret used to compute the HMAC-SHA256 signature in X-MIP-Signature. Only returned on creation; subsequent reads return a masked value (e.g. 'sk_whsec_***abc123').",
+      "writeOnly": true
+    },
+    "signing_secret_masked": {
+      "type": ["string", "null"],
+      "pattern": "^sk_whsec_\\*+[a-zA-Z0-9]{6}$",
+      "readOnly": true,
+      "description": "Masked representation of the signing secret for display purposes. Full secret is only available on creation response."
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "api_version": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "API version to use when serialising event payloads. Format: YYYY-MM-DD. Defaults to the version current at creation time."
+    },
+    "filter": {
+      "type": "object",
+      "description": "Optional fine-grained event filter. Events matching the subscription event types are only delivered if they also satisfy these filter conditions.",
+      "additionalProperties": false,
+      "properties": {
+        "flow_ids": {
+          "type": "array",
+          "items": {"type": "string", "format": "uuid"},
+          "description": "Only deliver events related to these specific flows"
+        },
+        "credential_template_ids": {
+          "type": "array",
+          "items": {"type": "string", "format": "uuid"},
+          "description": "Only deliver events related to credentials from these templates"
+        }
+      }
+    },
+    "delivery_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 30,
+          "default": 10,
+          "description": "Seconds to wait for endpoint acknowledgement (HTTP 2xx)"
+        },
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5,
+          "default": 3,
+          "description": "Maximum delivery retry attempts on 5xx or timeout"
+        },
+        "retry_backoff_seconds": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 1},
+          "maxItems": 5,
+          "default": [5, 15, 60, 300, 900],
+          "description": "Per-retry wait times in seconds. Array length must equal max_retries."
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "PAUSED", "DISABLED_PERMANENTLY"],
+      "default": "ACTIVE",
+      "description": "ACTIVE: delivering. PAUSED: temporarily suspended. DISABLED_PERMANENTLY: too many consecutive failures — operator must re-enable explicitly."
+    },
+    "failure_count": {
+      "type": "integer",
+      "minimum": 0,
+      "readOnly": true,
+      "description": "Consecutive delivery failures since last success. Automatically reset on a successful delivery."
+    },
+    "last_triggered_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "readOnly": true
+    },
+    "last_success_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "readOnly": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$comment": "Security: signing_secret MUST be generated by the server with at least 32 bytes of CSPRNG entropy. It MUST be stored hashed (HMAC-SHA256). The raw value MUST be returned only once, in the creation response."
+}

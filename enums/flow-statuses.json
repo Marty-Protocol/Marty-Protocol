@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/flow-statuses.json",
+  "title": "FlowInstanceStatus",
+  "description": "Lifecycle status of a FlowInstance. Aligned with \u00a79.9.2 state machine. Terminal states: COMPLETED, FAILED, EXPIRED, CANCELLED.",
+  "type": "string",
+  "enum": ["PENDING", "IN_PROGRESS", "AWAITING_APPROVAL", "AWAITING_WALLET", "AWAITING_EVIDENCE", "COMPLETED", "FAILED", "EXPIRED", "CANCELLED"],
+  "$defs": {
+    "values": {
+      "PENDING": {"description": "Instance created; not yet started.", "terminal": false},
+      "IN_PROGRESS": {"description": "Active execution; a step is running.", "terminal": false},
+      "AWAITING_APPROVAL": {"description": "Paused pending a manual reviewer decision.", "terminal": false},
+      "AWAITING_WALLET": {"description": "Paused pending a holder action (credential request or VP response).", "terminal": false},
+      "AWAITING_EVIDENCE": {"description": "Paused pending supplementary evidence from the applicant.", "terminal": false},
+      "COMPLETED": {"description": "All steps finished successfully.", "terminal": true},
+      "FAILED": {"description": "A step failed with no further retries.", "terminal": true},
+      "EXPIRED": {"description": "Instance exceeded TTL before completing.", "terminal": true},
+      "CANCELLED": {"description": "Explicitly cancelled by an authorized party.", "terminal": true}
+    },
+    "transitions": {
+      "PENDING": ["IN_PROGRESS"],
+      "IN_PROGRESS": ["AWAITING_APPROVAL", "AWAITING_WALLET", "AWAITING_EVIDENCE", "COMPLETED", "FAILED", "EXPIRED", "CANCELLED"],
+      "AWAITING_APPROVAL": ["IN_PROGRESS", "FAILED", "CANCELLED"],
+      "AWAITING_WALLET": ["IN_PROGRESS", "EXPIRED"],
+      "AWAITING_EVIDENCE": ["IN_PROGRESS", "EXPIRED"],
+      "COMPLETED": [],
+      "FAILED": [],
+      "EXPIRED": [],
+      "CANCELLED": []
+    },
+    "terminal_states": ["COMPLETED", "FAILED", "EXPIRED", "CANCELLED"]
+  }
+}

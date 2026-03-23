@@ -1,0 +1,28 @@
+{
+  "id": "pp-invalid-001",
+  "organization_id": "org-conformance",
+  "name": "Invalid Presentation Policy — DENY fallback with raw claim",
+  "required_claims": [
+    {
+      "claim_name": "age",
+      "credential_type": "AgeCredential",
+      "predicate": {
+        "type": "RANGE_PROOF",
+        "threshold": 21,
+        "comparison": "GTE"
+      },
+      "fallback_policy": "DENY",
+      "fallback_claim_name": "birth_date"
+    }
+  ],
+  "accepted_credential_types": ["AgeCredential"],
+  "trust_profile_id": "tp-valid-001",
+  "holder_binding": {
+    "required": false
+  },
+  "freshness": {
+    "require_not_revoked": false
+  },
+  "prefer_predicates": true,
+  "created_at": "2026-01-01T00:00:00Z"
+}

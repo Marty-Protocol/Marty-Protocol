@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/lane.json",
+  "title": "Lane",
+  "description": "Logical device grouping within a Deployment Profile",
+  "type": "object",
+  "required": ["id", "name", "deployment_profile_id"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "deployment_profile_id": {"type": "string", "format": "uuid"},
+    "default_policy_id": {"type": ["string", "null"], "format": "uuid"},
+    "device_ids": {
+      "type": "array",
+      "items": {"type": "string", "maxLength": 256},
+      "uniqueItems": true
+    },
+    "metadata": {"type": "object"}
+  }
+}

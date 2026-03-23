@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/predicate-types.json",
+  "title": "PredicateType",
+  "description": "Types of zero-knowledge predicates supported in Presentation Policies",
+  "type": "string",
+  "enum": ["RANGE_PROOF", "MEMBERSHIP", "EQUALITY", "NON_MEMBERSHIP", "INEQUALITY"],
+  "$defs": {
+    "values": {
+      "RANGE_PROOF": {
+        "description": "Proves a numeric claim satisfies a range condition without revealing the value",
+        "params_schema": {
+          "threshold_form": {"threshold": "integer", "comparison": "gte|gt|lte|lt"},
+          "interval_form": {"min": "integer", "max": "integer"}
+        },
+        "example": "age >= 21 without disclosing birth_date"
+      },
+      "MEMBERSHIP": {
+        "description": "Proves a claim value is in an allowed set without revealing which value",
+        "params_schema": {"allowed_values": "array"},
+        "example": "country_code is one of US, CA, MX"
+      },
+      "EQUALITY": {
+        "description": "Proves a claim equals a specific value (useful for boolean flags)",
+        "params_schema": {"target_value": "any"},
+        "example": "age_over_21 == true"
+      },
+      "NON_MEMBERSHIP": {
+        "description": "Proves a claim value is NOT in a set",
+        "params_schema": {"excluded_values": "array"},
+        "example": "status not in [REVOKED, SUSPENDED]"
+      },
+      "INEQUALITY": {
+        "description": "Proves a claim is not equal to a specific value",
+        "params_schema": {"target_value": "any"},
+        "example": "document_status != null"
+      }
+    }
+  }
+}

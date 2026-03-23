@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/flow-types.json",
+  "title": "FlowType",
+  "description": "Protocol-aligned flow types. Each type maps to a fixed ordered step sequence. Issuance and verification flows are separate; application_approval_issuance is the multi-step application workflow.",
+  "type": "string",
+  "enum": [
+    "oid4vci_pre_authorized",
+    "oid4vci_authorization_code",
+    "mdl_issuance",
+    "oid4vp_presentation",
+    "mdl_presentation",
+    "application_approval_issuance",
+    "credential_renewal",
+    "credential_revocation",
+    "combined",
+    "siopv2"
+  ],
+  "$comment": "flow_category derivation: ISSUANCE=[oid4vci_pre_authorized, oid4vci_authorization_code, mdl_issuance, application_approval_issuance], VERIFICATION=[oid4vp_presentation, mdl_presentation, siopv2], RENEWAL=[credential_renewal], REVOCATION=[credential_revocation], COMBINED=[combined]",
+  "$defs": {
+    "values": {
+      "oid4vci_pre_authorized": {
+        "description": "OID4VCI Pre-Authorized Code flow. Issuer provides a pre-authorized code; wallet exchanges it for a credential. Steps: create_offer → token_exchange → credential_request → issue_credential.",
+        "spec": "OpenID for Verifiable Credential Issuance §6.1",
+        "requires": "credential_template_id"
+      },
+      "oid4vci_authorization_code": {
+        "description": "OID4VCI Authorization Code flow. Full OAuth2 authorization before credential issuance. Steps: create_offer → authorization → token_exchange → credential_request → issue_credential.",
+        "spec": "OpenID for Verifiable Credential Issuance §6.2",
+        "requires": "credential_template_id"
+      },
+      "mdl_issuance": {
+        "description": "ISO 18013-5 mDL issuance. Steps: application_submit → validate_evidence → approval_decision → issue_mdl → deliver_credential.",
+        "spec": "ISO 18013-5:2021",
+        "requires": "credential_template_id"
+      },
+      "oid4vp_presentation": {
+        "description": "OID4VP verifier-initiated presentation. Steps: create_request → wallet_selection → presentation_submission → verify_presentation.",
+        "spec": "OpenID for Verifiable Presentations",
+        "requires": "presentation_policy_id"
+      },
+      "mdl_presentation": {
+        "description": "ISO 18013-5 mDL proximity/online presentation. Steps: device_engagement → session_establishment → request_items → response_items → session_termination.",
+        "spec": "ISO 18013-5:2021 Part 2",
+        "requires": "presentation_policy_id"
+      },
+      "application_approval_issuance": {
+        "description": "Multi-step application workflow with evidence collection and approval. Steps: accept_application → validate_evidence → approval_decision → issue_credential → deliver_credential. approval_decision step is extensible via hooks.",
+        "requires": "application_template_id",
+        "flow_category": "ISSUANCE"
+      },
+      "credential_renewal": {
+        "description": "Renew an existing credential before or after expiry using OID4VCI with holder confirmation. Steps: validate_existing → create_offer → token_exchange → credential_request → issue_renewed_credential → revoke_old_credential.",
+        "spec": "OpenID for Verifiable Credential Issuance §6 (renewal variant)",
+        "requires": "credential_template_id",
+        "flow_category": "RENEWAL"
+      },
+      "credential_revocation": {
+        "description": "Revoke an issued credential record. Steps: validate_revocation_request → update_status_list → notify_holder.",
+        "requires": "credential_template_id",
+        "flow_category": "REVOCATION"
+      },
+      "combined": {
+        "description": "Combined issuance + verification flow. Credential is issued and then a presentation is requested in a single orchestrated sequence. Steps: accept_application → approval_decision → issue_credential → create_request → presentation_submission → verify_presentation.",
+        "requires": ["credential_template_id", "presentation_policy_id"],
+        "flow_category": "COMBINED"
+      },
+      "siopv2": {
+        "description": "Self-Issued OpenID Provider v2 authentication flow. Steps: create_request → authentication_submission → verify_id_token.",
+        "spec": "Self-Issued OpenID Provider v2",
+        "flow_category": "VERIFICATION"
+      }
+    },
+    "step_sequences": {
+      "oid4vci_pre_authorized": ["create_offer", "token_exchange", "credential_request", "issue_credential"],
+      "oid4vci_authorization_code": ["create_offer", "authorization", "token_exchange", "credential_request", "issue_credential"],
+      "mdl_issuance": ["application_submit", "validate_evidence", "approval_decision", "issue_mdl", "deliver_credential"],
+      "oid4vp_presentation": ["create_request", "wallet_selection", "presentation_submission", "verify_presentation"],
+      "mdl_presentation": ["device_engagement", "session_establishment", "request_items", "response_items", "session_termination"],
+      "application_approval_issuance": ["accept_application", "validate_evidence", "approval_decision", "issue_credential", "deliver_credential"],
+      "credential_renewal": ["validate_existing", "create_offer", "token_exchange", "credential_request", "issue_renewed_credential", "revoke_old_credential"],
+      "credential_revocation": ["validate_revocation_request", "update_status_list", "notify_holder"],
+      "combined": ["accept_application", "approval_decision", "issue_credential", "create_request", "presentation_submission", "verify_presentation"],
+      "siopv2": ["create_request", "authentication_submission", "verify_id_token"]
+    },
+    "extensible_steps": {
+      "mdl_issuance": ["approval_decision", "deliver_credential"],
+      "application_approval_issuance": ["approval_decision", "deliver_credential"]
+    }
+  }
+}

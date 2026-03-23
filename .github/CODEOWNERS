@@ -1,0 +1,35 @@
+# CODEOWNERS
+# These owners are automatically requested for review when the listed paths are changed.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Normative specification — requires maintainer review
+SPECIFICATION.md                @mip-protocol/maintainers
+VERSIONING.md                   @mip-protocol/maintainers
+GOVERNANCE.md                   @mip-protocol/maintainers
+
+# JSON Schemas and enumerations — normative; breaking changes require maintainer approval
+schemas/                        @mip-protocol/maintainers
+enums/                          @mip-protocol/maintainers
+
+# Cedar schema — normative; changes affect all Cedar policy evaluation
+cedar/mip.cedarschema           @mip-protocol/maintainers
+cedar/                          @mip-protocol/maintainers
+
+# Per-entity specifications
+protocol/                       @mip-protocol/maintainers
+
+# Conformance suite — maintainer review required to keep the suite authoritative
+conformance/                    @mip-protocol/maintainers
+
+# Compliance profiles — normative once merged
+compliance-profiles/            @mip-protocol/maintainers
+
+# License — must not be changed without unanimous maintainer approval
+LICENSE                         @mip-protocol/maintainers
+
+# Community health files
+CODE_OF_CONDUCT.md              @mip-protocol/maintainers
+SECURITY.md                     @mip-protocol/maintainers
+
+# Everything else (docs, examples, reference implementations, tooling)
+# can be merged with a single maintainer approval

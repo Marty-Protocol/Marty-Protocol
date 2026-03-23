@@ -1,0 +1,28 @@
+{
+  "id": "b2c3d4e5-f6a7-4890-bcde-f01234567890",
+  "organization_id": "f1e2d3c4-b5a6-4978-9012-345678901234",
+  "flow_id": "c3d4e5f6-a7b8-4901-cdef-012345678901",
+  "credential_template_id": "d4e5f6a7-b8c9-4012-def0-123456789012",
+  "user_id": "e5f6a7b8-c9d0-4123-ef01-234567890123",
+  "given_name": "Alice",
+  "family_name": "Smith",
+  "email": "alice@example.com",
+  "phone": "+14155551234",
+  "external_id": "EMP-2026-0042",
+  "status": "SUBMITTED",
+  "submitted_at": "2026-03-15T14:30:00Z",
+  "vetting_checks": [
+    {
+      "id": "f6a7b8c9-d0e1-4234-f012-345678901234",
+      "check_type": "DOCUMENT_AUTHENTICITY",
+      "status": "PENDING"
+    }
+  ],
+  "application_data": {
+    "department": "Engineering",
+    "badge_level": "L3"
+  },
+  "metadata": {},
+  "created_at": "2026-03-15T14:00:00Z",
+  "updated_at": "2026-03-15T14:30:00Z"
+}

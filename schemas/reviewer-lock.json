@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/reviewer-lock.json",
+  "title": "ReviewerLock",
+  "description": "A time-bounded exclusive lock that prevents two reviewers from acting on the same applicant simultaneously. A lock MUST be acquired before transitioning an applicant out of SUBMITTED or UNDER_REVIEW. Locks expire automatically; the default TTL is 1800 seconds (30 minutes).",
+  "type": "object",
+  "required": ["id", "applicant_id", "organization_id", "holder_user_id", "expires_at", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "applicant_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "organization_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "holder_user_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "User ID of the reviewer that currently holds the lock"
+    },
+    "ttl_seconds": {
+      "type": "integer",
+      "minimum": 60,
+      "maximum": 7200,
+      "default": 1800,
+      "description": "Requested lock duration in seconds. Maximum 7200 (2 hours). Default 1800 (30 minutes)."
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Absolute expiry timestamp. Computed as created_at + ttl_seconds."
+    },
+    "released_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Timestamp at which the lock was explicitly released before expiry"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "RELEASED", "EXPIRED"],
+      "default": "ACTIVE"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$comment": "Only one ACTIVE ReviewerLock may exist per applicant at any time. An attempt to acquire a lock on an applicant with an ACTIVE, non-expired lock MUST return HTTP 409 Conflict with error code 'APPLICANT_LOCKED'."
+}

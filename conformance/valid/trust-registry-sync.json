@@ -1,0 +1,28 @@
+{
+  "sync_token": "2026-03-15T14:00:00Z-seq-42",
+  "sequence": 42,
+  "entries": [
+    {
+      "entry_id": "c6d7e8f9-a0b1-4234-5678-901234abcdef",
+      "anchor_type": "CSCA",
+      "operation": "ADD",
+      "country_code": "DE",
+      "certificate_pem": "-----BEGIN CERTIFICATE-----\nMIIBkTCB+wIUE...\n-----END CERTIFICATE-----",
+      "subject_key_id": "a1:b2:c3:d4:e5:f6",
+      "not_before": "2024-01-01T00:00:00Z",
+      "not_after": "2034-01-01T00:00:00Z",
+      "source": "EUDI_LOTL"
+    },
+    {
+      "entry_id": "d7e8f9a0-b1c2-4345-6789-012345abcdef",
+      "anchor_type": "DSC",
+      "operation": "REMOVE",
+      "country_code": "FR",
+      "certificate_pem": null,
+      "subject_key_id": "f1:e2:d3:c4:b5:a6",
+      "source": "ICAO_PKD"
+    }
+  ],
+  "has_more": false,
+  "generated_at": "2026-03-15T14:00:00Z"
+}

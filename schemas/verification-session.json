@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/verification-session.json",
+  "title": "VerificationSession",
+  "description": "A single presentation-request/response cycle instance",
+  "type": "object",
+  "required": ["id", "flow_id", "presentation_policy_id", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "flow_id": {"type": "string", "format": "uuid"},
+    "flow_instance_id": {"type": "string", "format": "uuid"},
+    "presentation_policy_id": {"type": "string", "format": "uuid"},
+    "deployment_profile_id": {"type": ["string", "null"], "format": "uuid"},
+    "verifier_nonce": {"type": "string", "minLength": 22, "description": "Base64url-encoded random nonce (min 128 bits)"},
+    "holder_id": {"type": ["string", "null"]},
+    "status": {
+      "type": "string",
+      "enum": ["PENDING", "AWAITING_PRESENTATION", "VERIFYING", "PASSED", "FAILED", "EXPIRED", "CANCELLED"]
+    },
+    "result": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "passed": {"type": "boolean"},
+        "claims_satisfied": {"type": "array", "items": {"type": "string"}},
+        "claims_missing": {"type": "array", "items": {"type": "string"}},
+        "trust_validated": {"type": "boolean"},
+        "revocation_checked": {"type": "boolean"},
+        "failure_reason": {"type": "string"}
+      }
+    },
+    "expires_at": {"type": "string", "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "completed_at": {"type": ["string", "null"], "format": "date-time"},
+    "updated_at": {"type": ["string", "null"], "format": "date-time"},
+    "error": {
+      "type": ["string", "null"],
+      "description": "Error reason if session terminated before a result was recorded (e.g. expired before presentation was submitted)"
+    }
+  }
+}

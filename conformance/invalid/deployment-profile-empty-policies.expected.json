@@ -1,0 +1,5 @@
+{
+  "pointer": "/presentation_policy_ids",
+  "error_code": "MIN_ITEMS_VIOLATION",
+  "message": "presentation_policy_ids must contain at least 1 element. A Deployment Profile MUST enable at least one Presentation Policy."
+}

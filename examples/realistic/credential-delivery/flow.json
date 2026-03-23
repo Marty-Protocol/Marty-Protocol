@@ -1,0 +1,14 @@
+{
+  "id": "b2000001-0001-4000-8000-000000000001",
+  "organization_id": "b2000001-0000-4000-8000-000000000000",
+  "name": "Loyalty Credential Issuance Flow",
+  "description": "OID4VCI pre-authorized code flow for issuing LoyaltyProgramMembership SD-JWT-VC. Push notification delivers the offer URI to the member's wallet after enrollment confirmation.",
+  "flow_type": "oid4vci_pre_authorized",
+  "flow_category": "ISSUANCE",
+  "credential_template_id": "b2000001-0002-4000-8000-000000000002",
+  "trust_profile_id": "b2000001-0003-4000-8000-000000000003",
+  "approval_strategy": "AUTO",
+  "enabled": true,
+  "status": "ACTIVE",
+  "created_at": "2026-03-11T00:00:00Z"
+}

@@ -1,0 +1,6 @@
+{
+  "description": "Full administrative access to the organization",
+  "permissions": ["admin:full", "credentials:read", "users:read"],
+  "is_system_role": true,
+  "policy_set_id": "d1e2f3a4-b5c6-4789-0123-456789abcdef"
+}

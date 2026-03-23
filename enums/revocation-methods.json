@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/revocation-methods.json",
+  "title": "RevocationMechanism",
+  "description": "Supported cryptographic credential revocation mechanisms",
+  "type": "string",
+  "enum": ["OCSP", "CRL", "STATUS_LIST_2021", "BITSTRING_STATUS_LIST", "TOKEN_STATUS_LIST"],
+  "$defs": {
+    "values": {
+      "OCSP": {
+        "description": "Online Certificate Status Protocol",
+        "standard": "RFC 6960",
+        "use_case": "X.509-based credentials (mDoc, VC-JWT with X.509 issuer)",
+        "online_only": true
+      },
+      "CRL": {
+        "description": "Certificate Revocation List",
+        "standard": "RFC 5280",
+        "use_case": "X.509-based credentials in low-connectivity deployments",
+        "online_only": false
+      },
+      "STATUS_LIST_2021": {
+        "description": "W3C Status List 2021 (bitstring status list)",
+        "standard": "W3C Status List 2021",
+        "use_case": "W3C VC credentials",
+        "online_only": false
+      },
+      "BITSTRING_STATUS_LIST": {
+        "description": "IETF Bitstring Status List",
+        "standard": "IETF draft-ietf-oauth-status-list",
+        "use_case": "SD-JWT-VC, OID4VCI credentials",
+        "online_only": false
+      },
+      "TOKEN_STATUS_LIST": {
+        "description": "IETF Token Status List",
+        "standard": "IETF RFC 9738",
+        "use_case": "JWT-based and SD-JWT-VC credentials",
+        "online_only": false
+      }
+    }
+  }
+}

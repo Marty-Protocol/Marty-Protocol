@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mip-protocol-types"
+version = "0.1.0"
+description = "Generated Python types for the Marty Identity Protocol"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+dependencies = [
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["mypy>=1.0", "pytest>=7.0"]

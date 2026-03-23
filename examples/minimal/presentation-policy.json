@@ -1,0 +1,21 @@
+{
+  "id": "pp-minimal",
+  "organization_id": "org-example",
+  "name": "Minimal Presentation Policy",
+  "required_claims": [
+    {
+      "claim_name": "subject_id",
+      "credential_type": "MinimalCredential"
+    }
+  ],
+  "accepted_credential_types": ["MinimalCredential"],
+  "trust_profile_id": "tp-minimal",
+  "holder_binding": {
+    "required": false
+  },
+  "freshness": {
+    "require_not_revoked": false
+  },
+  "prefer_predicates": false,
+  "created_at": "2026-03-11T00:00:00Z"
+}

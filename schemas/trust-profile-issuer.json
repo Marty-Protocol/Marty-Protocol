@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/trust-profile-issuer.json",
+  "title": "TrustProfileIssuer",
+  "description": "Join entity between TrustProfile and IssuerEntity with trust scoring and cascade revocation policy. trust_level is a 0–100 score; future versions will auto-adjust based on issuer history (failed validations, revocation events, compliance lapses).",
+  "type": "object",
+  "required": ["id", "trust_profile_id", "issuer_id", "trust_level", "relationship_status", "cascade_revocation_policy", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "trust_profile_id": {"type": "string", "format": "uuid"},
+    "issuer_id": {"type": "string", "format": "uuid", "description": "References IssuerEntity.id"},
+    "trust_level": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 100,
+      "description": "Trust score 0–100. Consumer policies may require a minimum trust_level via PresentationPolicy.issuer_constraints.min_trust_level."
+    },
+    "relationship_status": {
+      "type": "string",
+      "enum": ["TRUSTED", "DENIED", "UNDER_REVIEW"],
+      "description": "TRUSTED: issuer accepted. DENIED: issuer explicitly rejected. UNDER_REVIEW: pending compliance evaluation."
+    },
+    "cascade_revocation_policy": {
+      "type": "string",
+      "enum": ["AUTO_CASCADE", "MANUAL", "NOTIFY_ONLY"],
+      "description": "What happens when this issuer is revoked. AUTO_CASCADE: automatically revoke all dependent credentials. MANUAL: queue for manual review. NOTIFY_ONLY: alert affected parties without auto-revoking."
+    },
+    "metadata": {"type": "object"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

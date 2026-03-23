@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/approval-strategies.json",
+  "title": "ApprovalStrategy",
+  "description": "How credential applications are reviewed and approved",
+  "type": "string",
+  "enum": ["AUTO", "MANUAL", "RULES_BASED", "EXTERNAL"],
+  "$defs": {
+    "values": {
+      "AUTO": {
+        "description": "Application is approved immediately upon submission without human review",
+        "use_case": "Employee batch issuance, low-risk credentials, pre-verified applicants"
+      },
+      "MANUAL": {
+        "description": "A human reviewer must explicitly approve or reject the application",
+        "use_case": "High-assurance credentials, immigration documents, privileged access"
+      },
+      "RULES_BASED": {
+        "description": "Automated rules engine evaluates the application; routes to MANUAL on rule mismatch",
+        "requires": "approval_rules must be non-empty",
+        "use_case": "Age verification, professional credentials, jurisdiction-based eligibility"
+      },
+      "EXTERNAL": {
+        "description": "Approval decision is delegated to an external system via callback. Flow execution pauses at the approval_decision step until the external system POSTs a decision.",
+        "use_case": "Third-party background checks, government identity proofing, enterprise HR systems"
+      }
+    }
+  }
+}

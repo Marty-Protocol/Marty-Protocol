@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/mip-configuration.json",
+  "title": "MIP Configuration Discovery Document",
+  "description": "Schema for the /.well-known/mip-configuration endpoint response. This document describes the capabilities, endpoints, and supported profiles of a MIP implementation. Analogous to OpenID Connect Discovery (RFC 8414) but scoped to MIP-specific capabilities.",
+  "type": "object",
+  "required": ["mip_version", "issuer", "mip_configuration_endpoint"],
+  "additionalProperties": false,
+  "properties": {
+    "mip_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
+      "description": "The MIP protocol version supported by this implementation. MUST match the version in the served specification.",
+      "example": "0.1.0"
+    },
+    "issuer": {
+      "type": "string",
+      "format": "uri",
+      "description": "Base URL of this MIP deployment. MUST be an absolute HTTPS URI. All relative endpoint paths in this document are resolved against this base URL.",
+      "example": "https://api.example.com"
+    },
+    "mip_configuration_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "description": "Canonical URL of this discovery document (self-referential). MUST be /.well-known/mip-configuration resolved against issuer.",
+      "example": "https://api.example.com/.well-known/mip-configuration"
+    },
+    "supported_versions": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^\\d+\\.\\d+(\\.\\d+)?$" },
+      "description": "All MIP protocol versions supported by this implementation. Used for version negotiation (see §21). Includes the current version and any backward-compatible prior versions.",
+      "example": ["0.1.0"]
+    },
+    "implementation_classes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["ISSUER", "VERIFIER", "WALLET", "REGISTRY"]
+      },
+      "description": "Which MIP implementation classes this deployment satisfies. Used for conformance declarations (see §20.3).",
+      "example": ["ISSUER", "VERIFIER", "REGISTRY"]
+    },
+    "issuance_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "description": "Base URL for OID4VCI issuance operations. The /.well-known/openid-credential-issuer metadata endpoint is resolved relative to this URL.",
+      "example": "https://api.example.com/v1/issuance"
+    },
+    "openid_credential_issuer": {
+      "type": "string",
+      "format": "uri",
+      "description": "Direct URL to the OID4VCI issuer metadata document (/.well-known/openid-credential-issuer). Present when implementation_classes includes ISSUER.",
+      "example": "https://api.example.com/.well-known/openid-credential-issuer"
+    },
+    "presentation_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "description": "Base URL for OID4VP verification operations. Present when implementation_classes includes VERIFIER.",
+      "example": "https://api.example.com/v1/flows/verify"
+    },
+    "token_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "description": "OAuth2 token endpoint for credential issuance flows.",
+      "example": "https://api.example.com/v1/issuance/token"
+    },
+    "authorization_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "description": "OAuth2 authorization endpoint for authorization_code issuance flows.",
+      "example": "https://api.example.com/v1/auth/authorize"
+    },
+    "supported_credential_formats": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]
+      },
+      "description": "Credential formats supported by this implementation.",
+      "example": ["MDOC", "SD_JWT_VC"]
+    },
+    "supported_compliance_profiles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Compliance profile IDs or compliance_codes supported by this implementation.",
+      "example": ["AAMVA_MDL", "ICAO_DTC", "ENTERPRISE_VC"]
+    },
+    "supported_flow_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "oid4vci_pre_authorized",
+          "oid4vci_authorization_code",
+          "mdl_issuance",
+          "application_approval_issuance",
+          "credential_renewal",
+          "credential_revocation",
+          "oid4vp_presentation",
+          "mdl_presentation"
+        ]
+      },
+      "description": "Flow types supported at runtime by this implementation.",
+      "example": ["oid4vci_pre_authorized", "oid4vp_presentation"]
+    },
+    "supported_signing_algorithms": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Signing algorithms supported for credential issuance and holder binding proofs.",
+      "example": ["ES256", "ES384", "EdDSA"]
+    },
+    "proximity_supported": {
+      "type": "boolean",
+      "description": "Whether this implementation supports ISO 18013-5 proximity flows (BLE/NFC device engagement).",
+      "default": false
+    },
+    "proximity_engagement_methods": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["QR_CODE", "NFC"]
+      },
+      "description": "Supported proximity engagement methods. Present only when proximity_supported is true.",
+      "example": ["QR_CODE", "NFC"]
+    },
+    "scim_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "description": "Base URL for SCIM 2.0 organization and user management. Present when REGISTRY class is implemented.",
+      "example": "https://api.example.com/v1/organizations/{org_id}/scim/v2"
+    },
+    "revocation_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "description": "Base URL for revocation status list retrieval.",
+      "example": "https://api.example.com/v1/issuance/status-list"
+    },
+    "jwks_uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the JSON Web Key Set containing the implementation's public keys (for verifying issuer signatures, request objects, etc.).",
+      "example": "https://api.example.com/.well-known/jwks.json"
+    },
+    "org_endpoints": {
+      "type": "array",
+      "description": "Per-organization endpoint overrides. Each entry provides scoped URLs for a specific organization.",
+      "items": {
+        "type": "object",
+        "required": ["org_id"],
+        "additionalProperties": false,
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization identifier"
+          },
+          "openid_credential_issuer": {
+            "type": "string",
+            "format": "uri",
+            "description": "Org-scoped OID4VCI issuer metadata endpoint"
+          },
+          "token_endpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "credential_endpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "presentation_endpoint": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    },
+    "service_documentation": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to human-readable documentation for this MIP deployment.",
+      "example": "https://docs.example.com/mip"
+    },
+    "policy_uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the privacy policy or acceptable use policy for this deployment."
+    }
+  }
+}

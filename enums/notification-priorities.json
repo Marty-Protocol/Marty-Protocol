@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/notification-priorities.json",
+  "title": "NotificationPriority",
+  "description": "Priority levels for notification delivery routing and FCM/APNs configuration",
+  "type": "string",
+  "enum": ["LOW", "NORMAL", "HIGH", "CRITICAL"],
+  "$defs": {
+    "values": {
+      "LOW": {
+        "description": "Non-urgent informational notification",
+        "fcm_priority": "normal",
+        "wake_device": false,
+        "use_case": "Weekly summaries, informational updates"
+      },
+      "NORMAL": {
+        "description": "Standard notification; default for most events",
+        "fcm_priority": "normal",
+        "wake_device": false,
+        "use_case": "Application status updates, credential ready"
+      },
+      "HIGH": {
+        "description": "Time-sensitive notification requiring prompt attention",
+        "fcm_priority": "high",
+        "wake_device": true,
+        "use_case": "Credential offers (time-limited), verification requests"
+      },
+      "CRITICAL": {
+        "description": "Urgent notification for security or compliance events",
+        "fcm_priority": "high",
+        "wake_device": true,
+        "use_case": "Credential revoked, security alert, required compliance action"
+      }
+    }
+  }
+}

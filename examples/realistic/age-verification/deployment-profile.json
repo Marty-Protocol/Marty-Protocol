@@ -1,0 +1,11 @@
+{
+  "id": "b1000001-0002-4000-8000-000000000002",
+  "organization_id": "b1000001-0000-4000-8000-000000000000",
+  "name": "Retail POS Age Verification",
+  "description": "Deployment profile for point-of-sale terminals performing age-gated purchase verification. Requires online connectivity; age predicates cannot be cached.",
+  "trust_profile_id": "b1000001-0002-4000-8000-000000000002",
+  "presentation_policy_ids": ["b1000001-0004-4000-8000-000000000004"],
+  "default_policy_id": "b1000001-0004-4000-8000-000000000004",
+  "network_mode": "ONLINE",
+  "created_at": "2026-03-11T00:00:00Z"
+}

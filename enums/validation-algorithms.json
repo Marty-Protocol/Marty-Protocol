@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/validation-algorithms.json",
+  "title": "ValidationAlgorithm",
+  "description": "Accepted cryptographic signature algorithms for credential signing and verification",
+  "type": "string",
+  "enum": ["ES256", "ES384", "ES512", "PS256", "PS384", "PS512", "EdDSA", "RS256", "RS384", "RS512", "BBS_BLS12381_SHA256", "BBS_BLS12381_SHAKE256"],
+  "$defs": {
+    "values": {
+      "ES256": {"description": "ECDSA with P-256 curve and SHA-256", "recommended": true, "use_case": "SD-JWT-VC, OID4VCI, EUDI"},
+      "ES384": {"description": "ECDSA with P-384 curve and SHA-384", "recommended": true},
+      "ES512": {"description": "ECDSA with P-521 curve and SHA-512"},
+      "PS256": {"description": "RSASSA-PSS with SHA-256 (min 2048-bit key)", "recommended": true, "use_case": "mDoc, X.509-based credentials"},
+      "PS384": {"description": "RSASSA-PSS with SHA-384"},
+      "PS512": {"description": "RSASSA-PSS with SHA-512"},
+      "EdDSA": {"description": "Edwards-curve Digital Signature Algorithm (Ed25519)", "recommended": true, "use_case": "DID-based credentials"},
+      "RS256": {"description": "RSASSA-PKCS1-v1_5 with SHA-256 (min 2048-bit key)", "note": "PS256 preferred where possible"},
+      "RS384": {"description": "RSASSA-PKCS1-v1_5 with SHA-384"},
+      "RS512": {"description": "RSASSA-PKCS1-v1_5 with SHA-512"},
+      "BBS_BLS12381_SHA256": {"description": "BBS+ signature scheme with BLS12-381 curve and SHA-256 hash-to-curve. Provides unlinkable selective disclosure for JSON-LD Verifiable Credentials.", "recommended": true, "use_case": "JSON_LD credentials requiring unlinkable selective disclosure", "spec": "IETF draft-irtf-cfrg-bbs-signatures"},
+      "BBS_BLS12381_SHAKE256": {"description": "BBS+ signature scheme with BLS12-381 curve and SHAKE-256 hash-to-curve. Alternative hash function variant for BBS+ signatures.", "use_case": "JSON_LD credentials requiring unlinkable selective disclosure", "spec": "IETF draft-irtf-cfrg-bbs-signatures"}
+    },
+    "deprecated": {
+      "RS256_1024": "RS256 with key size < 2048 bits is rejected",
+      "HS256": "HMAC-based algorithms are not accepted for credential signing"
+    }
+  }
+}

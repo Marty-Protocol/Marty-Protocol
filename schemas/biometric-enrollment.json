@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/biometric-enrollment.json",
+  "title": "BiometricEnrollment",
+  "description": "A record of a biometric enrollment event for an applicant. Stores only the modality, hash of the biometric template, and metadata. Raw biometric data MUST NOT be stored in this record and MUST NOT be transmitted via the MIP API.",
+  "type": "object",
+  "required": ["id", "applicant_id", "organization_id", "modality", "template_hash", "hash_algorithm", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "applicant_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "organization_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "modality": {
+      "type": "string",
+      "enum": [
+        "FACE",
+        "FINGERPRINT",
+        "IRIS",
+        "VOICE",
+        "PALM_VEIN",
+        "SIGNATURE"
+      ],
+      "description": "Type of biometric sample that was enrolled"
+    },
+    "template_hash": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]+$",
+      "description": "Hex-encoded hash of the biometric template. The hash MUST be computed over the provider-normalised template, not the raw sample."
+    },
+    "hash_algorithm": {
+      "type": "string",
+      "enum": ["SHA-256", "SHA-384", "SHA-512"],
+      "description": "Hash algorithm used to compute template_hash"
+    },
+    "provider": {
+      "type": ["string", "null"],
+      "maxLength": 128,
+      "description": "Name of the biometric SDK or third-party service that produced the template"
+    },
+    "capture_device": {
+      "type": ["string", "null"],
+      "maxLength": 256,
+      "description": "Identifier or description of the capture device or SDK version"
+    },
+    "quality_score": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Normalised quality score of the captured sample, in range [0, 1]"
+    },
+    "liveness_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a liveness detection check was performed and passed during this enrollment"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ENROLLED", "REVOKED", "SUPERSEDED"],
+      "description": "Enrollment status. SUPERSEDED indicates a newer enrollment for the same modality exists for this applicant."
+    },
+    "revoked_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "revocation_reason": {
+      "type": ["string", "null"],
+      "maxLength": 512
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$comment": "Privacy constraint: raw biometric samples (images, audio, sensor data) MUST be deleted immediately after template extraction and MUST NOT be stored in or retrieved from MIP. Only template_hash is retained."
+}

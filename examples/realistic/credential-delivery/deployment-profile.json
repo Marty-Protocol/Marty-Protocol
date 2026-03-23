@@ -1,0 +1,11 @@
+{
+  "id": "b2000001-0004-4000-8000-000000000004",
+  "organization_id": "b2000001-0000-4000-8000-000000000000",
+  "name": "Loyalty App Credential Delivery",
+  "description": "Deployment profile for the loyalty credential delivery flow. Customers receive credentials via OID4VCI pre-authorized code offer URI.",
+  "trust_profile_id": "b2000001-0002-4000-8000-000000000002",
+  "presentation_policy_ids": ["b2000001-0004-4000-8000-000000000004"],
+  "credential_template_ids": ["b2000001-0003-4000-8000-000000000003"],
+  "network_mode": "ONLINE",
+  "created_at": "2026-03-11T00:00:00Z"
+}

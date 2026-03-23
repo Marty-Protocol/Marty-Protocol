@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/deployment-profile.json",
+  "title": "DeploymentProfile",
+  "description": "Runtime configuration for a physical or logical identity verification endpoint. Packages trust, policies, issuance capability, network mode, UX, and device grouping via Lanes. Compatibility extensions may additionally expose rollout and operational fields.",
+  "type": "object",
+  "required": ["id", "organization_id", "name", "trust_profile_id", "presentation_policy_ids", "network_mode", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string", "maxLength": 1024},
+    "trust_profile_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Trust configuration reference used by this deployment profile."
+    },
+    "presentation_policy_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "format": "uuid"},
+      "uniqueItems": true,
+      "description": "Enabled presentation policies available to this deployment."
+    },
+    "credential_template_ids": {
+      "type": "array",
+      "items": {"type": "string", "format": "uuid"},
+      "uniqueItems": true,
+      "description": "Enabled credential templates for issuance-capable deployments."
+    },
+    "default_policy_id": {"type": ["string", "null"], "format": "uuid"},
+    "site_id": {
+      "type": ["string", "null"],
+      "maxLength": 256,
+      "description": "Optional site/location identifier (e.g. airport IATA code, building ID)"
+    },
+    "enabled_flow_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "format": "uuid"},
+      "uniqueItems": true,
+      "description": "IDs of Flow entities that are active at this deployment. A Flow can reference multiple DeploymentProfiles via its deployment_profile_ids."
+    },
+    "default_presentation_policy_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Compatibility alias for default_policy_id."
+    },
+    "network_mode": {
+      "type": "string",
+      "enum": ["ONLINE", "OFFLINE", "HYBRID"]
+    },
+    "key_access_mode": {
+      "type": "string",
+      "enum": ["KEY_VAULT", "HSM", "DEVICE_KEYSTORE"]
+    },
+    "environment_config": {
+      "type": "object",
+      "description": "User experience and offline behavior configuration for the deployed client.",
+      "additionalProperties": false,
+      "properties": {
+        "language": {"type": "string", "default": "en-US"},
+        "signage_text": {"type": "object", "additionalProperties": {"type": "string"}},
+        "operator_mode": {"type": "boolean", "default": false},
+        "accessibility_mode": {"type": "boolean", "default": false},
+        "offline_cache_ttl_seconds": {"type": "integer", "minimum": 0},
+        "theme": {"type": "string", "enum": ["light", "dark", "high_contrast"], "default": "light"}
+      }
+    },
+    "ux_config": {
+      "type": "object",
+      "description": "Compatibility alias for environment_config.",
+      "additionalProperties": false,
+      "properties": {
+        "language": {"type": "string", "default": "en-US"},
+        "signage_text": {"type": "object", "additionalProperties": {"type": "string"}},
+        "operator_mode": {"type": "boolean", "default": false},
+        "accessibility_mode": {"type": "boolean", "default": false},
+        "theme": {"type": "string", "enum": ["light", "dark", "high_contrast"], "default": "light"}
+      }
+    },
+    "update_channel": {
+      "type": "string",
+      "enum": ["stable", "beta", "pinned"],
+      "default": "stable",
+      "description": "Version rollout channel."
+    },
+    "update_policy": {
+      "type": "object",
+      "description": "Compatibility extension for software update policy.",
+      "additionalProperties": false,
+      "properties": {
+        "channel": {"type": "string", "enum": ["stable", "beta", "pinned"], "default": "stable"},
+        "pinned_version": {"type": ["string", "null"]},
+        "auto_update": {"type": "boolean", "default": true}
+      }
+    },
+    "offline_cache_ttl_hours": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 24,
+      "description": "Hours to cache trust anchors and status lists when network_mode is OFFLINE or HYBRID"
+    },
+    "biometric_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "Require the operator to authenticate with biometric before processing verifications"
+    },
+    "audit_all_events": {
+      "type": "boolean",
+      "default": true,
+      "description": "Log every verification and issuance event from this deployment for audit purposes"
+    },
+    "lanes": {
+      "type": "array",
+      "description": "Read-only in the profile body. Lanes are created and managed via sub-resource: POST /v1/identity/deployment-profiles/{id}/lanes",
+      "items": {"$ref": "lane.json"}
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

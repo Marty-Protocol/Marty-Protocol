@@ -1,0 +1,17 @@
+{
+  "id": "b3c4d5e6-f7a8-4901-bcde-f01234567890",
+  "flow_id": "c4d5e6f7-a8b9-4012-cdef-012345678901",
+  "flow_type": "oid4vp_presentation",
+  "organization_id": "d5e6f7a8-b9c0-4123-def0-123456789012",
+  "status": "IN_PROGRESS",
+  "current_step_index": 1,
+  "step_results": {
+    "present_credential": {"status": "completed"}
+  },
+  "issued_credential_id": null,
+  "expires_at": "2026-03-15T16:00:00Z",
+  "error_code": null,
+  "metadata": {},
+  "created_at": "2026-03-15T14:30:00Z",
+  "updated_at": "2026-03-15T14:35:00Z"
+}

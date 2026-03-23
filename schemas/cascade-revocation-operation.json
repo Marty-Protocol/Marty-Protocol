@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/cascade-revocation-operation.json",
+  "title": "CascadeRevocationOperation",
+  "description": "Tracks the cascade from a trust anchor or issuer revocation to dependent credentials. Provides circuit-breaker protection (pauses when affected_credential_count >= circuit_breaker_threshold), rollback support, and manual confirmation for high-impact operations.",
+  "type": "object",
+  "required": ["id", "organization_id", "operation_type", "trigger_entity_type", "trigger_entity_id", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "operation_type": {
+      "type": "string",
+      "enum": ["ISSUER_REVOCATION", "ANCHOR_REVOCATION"]
+    },
+    "trigger_entity_type": {
+      "type": "string",
+      "enum": ["ISSUER", "TRUST_ANCHOR"]
+    },
+    "trigger_entity_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "ID of the IssuerEntity or trust anchor that was revoked"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["PENDING_CONFIRMATION", "IN_PROGRESS", "COMPLETED", "ROLLED_BACK", "FAILED"]
+    },
+    "affected_credential_count": {"type": "integer", "minimum": 0, "default": 0},
+    "affected_credential_ids": {
+      "type": "array",
+      "items": {"type": "string", "format": "uuid"}
+    },
+    "requires_confirmation": {
+      "type": "boolean",
+      "default": false,
+      "description": "true when affected_credential_count >= circuit_breaker_threshold: operation pauses for manual sign-off"
+    },
+    "confirmed_at": {"type": ["string", "null"], "format": "date-time"},
+    "confirmed_by": {"type": ["string", "null"], "maxLength": 256},
+    "max_cascade_depth": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 3,
+      "description": "Maximum depth to traverse in the revocation cascade tree"
+    },
+    "current_depth": {"type": "integer", "minimum": 0, "default": 0},
+    "circuit_breaker_threshold": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1000,
+      "description": "If affected_credential_count reaches this value, requires_confirmation is set to true"
+    },
+    "circuit_breaker_triggered": {"type": "boolean", "default": false},
+    "can_rollback": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether a snapshot was captured to support rollback after COMPLETED"
+    },
+    "rollback_snapshot": {
+      "type": "object",
+      "description": "Pre-revocation state captured for rollback; omitted after rollback completes"
+    },
+    "rolled_back_at": {"type": ["string", "null"], "format": "date-time"},
+    "rolled_back_by": {"type": ["string", "null"], "maxLength": 256},
+    "error_message": {"type": ["string", "null"]},
+    "metadata": {"type": "object"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

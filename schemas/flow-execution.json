@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/flow-execution.json",
+  "title": "FlowExecution",
+  "description": "Runtime state of a single flow instance. Tracks current step, step results, context data, and lifecycle transitions. Created when a flow is initiated; updated as steps complete.",
+  "type": "object",
+  "required": ["id", "flow_id", "flow_type", "organization_id", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "flow_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "References Flow.id"
+    },
+    "flow_type": {
+      "$ref": "../enums/flow-types.json",
+      "description": "Copied from the Flow definition at instantiation time. Immutable after creation."
+    },
+    "organization_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Owning organization. Copied from the Flow definition at instantiation time."
+    },
+    "status": {
+      "$ref": "../enums/flow-statuses.json",
+      "description": "FlowInstance lifecycle state. See \u00a79.9.2 for states and \u00a79.9.3 for normative transitions."
+    },
+    "current_step": {
+      "type": ["string", "null"],
+      "description": "Name of the currently executing step (from the FLOW_STEPS sequence for this flow_type)"
+    },
+    "current_step_index": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0
+    },
+    "step_results": {
+      "type": "object",
+      "description": "Keyed by step name. Each value records the step result and completion timestamp.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "result": {},
+          "completed_at": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "context_data": {
+      "type": "object",
+      "description": "Arbitrary execution context shared across steps (e.g. applicant data, session tokens)"
+    },
+    "issued_credential_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "References IssuedCredential.id, populated after successful issuance"
+    },
+    "started_at": {"type": ["string", "null"], "format": "date-time"},
+    "completed_at": {"type": ["string", "null"], "format": "date-time"},
+    "expires_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Hard expiry deadline. Instance transitions to EXPIRED if not completed by this time."
+    },
+    "error_code": {
+      "type": ["string", "null"],
+      "description": "Terminal error code (present when status is FAILED). See protocol/messages/SPECIFICATION.md for error code registry."
+    },
+    "metadata": {"type": "object"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "b3000001-0004-4000-8000-000000000004",
+  "organization_id": "b3000001-0000-4000-8000-000000000000",
+  "name": "HQ Secure Zone Access Control",
+  "description": "Deployment profile for HQ building access control readers. Readers are always online — connected to the corporate network via 802.1X.",
+  "trust_profile_id": "b3000001-0002-4000-8000-000000000002",
+  "presentation_policy_ids": ["b3000001-0003-4000-8000-000000000003"],
+  "network_mode": "ONLINE",
+  "update_policy": {
+    "channel": "stable",
+    "auto_update": false
+  },
+  "created_at": "2026-03-11T00:00:00Z"
+}

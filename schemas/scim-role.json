@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/scim-role.json",
+  "title": "MIP SCIM Role (Group Extension)",
+  "description": "MIP extension attributes for SCIM 2.0 Group resources representing roles. Schema URI: urn:mip:scim:schemas:extension:Organization:2.0:Role",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Permission string from the MIP permission catalog (e.g., credentials:issue, flows:read, trust:admin). These map to Cedar action entity IDs in the MIP namespace."
+      },
+      "uniqueItems": true,
+      "description": "Permission strings granted by this role. Each string corresponds to a Cedar Action entity (e.g., MIP::Action::\"credentials:issue\")."
+    },
+    "policy_set_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Reference to a PolicySet (policy_type=ACCESS_CONTROL) containing Cedar policies that define fine-grained access rules for this role. When set, Cedar policies are evaluated in addition to the permissions array — Cedar forbid policies can restrict access, and Cedar permit policies with conditions can enable attribute-based access control beyond simple RBAC."
+    },
+    "is_system_role": {
+      "type": "boolean",
+      "default": false,
+      "description": "System-defined roles are read-only and cannot be modified or deleted"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 512,
+      "description": "Human-readable description of the role's purpose"
+    }
+  }
+}

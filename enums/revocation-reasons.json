@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/revocation-reasons.json",
+  "title": "RevocationReason",
+  "description": "Standard reasons for revoking a credential or trust anchor. Aligned with RFC 5280 CRL reason codes and X.509 CRLReason extension.",
+  "type": "string",
+  "enum": [
+    "unspecified",
+    "key_compromise",
+    "ca_compromise",
+    "affiliation_changed",
+    "superseded",
+    "cessation_of_operation",
+    "certificate_hold",
+    "privilege_withdrawn"
+  ],
+  "$defs": {
+    "values": {
+      "unspecified": {"description": "Reason not specified", "rfc5280_code": 0},
+      "key_compromise": {"description": "Private key has been compromised", "rfc5280_code": 1},
+      "ca_compromise": {"description": "CA private key has been compromised", "rfc5280_code": 2},
+      "affiliation_changed": {"description": "Subject's affiliation or relationship changed", "rfc5280_code": 3},
+      "superseded": {"description": "Credential replaced by a newer one", "rfc5280_code": 4},
+      "cessation_of_operation": {"description": "Entity has ceased operations", "rfc5280_code": 5},
+      "certificate_hold": {"description": "Temporary hold; may be reinstated", "rfc5280_code": 6},
+      "privilege_withdrawn": {"description": "Subject's privilege to hold this credential withdrawn", "rfc5280_code": 9}
+    }
+  }
+}

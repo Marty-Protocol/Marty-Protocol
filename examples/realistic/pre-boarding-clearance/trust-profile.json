@@ -1,0 +1,28 @@
+{
+  "id": "b4000001-0003-4000-8000-000000000003",
+  "organization_id": "b4000001-0000-4000-8000-000000000000",
+  "name": "ICAO DTC Trust — Pre-Boarding Clearance Example",
+  "description": "Trust profile for ICAO Digital Travel Credential verification at airport boarding gates",
+  "profile_type": "ICAO",
+  "trust_sources": [
+    {
+      "source_type": "PKD_URL",
+      "url": "https://pkddownloadsg.icao.int/download",
+      "description": "ICAO Public Key Directory — CSCA certificates"
+    },
+    {
+      "source_type": "TRUST_LIST",
+      "url": "https://trust-list.example-airline.com/document-signers",
+      "description": "Airline-augmented document signer trust list"
+    }
+  ],
+  "allowed_algorithms": ["ES256", "ES384", "PS256"],
+  "supported_formats": ["MDOC"],
+  "compatible_compliance_codes": ["ICAO_DTC", "ICAO_MRZ"],
+  "compliance_status": "COMPLIANT",
+  "time_policy": {
+    "clock_skew_seconds": 300,
+    "require_freshness": false
+  },
+  "created_at": "2026-03-11T00:00:00Z"
+}

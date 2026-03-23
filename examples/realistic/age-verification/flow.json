@@ -1,0 +1,14 @@
+{
+  "id": "b1000001-0001-4000-8000-000000000001",
+  "organization_id": "b1000001-0000-4000-8000-000000000000",
+  "name": "Age 21+ Purchase Verification Flow",
+  "description": "Verification-only flow. No credential issuance — the mDL is externally issued by a state DMV. Initiated at POS when a customer attempts an age-restricted purchase.",
+  "flow_type": "oid4vp_presentation",
+  "flow_category": "VERIFICATION",
+  "presentation_policy_id": "b1000001-0004-4000-8000-000000000004",
+  "trust_profile_id": "b1000001-0003-4000-8000-000000000003",
+  "approval_strategy": "AUTO",
+  "enabled": true,
+  "status": "ACTIVE",
+  "created_at": "2026-03-11T00:00:00Z"
+}

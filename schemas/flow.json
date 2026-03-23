@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/flow.json",
+  "title": "Flow",
+  "description": "End-to-end identity lifecycle orchestration. Each flow_type maps to a fixed protocol step sequence defined by OID4VCI, OID4VP, mDL ISO 18013-5, or application-approval workflows.",
+  "type": "object",
+  "required": ["id", "organization_id", "name", "flow_type", "approval_strategy", "enabled", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string", "maxLength": 1024},
+    "flow_type": {
+      "type": "string",
+      "enum": [
+        "oid4vci_pre_authorized",
+        "oid4vci_authorization_code",
+        "mdl_issuance",
+        "oid4vp_presentation",
+        "mdl_presentation",
+        "siopv2",
+        "application_approval_issuance",
+        "credential_renewal",
+        "credential_revocation",
+        "combined"
+      ],
+      "description": "Protocol-aligned flow type that determines the fixed step sequence. Issuance: oid4vci_pre_authorized, oid4vci_authorization_code, mdl_issuance, application_approval_issuance. Verification: oid4vp_presentation, mdl_presentation, siopv2. Lifecycle: credential_renewal, credential_revocation. Combined: combined."
+    },
+    "flow_category": {
+      "type": "string",
+      "enum": ["ISSUANCE", "VERIFICATION", "RENEWAL", "REVOCATION", "COMBINED"],
+      "readOnly": true,
+      "description": "Derived from flow_type. ISSUANCE: oid4vci_pre_authorized, oid4vci_authorization_code, mdl_issuance, application_approval_issuance. VERIFICATION: oid4vp_presentation, mdl_presentation, siopv2. RENEWAL: credential_renewal. REVOCATION: credential_revocation. COMBINED: combined."
+    },
+    "trust_profile_id": {"type": ["string", "null"], "format": "uuid"},
+    "credential_template_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Required for direct-issuance flows. Mutually exclusive with application_template_id."
+    },
+    "application_template_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Required for application_approval_issuance flows. Mutually exclusive with credential_template_id."
+    },
+    "presentation_policy_id": {"type": ["string", "null"], "format": "uuid"},
+    "deployment_profile_ids": {
+      "type": "array",
+      "items": {"type": "string", "format": "uuid"},
+      "uniqueItems": true,
+      "description": "Deployment Profiles that have this flow enabled via their enabled_flow_ids."
+    },
+    "approval_strategy": {
+      "$ref": "../enums/approval-strategies.json"
+    },
+    "enabled": {"type": "boolean", "default": true},
+    "hooks": {
+      "type": "object",
+      "description": "Pre/post step hooks keyed by 'pre_{step_name}' or 'post_{step_name}'. Extensible steps per flow type accept hook configurations.",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["hook_type"],
+          "properties": {
+            "hook_type": {"type": "string", "enum": ["WEBHOOK", "EXTERNAL_API", "SCRIPT"]},
+            "url": {"type": "string", "format": "uri"},
+            "config": {"type": "object"}
+          }
+        }
+      }
+    },
+    "trigger": {
+      "type": "object",
+      "required": ["trigger_type"],
+      "additionalProperties": false,
+      "properties": {
+        "trigger_type": {
+          "type": "string",
+          "enum": ["API_CALL", "WEBHOOK", "SCHEDULE", "APPLICATION_SUBMITTED"]
+        },
+        "config": {"type": "object"}
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "ACTIVE", "PAUSED", "ARCHIVED"]
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"flow_type": {"enum": ["oid4vci_pre_authorized", "oid4vci_authorization_code", "mdl_issuance", "credential_renewal"]}}
+      },
+      "then": {"required": ["credential_template_id"]}
+    },
+    {
+      "if": {
+        "properties": {"flow_type": {"const": "credential_revocation"}}
+      },
+      "then": {"required": ["credential_template_id"]}
+    },
+    {
+      "if": {
+        "properties": {"flow_type": {"const": "application_approval_issuance"}}
+      },
+      "then": {"required": ["application_template_id"]}
+    },
+    {
+      "if": {
+        "properties": {"flow_type": {"enum": ["oid4vp_presentation", "mdl_presentation", "siopv2"]}}
+      },
+      "then": {"required": ["presentation_policy_id"]}
+    },
+    {
+      "not": {
+        "required": ["credential_template_id", "application_template_id"],
+        "properties": {
+          "credential_template_id": {"type": "string"},
+          "application_template_id": {"type": "string"}
+        }
+      }
+    }
+  ]
+}

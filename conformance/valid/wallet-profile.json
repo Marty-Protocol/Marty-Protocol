@@ -1,0 +1,11 @@
+{
+  "name": "Default SD-JWT Wallet",
+  "credential_format": "SD_JWT_VC",
+  "issuance_protocol": "OID4VCI_PRE_AUTH",
+  "supported_platforms": ["ios", "android"],
+  "is_override": false,
+  "override_precedence": 50,
+  "merge_strategy": "APPEND",
+  "created_at": "2026-01-01T00:00:00Z",
+  "updated_at": "2026-03-15T14:00:00Z"
+}

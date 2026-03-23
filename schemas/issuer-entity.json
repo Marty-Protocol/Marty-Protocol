@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/issuer-entity.json",
+  "title": "IssuerEntity",
+  "description": "An organisation or authority that issues credentials. Separate from Trust Anchors (cryptographic roots). An issuer may be backed by one or more trust anchors. Supports full lifecycle: accreditation, suspension, and revocation.",
+  "type": "object",
+  "required": ["id", "issuer_id", "issuer_type", "display_name", "compliance_status", "valid_from", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "null = global/system issuer (auto-visible to all organisations)"
+    },
+    "issuer_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "Unique issuer identifier: DID, domain, X.509 subject DN, or custom ID"
+    },
+    "issuer_type": {
+      "type": "string",
+      "enum": ["ORGANIZATION", "GOVERNMENT", "DEVICE"],
+      "description": "ORGANIZATION: enterprise issuer. GOVERNMENT: state/national authority. DEVICE: device-bound credential issuer."
+    },
+    "display_name": {"type": "string", "minLength": 1, "maxLength": 256},
+    "description": {"type": "string", "maxLength": 1024},
+    "is_system_issuer": {
+      "type": "boolean",
+      "default": false,
+      "description": "true = automatically visible to all organisations (e.g. ICAO-enrolled states, AAMVA issuers)"
+    },
+    "compliance_status": {
+      "type": "string",
+      "enum": ["ACCREDITED", "COMPLIANT", "SUSPENDED", "REVOKED"],
+      "description": "ACCREDITED: formally certified by an accreditation body. COMPLIANT: meets required standards. SUSPENDED: temporarily inactive (reversible). REVOKED: permanently invalidated."
+    },
+    "accreditation_body": {"type": ["string", "null"], "maxLength": 256},
+    "accreditation_date": {"type": ["string", "null"], "format": "date-time"},
+    "valid_from": {"type": "string", "format": "date-time"},
+    "valid_until": {"type": ["string", "null"], "format": "date-time", "description": "null = indefinite validity"},
+    "trust_anchor_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Optional link to a trust anchor (for X.509 chain-backed issuers)"
+    },
+    "revoked_at": {"type": ["string", "null"], "format": "date-time"},
+    "revocation_reason": {"type": ["string", "null"], "maxLength": 512},
+    "revoked_by": {"type": ["string", "null"], "maxLength": 256},
+    "metadata": {"type": "object"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

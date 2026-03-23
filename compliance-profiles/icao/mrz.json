@@ -1,0 +1,64 @@
+{
+  "id": "cp-icao-mrz",
+  "name": "ICAO Machine Readable Zone",
+  "compliance_code": "ICAO_MRZ",
+  "version": "1.0.0",
+  "credential_format": "MDOC",
+  "description": "Compliance profile for ICAO Doc 9303 Machine Readable Travel Document (MRTD) verification. Governs extraction and cryptographic validation of Machine Readable Zone (MRZ) data from TD1 (ID card), TD2 (visa-size), and TD3 (booklet/passport) documents. Used on the VERIFIER side to validate physical travel documents against digitally bound credentials.",
+  "specification_reference": "ICAO Doc 9303 Parts 1–13 — Machine Readable Travel Documents",
+  "required_claims": [
+    {"name": "doc_type",          "namespace": "com.icao.mrz", "description": "Document type code (TD1/TD2/TD3/MRVA/MRVB)", "required": true},
+    {"name": "issuing_country",   "namespace": "com.icao.mrz", "description": "3-letter ICAO issuing state or organization code", "required": true},
+    {"name": "surname",           "namespace": "com.icao.mrz", "description": "Primary identifier (surname) from MRZ", "required": true},
+    {"name": "given_names",       "namespace": "com.icao.mrz", "description": "Secondary identifier (given names) from MRZ", "required": false},
+    {"name": "document_number",   "namespace": "com.icao.mrz", "description": "Travel document number", "required": true},
+    {"name": "nationality",       "namespace": "com.icao.mrz", "description": "Nationality code (ICAO 3-letter)", "required": true},
+    {"name": "birth_date",        "namespace": "com.icao.mrz", "description": "Date of birth in YYMMDD format", "required": true},
+    {"name": "sex",               "namespace": "com.icao.mrz", "description": "Sex code: M, F, or < (unspecified)", "required": true},
+    {"name": "expiry_date",       "namespace": "com.icao.mrz", "description": "Document expiry date in YYMMDD format", "required": true},
+    {"name": "check_digits_valid","namespace": "com.icao.mrz", "description": "All MRZ check digits computed and validated", "required": true}
+  ],
+  "required_namespaces": ["com.icao.mrz"],
+  "supported_algorithms": ["ES256", "ES384", "PS256"],
+  "key_requirements": {
+    "min_key_size_bits": 256,
+    "key_modes": ["HSM"],
+    "key_algorithm_families": ["EC", "RSA"]
+  },
+  "revocation_methods": ["CRL", "OCSP"],
+  "revocation_required": false,
+  "allow_skip_revocation": true,
+  "trust_source_types": ["PKD_URL", "TRUST_LIST"],
+  "holder_binding_required": false,
+  "is_system": true,
+  "immutable": true,
+  "status": "ACTIVE",
+  "discoverable": true,
+  "conformance_tests": [
+    {
+      "suite": "icao-mrz",
+      "module": "MRZExtractionConformanceTest",
+      "spec_ref": "ICAO Doc 9303 Part 3 §4 — MRZ composition rules",
+      "test_file": "marty-integration-tests/tests/integration/test_icao_mrz_conformance.py"
+    }
+  ],
+  "api_surface": [
+    {
+      "rel": "mrz-read",
+      "path_template": "/v1/flows/mrz/read",
+      "method": "POST",
+      "auth_required": true,
+      "discoverable": false,
+      "standard_ref": "ICAO Doc 9303 Part 3 §4 — Machine Readable Zone composition"
+    },
+    {
+      "rel": "mrz-verify",
+      "path_template": "/v1/flows/mrz/verify",
+      "method": "POST",
+      "auth_required": true,
+      "discoverable": false,
+      "standard_ref": "ICAO Doc 9303 Part 3 §4.3 — Check digit algorithm"
+    }
+  ],
+  "created_at": "2026-03-12T00:00:00Z"
+}

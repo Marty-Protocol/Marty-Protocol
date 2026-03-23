@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/trust-profile.json",
+  "title": "TrustProfile",
+  "description": "Cryptographic trust configuration for credential issuance and verification. Used by both issuance flows (which issuer keys are trusted) and verification flows (which credential issuers/roots are accepted). For org-specific framework overrides, see OrganizationTrustProfile.",
+  "type": "object",
+  "required": ["id", "organization_id", "name", "profile_type", "trust_sources", "allowed_algorithms", "supported_formats", "compliance_status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string", "maxLength": 1024},
+    "profile_type": {
+      "type": "string",
+      "enum": ["ICAO", "AAMVA", "EUDI", "CUSTOM"],
+      "description": "Top-level framework classification. Determines default trust anchors, certificate chain validation rules, and which PKD endpoints to consult."
+    },
+    "trust_sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["source_type"],
+        "additionalProperties": false,
+        "properties": {
+          "source_type": {"type": "string", "enum": ["TRUST_LIST", "PINNED_ISSUER", "ROOT_CA", "PKD_URL"]},
+          "url": {"type": "string", "format": "uri", "pattern": "^https://"},
+          "certificate_pem": {"type": "string", "pattern": "^-----BEGIN CERTIFICATE-----"},
+          "issuer_did": {"type": "string", "pattern": "^did:"},
+          "description": {"type": "string", "maxLength": 256}
+        },
+        "oneOf": [
+          {"required": ["url"]},
+          {"required": ["certificate_pem"]},
+          {"required": ["issuer_did"]}
+        ]
+      }
+    },
+    "allowed_algorithms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": ["RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512", "EdDSA", "Ed25519", "Ed448"]
+      },
+      "uniqueItems": true
+    },
+    "revocation_policy": {
+      "type": "object",
+      "description": "Revocation checking configuration",
+      "additionalProperties": false,
+      "properties": {
+        "check_mode": {
+          "type": "string",
+          "enum": ["HARD_FAIL", "SOFT_FAIL", "SKIP"],
+          "default": "HARD_FAIL",
+          "description": "HARD_FAIL: reject credential if revocation check fails or is unavailable. SOFT_FAIL: accept with warning if check fails. SKIP: bypass revocation check entirely."
+        },
+        "cache_ttl_seconds": {"type": "integer", "minimum": 0, "default": 300}
+      }
+    },
+    "revocation_services": {
+      "type": "object",
+      "description": "Revocation endpoint configuration for CRL, OCSP, and status list methods",
+      "additionalProperties": false,
+      "properties": {
+        "enabled_methods": {
+          "type": "array",
+          "items": {"type": "string", "enum": ["CRL", "OCSP", "STATUS_LIST"]},
+          "uniqueItems": true
+        },
+        "auto_discover": {
+          "type": "boolean",
+          "default": false,
+          "description": "Attempt to discover revocation endpoints from credential metadata"
+        },
+        "merge_discovered": {
+          "type": "boolean",
+          "default": false,
+          "description": "Merge auto-discovered endpoints with explicitly configured ones"
+        },
+        "crl_endpoints": {"type": "array", "items": {"type": "string", "format": "uri"}},
+        "ocsp_urls": {"type": "array", "items": {"type": "string", "format": "uri"}},
+        "status_list_urls": {"type": "array", "items": {"type": "string", "format": "uri"}}
+      }
+    },
+    "time_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "clock_skew_seconds": {"type": "integer", "minimum": 0, "maximum": 3600, "default": 300},
+        "max_credential_age_seconds": {"type": ["integer", "null"], "minimum": 1},
+        "require_freshness": {"type": "boolean", "default": false},
+        "freshness_window_seconds": {"type": ["integer", "null"], "minimum": 1}
+      },
+      "if": {"properties": {"require_freshness": {"const": true}}},
+      "then": {"required": ["freshness_window_seconds"], "properties": {"freshness_window_seconds": {"type": "integer"}}}
+    },
+    "supported_formats": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]},
+      "uniqueItems": true
+    },
+    "allowed_issuers": {
+      "type": ["array", "null"],
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "description": "Explicit issuer allowlist. null = allow all not in denied_issuers."
+    },
+    "denied_issuers": {
+      "type": ["array", "null"],
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "description": "Explicit issuer denylist. Checked before allowed_issuers."
+    },
+    "system_issuer_overrides": {
+      "type": "object",
+      "description": "Per-issuer overrides for system issuers (e.g. ICAO-enrolled states). Keyed by issuer_id.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["action"],
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["DENY", "DOWNGRADE"],
+            "description": "DENY: reject credentials from this issuer even though it's a trusted system issuer. DOWNGRADE: reduce trust_level for credentials from this issuer."
+          },
+          "trust_level": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Required when action is DOWNGRADE. Sets an effective trust level below the default 100."
+          },
+          "reason": {"type": "string", "maxLength": 512}
+        }
+      }
+    },
+    "compliance_status": {
+      "type": "string",
+      "enum": ["COMPLIANT", "NEEDS_ATTENTION", "SETUP_REQUIRED"],
+      "default": "SETUP_REQUIRED"
+    },
+    "revocation_profile_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Optional reference to a RevocationProfile entity that governs revocation check mode, caching, and grace period. When set, takes precedence over inline revocation_policy configuration."
+    },
+    "verification_policy_set_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Reference to a PolicySet (policy_type=CREDENTIAL_VERIFICATION) containing Cedar policies for issuer trust decisions. When set, Cedar policies augment the allowed_issuers/denied_issuers lists: Cedar forbid policies act as an additional deny layer, and Cedar permit policies can grant access to issuers not in allowed_issuers."
+    },
+    "compatible_compliance_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["ICAO_DTC", "ICAO_MRZ", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "OB2_COMPATIBILITY", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
+      },
+      "uniqueItems": true,
+      "description": "Compliance codes whose trust requirements this profile satisfies. Enables multiple compliance profiles (e.g., EUDI_PID and EUDI_MDL) to share a single EUDI trust registry. When null or absent, compatibility is inferred from profile_type alone."
+    },
+    "auto_generated": {"type": "boolean", "default": false},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

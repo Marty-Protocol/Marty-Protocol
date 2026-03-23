@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/channel-types.json",
+  "title": "ChannelType",
+  "description": "Notification delivery channel types",
+  "type": "string",
+  "enum": ["FCM", "SSE", "WEBHOOK", "EMAIL", "SMS"],
+  "$defs": {
+    "values": {
+      "FCM": {
+        "description": "Firebase Cloud Messaging — push notifications for iOS and Android",
+        "platforms": ["ios", "android"],
+        "delivery": "Asynchronous push; device must be registered with FCM token",
+        "real_time": true
+      },
+      "SSE": {
+        "description": "Server-Sent Events — real-time web notifications over HTTP",
+        "platforms": ["web"],
+        "delivery": "Long-lived HTTP connection; events pushed from server to browser",
+        "real_time": true
+      },
+      "WEBHOOK": {
+        "description": "HTTP POST to a server-side callback URL",
+        "platforms": ["server"],
+        "delivery": "Synchronous HTTP POST; receiving server must return 2xx",
+        "real_time": true,
+        "auth": "HMAC-SHA256 signature in X-MIP-Signature header"
+      },
+      "EMAIL": {
+        "description": "SMTP email delivery",
+        "platforms": ["any"],
+        "delivery": "Asynchronous; no delivery guarantee beyond SMTP acceptance",
+        "real_time": false,
+        "use_case": "Status updates (approved, rejected), audit notifications"
+      },
+      "SMS": {
+        "description": "SMS gateway delivery",
+        "platforms": ["mobile"],
+        "delivery": "Best-effort; subject to carrier routing",
+        "real_time": false,
+        "use_case": "Fallback for mobile; OTP codes; critical alerts"
+      }
+    }
+  }
+}

@@ -1,0 +1,359 @@
+// ============================================================================
+// MIP Cedar Schema — Marty Identity Protocol Authorization Model
+// ============================================================================
+//
+// This schema defines the entity types, actions, and common types used by
+// Cedar policies within the Marty Identity Protocol. It covers:
+//
+//   1. API access control       — who can call which MIP endpoints
+//   2. Credential authorization  — issuer trust, format, and compliance decisions
+//   3. Approval workflow         — application approval and review rules
+//
+// Cedar version: >= 4.3
+// Spec reference: https://docs.cedarpolicy.com/schema/human-readable-schema.html
+// ============================================================================
+
+namespace MIP {
+
+  // ========================================================================
+  // Common types
+  // ========================================================================
+
+  type RequestContext = {
+    ip_address: __cedar::ipaddr,
+    timestamp: Long,
+    mfa_authenticated: Bool,
+    session_id?: String,
+    user_agent?: String,
+  };
+
+  type CredentialContext = {
+    credential_format: String,     // MDOC | SD_JWT_VC | VC_JWT | JSON_LD | ZK_MDOC
+    compliance_code: String,       // ICAO_DTC | AAMVA_MDL | EUDI_PID | ...
+    issuer_id: String,
+    issuer_trust_level: Long,      // 0–100
+    credential_age_seconds: Long,
+    is_revoked: Bool,
+    is_expired: Bool,
+    holder_binding_present: Bool,
+    algorithm: String,             // ES256 | EdDSA | ...
+  };
+
+  type ApprovalContext = {
+    risk_score: Long,              // 0–100
+    document_verification_passed: Bool,
+    biometric_match_score: Long,   // 0–100
+    evidence_count: Long,
+    applicant_country: String,     // ISO 3166-1 alpha-2
+  };
+
+  // ========================================================================
+  // Principal entity types
+  // ========================================================================
+
+  /// A human user authenticated via OIDC / SCIM provisioning.
+  entity User in [Organization, Role] {
+    email: String,
+    status: String,                // ACTIVE | SUSPENDED | DEACTIVATED
+  };
+
+  /// An API key for programmatic access.
+  entity ApiKey in [Organization, DeploymentProfile] {
+    scope_type: String,            // ORGANIZATION | DEPLOYMENT
+    enabled: Bool,
+  };
+
+  /// A backend service identity (service-to-service calls).
+  entity ServiceAccount in [Organization] {
+    service_name: String,
+  };
+
+  // ========================================================================
+  // Grouping / hierarchy entity types
+  // ========================================================================
+
+  /// Top-level tenant boundary. All resources belong to an Organization.
+  entity Organization {};
+
+  /// SCIM role granting permissions to users.
+  entity Role in [Organization] {
+    is_system_role: Bool,
+  };
+
+  /// Deployment profile scoping API key actions.
+  entity DeploymentProfile in [Organization] {};
+
+  // ========================================================================
+  // Resource entity types
+  // ========================================================================
+
+  /// An issued or presented credential.
+  entity Credential in [Organization] {
+    format: String,                // CredentialFormat enum value
+    status: String,                // ACTIVE | SUSPENDED | REVOKED | EXPIRED
+    compliance_code: String,       // ComplianceCode enum value
+    issuer_id: String,
+    trust_level: Long,
+  };
+
+  /// A flow definition (issuance, verification, combined, etc.).
+  entity Flow in [Organization] {
+    flow_type: String,             // FlowType enum value
+    status: String,
+  };
+
+  /// A running instance of a flow.
+  entity FlowExecution in [Flow, Organization] {
+    status: String,                // FlowInstanceStatus enum value
+  };
+
+  /// Trust profile governing issuer validation and revocation.
+  entity TrustProfile in [Organization] {};
+
+  /// Compliance profile abstracting credential format requirements.
+  entity ComplianceProfile in [Organization] {
+    is_system: Bool,
+    compliance_code: String,
+  };
+
+  /// Credential template defining claim structure.
+  entity CredentialTemplate in [Organization] {
+    credential_format: String,
+  };
+
+  /// Revocation profile governing revocation check behavior.
+  entity RevocationProfile in [Organization] {};
+
+  /// Presentation policy defining verification requirements.
+  entity PresentationPolicy in [Organization] {};
+
+  /// A credential application submitted by an applicant.
+  entity Application in [Organization, Flow] {
+    risk_score: Long,
+    status: String,                // PENDING | APPROVED | REJECTED
+  };
+
+  /// Webhook or notification target.
+  entity WebhookEndpoint in [Organization] {};
+
+  /// Audit log entry (read-only resource).
+  entity AuditEvent in [Organization] {};
+
+  // ========================================================================
+  // Actions — map to API key scope strings
+  // ========================================================================
+
+  // ── Credential actions ──────────────────────────────────────────────────
+
+  action "credentials:issue" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Credential, CredentialTemplate],
+    context: RequestContext,
+  };
+
+  action "credentials:revoke" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Credential],
+    context: RequestContext,
+  };
+
+  action "credentials:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Credential],
+    context: RequestContext,
+  };
+
+  // ── Flow actions ────────────────────────────────────────────────────────
+
+  action "flows:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Flow],
+    context: RequestContext,
+  };
+
+  action "flows:write" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Flow],
+    context: RequestContext,
+  };
+
+  action "flows:execute" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Flow, FlowExecution],
+    context: RequestContext,
+  };
+
+  // ── Application actions ─────────────────────────────────────────────────
+
+  action "applications:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Application],
+    context: RequestContext,
+  };
+
+  action "applications:write" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Application],
+    context: RequestContext,
+  };
+
+  action "applications:approve" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Application],
+    context: ApprovalContext,
+  };
+
+  // ── Trust management actions ────────────────────────────────────────────
+
+  action "trust:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [TrustProfile, ComplianceProfile],
+    context: RequestContext,
+  };
+
+  action "trust:write" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [TrustProfile, ComplianceProfile],
+    context: RequestContext,
+  };
+
+  action "trust:admin" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [TrustProfile, ComplianceProfile, RevocationProfile],
+    context: RequestContext,
+  };
+
+  // ── Compliance actions ──────────────────────────────────────────────────
+
+  action "compliance:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [ComplianceProfile],
+    context: RequestContext,
+  };
+
+  action "compliance:write" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [ComplianceProfile],
+    context: RequestContext,
+  };
+
+  // ── Template actions ────────────────────────────────────────────────────
+
+  action "templates:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [CredentialTemplate],
+    context: RequestContext,
+  };
+
+  action "templates:write" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [CredentialTemplate],
+    context: RequestContext,
+  };
+
+  // ── Credential verification (used by trust/presentation policies) ──────
+
+  action "credentials:verify" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Credential],
+    context: CredentialContext,
+  };
+
+  // ── Webhook actions ─────────────────────────────────────────────────────
+
+  action "webhooks:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [WebhookEndpoint],
+    context: RequestContext,
+  };
+
+  action "webhooks:write" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [WebhookEndpoint],
+    context: RequestContext,
+  };
+
+  // ── User and role management ────────────────────────────────────────────
+
+  action "users:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [User],
+    context: RequestContext,
+  };
+
+  action "users:invite" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Organization],
+    context: RequestContext,
+  };
+
+  action "roles:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Role],
+    context: RequestContext,
+  };
+
+  action "roles:write" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Role],
+    context: RequestContext,
+  };
+
+  // ── Key management ──────────────────────────────────────────────────────
+
+  action "keys:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Organization],
+    context: RequestContext,
+  };
+
+  action "keys:write" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Organization],
+    context: RequestContext,
+  };
+
+  // ── Audit ───────────────────────────────────────────────────────────────
+
+  action "audit:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [AuditEvent, Organization],
+    context: RequestContext,
+  };
+
+  // ── Notifications ───────────────────────────────────────────────────────
+
+  action "notifications:send" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Organization],
+    context: RequestContext,
+  };
+
+  action "notifications:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Organization],
+    context: RequestContext,
+  };
+
+  // ── Deployment ──────────────────────────────────────────────────────────
+
+  action "deployment:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [DeploymentProfile],
+    context: RequestContext,
+  };
+
+  action "deployment:write" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [DeploymentProfile],
+    context: RequestContext,
+  };
+
+  // ── Super-admin ─────────────────────────────────────────────────────────
+
+  action "admin:full" appliesTo {
+    principal: [User, ApiKey],
+    resource: [Organization],
+    context: RequestContext,
+  };
+}

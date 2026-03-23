@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/presentation-policy.json",
+  "title": "PresentationPolicy",
+  "description": "Minimum disclosure requirements, predicates, and holder binding for credential verification",
+  "type": "object",
+  "required": ["id", "organization_id", "name", "required_claims", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string", "maxLength": 1024},
+    "purpose": {
+      "type": "string",
+      "maxLength": 512,
+      "description": "Human-readable consent description shown in the wallet UI during presentation request, e.g. 'Age verification for access control'"
+    },
+    "required_claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["claim_name"],
+        "additionalProperties": false,
+        "properties": {
+          "claim_name": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "credential_type": {"type": "string"},
+          "value_constraint": {},
+          "predicate_spec": {
+            "type": "object",
+            "required": ["predicate_type", "params"],
+            "additionalProperties": false,
+            "properties": {
+              "predicate_type": {
+                "type": "string",
+                "enum": ["RANGE_PROOF", "MEMBERSHIP", "EQUALITY", "NON_MEMBERSHIP", "INEQUALITY"]
+              },
+              "params": {"type": "object"},
+              "supported_circuits": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "fallback_policy": {
+                "type": "string",
+                "enum": ["REQUIRE_PREDICATE", "ACCEPT_RAW", "DENY"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "accepted_credential_types": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "trust_profile_id": {"type": ["string", "null"], "format": "uuid"},
+    "holder_binding": {
+      "type": "object",
+      "required": ["required"],
+      "additionalProperties": false,
+      "properties": {
+        "required": {"type": "boolean"},
+        "binding_methods": {
+          "type": "array",
+          "items": {"type": "string", "enum": ["NONCE", "DEVICE_KEY", "SESSION_BINDING"]}
+        },
+        "nonce_required": {"type": "boolean", "default": false}
+      }
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_age_seconds": {"type": "integer", "minimum": 1},
+        "require_not_revoked": {"type": "boolean", "default": false},
+        "revocation_grace_seconds": {"type": "integer", "minimum": 0}
+      }
+    },
+    "prefer_predicates": {"type": "boolean", "default": false},
+    "supported_circuits": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "fallback_policy": {
+      "type": "string",
+      "enum": ["REQUIRE_PREDICATE", "ACCEPT_RAW", "DENY"],
+      "default": "ACCEPT_RAW"
+    },
+    "issuer_constraints": {
+      "type": "object",
+      "description": "Constraints on credential issuers enforced at verification time",
+      "additionalProperties": false,
+      "properties": {
+        "min_trust_level": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Minimum TrustProfileIssuer.trust_level required. Credentials from issuers below this threshold are rejected."
+        },
+        "required_compliance_statuses": {
+          "type": "array",
+          "items": {"type": "string", "enum": ["ACCREDITED", "COMPLIANT"]},
+          "description": "Issuer's IssuerEntity.compliance_status must be in this set"
+        },
+        "required_accreditations": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Issuer must hold all listed accreditations (e.g. ['ISO27001', 'FIPS140-2'])"
+        }
+      }
+    },
+    "credential_ranking_strategy": {
+      "type": "string",
+      "enum": ["FRESHEST_FIRST", "HIGHEST_TRUST_FIRST", "CUSTOM"],
+      "default": "FRESHEST_FIRST",
+      "description": "When a wallet holds multiple matching credentials, this determines which is preferred. FRESHEST_FIRST: most recently issued wins. HIGHEST_TRUST_FIRST: highest trust_level wins. CUSTOM: use credential_ranking_weights."
+    },
+    "credential_ranking_weights": {
+      "type": "object",
+      "description": "Required when credential_ranking_strategy is CUSTOM. Maps ranking dimension to float weight.",
+      "additionalProperties": {"type": "number"}
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

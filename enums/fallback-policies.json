@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/fallback-policies.json",
+  "title": "FallbackPolicy",
+  "description": "Behavior when ZK circuit is unavailable for a predicate requirement",
+  "type": "string",
+  "enum": ["REQUIRE_PREDICATE", "ACCEPT_RAW", "DENY"],
+  "$defs": {
+    "values": {
+      "REQUIRE_PREDICATE": {
+        "description": "ZK proof is mandatory; reject the presentation if no compatible circuit is available",
+        "use_case": "High-privacy deployments where unlinkability is a hard requirement",
+        "warning": "Must only be used when supported_circuits is non-empty"
+      },
+      "ACCEPT_RAW": {
+        "description": "Fall back to requesting the raw claim value if no ZK circuit is available",
+        "use_case": "Default behavior; gradual ZK rollout with backward compatibility",
+        "privacy_note": "Raw claim values are disclosed to the verifier"
+      },
+      "DENY": {
+        "description": "Reject the presentation outright if the predicate cannot be satisfied",
+        "use_case": "Strict compliance contexts where both ZK and raw disclosure are unacceptable"
+      }
+    }
+  }
+}

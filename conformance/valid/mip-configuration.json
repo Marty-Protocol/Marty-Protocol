@@ -1,0 +1,29 @@
+{
+  "mip_version": "1.0",
+  "issuer": "https://issuer.example.com",
+  "mip_configuration_endpoint": "https://issuer.example.com/.well-known/mip-configuration",
+  "issuance_endpoint": "https://issuer.example.com/issuance",
+  "openid_credential_issuer": "https://issuer.example.com",
+  "presentation_endpoint": "https://issuer.example.com/presentation",
+  "token_endpoint": "https://issuer.example.com/token",
+  "authorization_endpoint": "https://issuer.example.com/authorize",
+  "revocation_endpoint": "https://issuer.example.com/revocation",
+  "jwks_uri": "https://issuer.example.com/.well-known/jwks.json",
+  "service_documentation": "https://docs.example.com",
+  "policy_uri": "https://issuer.example.com/policy",
+  "implementation_classes": ["ISSUER", "VERIFIER"],
+  "supported_credential_formats": ["SD_JWT_VC", "MDOC"],
+  "supported_flow_types": ["oid4vci_pre_authorized", "oid4vci_authorization_code"],
+  "supported_versions": ["1.0", "1.1"],
+  "proximity_supported": true,
+  "proximity_engagement_methods": ["QR_CODE", "NFC"],
+  "org_endpoints": [
+    {
+      "org_id": "f1e2d3c4-b5a6-4978-9012-345678901234",
+      "openid_credential_issuer": "https://org1.issuer.example.com",
+      "token_endpoint": "https://org1.issuer.example.com/token",
+      "credential_endpoint": "https://org1.issuer.example.com/credential",
+      "presentation_endpoint": "https://org1.issuer.example.com/presentation"
+    }
+  ]
+}

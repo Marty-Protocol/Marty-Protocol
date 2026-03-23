@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/trust-framework.json",
+  "title": "TrustFramework",
+  "description": "System-managed trust framework definition for ICAO, AAMVA, EUDI, or custom identity ecosystems. Immutable at the system level; organisations reference frameworks via OrganizationTrustProfile.",
+  "type": "object",
+  "required": ["id", "code", "display_name", "default_algorithms", "default_formats", "is_system", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "code": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$",
+      "description": "Short immutable identifier, e.g. ICAO, AAMVA, EUDI, CUSTOM"
+    },
+    "display_name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string", "maxLength": 1024},
+    "pkd_endpoints": {
+      "type": "object",
+      "description": "Public Key Directory endpoints for automatic CSCA/DSC fetching (e.g. ICAO PKD, AAMVA IACA list)",
+      "additionalProperties": {"type": "string", "format": "uri"}
+    },
+    "default_algorithms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"},
+      "description": "Cryptographic algorithms mandated by this framework"
+    },
+    "default_formats": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]},
+      "description": "Credential formats mandated or recommended by this framework"
+    },
+    "validation_ruleset": {
+      "type": "object",
+      "description": "Framework-specific validation rules (clock skew, chain length, revocation modes, etc.)"
+    },
+    "sync_config": {
+      "type": "object",
+      "description": "Configuration for periodic trust anchor refresh (interval, retry policy)",
+      "additionalProperties": false,
+      "properties": {
+        "interval_seconds": {"type": "integer", "minimum": 3600},
+        "retry_attempts": {"type": "integer", "minimum": 0, "default": 3},
+        "auto_sync": {"type": "boolean", "default": false}
+      }
+    },
+    "is_system": {
+      "type": "boolean",
+      "description": "true = platform-managed; false = custom org-defined framework",
+      "default": true
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

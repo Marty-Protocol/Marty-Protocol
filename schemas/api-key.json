@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/api-key.json",
+  "title": "ApiKey",
+  "description": "API key for authenticating programmatic access to the Marty gateway. Keys are either ORGANIZATION-scoped (full org access within their scopes) or DEPLOYMENT-scoped (restricted to a single deployment profile). The raw key value is only returned on creation; subsequent reads show a masked representation. Managed via /v1/api-keys.",
+  "type": "object",
+  "required": ["id", "organization_id", "name", "key_prefix", "scope_type", "scopes", "enabled", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string", "maxLength": 512},
+    "key_prefix": {
+      "type": "string",
+      "description": "First 8 characters of the key for identification (e.g. mk_live_ab). Full key only returned on creation."
+    },
+    "scope_type": {
+      "type": "string",
+      "enum": ["ORGANIZATION", "DEPLOYMENT"],
+      "description": "ORGANIZATION: key can perform actions across the entire organization, subject to scopes. DEPLOYMENT: key is restricted to the single deployment profile identified by deployment_profile_id."
+    },
+    "deployment_profile_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Required when scope_type = DEPLOYMENT. Restricts key actions to this deployment profile. Must be null when scope_type = ORGANIZATION."
+    },
+    "scopes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "../enums/api-key-scopes.json"
+      },
+      "description": "Permission scopes. When scope_type = DEPLOYMENT, scopes are further restricted to the deployment_restricted_scopes subset defined in enums/api-key-scopes.json."
+    },
+    "enabled": {"type": "boolean", "default": true},
+    "expires_at": {"type": ["string", "null"], "format": "date-time", "description": "null = no expiry"},
+    "last_used_at": {"type": ["string", "null"], "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "if": {
+    "properties": {"scope_type": {"const": "DEPLOYMENT"}},
+    "required": ["scope_type"]
+  },
+  "then": {
+    "required": ["deployment_profile_id"],
+    "properties": {
+      "deployment_profile_id": {"type": "string"}
+    }
+  },
+  "else": {
+    "properties": {
+      "deployment_profile_id": {"type": "null"}
+    }
+  }
+}

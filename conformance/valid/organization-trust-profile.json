@@ -1,0 +1,29 @@
+{
+  "id": "c0d1e2f3-a4b5-4678-9012-3456789abcde",
+  "organization_id": "f1e2d3c4-b5a6-4978-9012-345678901234",
+  "framework_id": "d1e2f3a4-b5c6-4789-0123-456789abcdef",
+  "name": "EUDI Wallet Compliance",
+  "display_name": "EU Digital Identity Wallet",
+  "description": "Compliance profile for EUDI wallet framework",
+  "compliance_status": "COMPLIANT",
+  "enabled": true,
+  "auto_generated": false,
+  "use_case_tags": ["identity-verification", "travel-document"],
+  "allowed_formats": ["SD_JWT_VC", "MDOC"],
+  "allowed_algorithms": ["ES256", "ES384"],
+  "allowed_issuers": [],
+  "denied_issuers": [],
+  "jurisdiction_filter": ["DE", "FR", "NL"],
+  "revocation_policy": {
+    "check_mode": "HARD_FAIL",
+    "cache_ttl_seconds": 300
+  },
+  "time_policy": {
+    "clock_skew_seconds": 300,
+    "max_credential_age_seconds": null,
+    "require_freshness": false,
+    "freshness_window_seconds": null
+  },
+  "created_at": "2026-01-15T09:00:00Z",
+  "updated_at": "2026-03-15T14:00:00Z"
+}

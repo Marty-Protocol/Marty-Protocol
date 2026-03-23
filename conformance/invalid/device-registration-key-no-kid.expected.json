@@ -1,0 +1,5 @@
+{
+  "pointer": "/public_key_kid",
+  "error_code": "MISSING_REQUIRED_CONDITIONAL",
+  "message": "public_key_kid is required when public_key_der is present. Compute public_key_kid as the RFC 7638 JWK Thumbprint (SHA-256) of the corresponding JWK representation of the DER-encoded public key."
+}

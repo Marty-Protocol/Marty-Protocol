@@ -1,0 +1,16 @@
+{
+  "id": "d1e2f3a4-0000-4000-8000-000000000001",
+  "organization_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "name": "Invalid Trust Profile — unknown algorithm",
+  "profile_type": "CUSTOM",
+  "trust_sources": [
+    {
+      "source_type": "TRUST_LIST",
+      "url": "https://trust.example.com/list.json"
+    }
+  ],
+  "allowed_algorithms": ["RS1024"],
+  "supported_formats": ["SD_JWT_VC"],
+  "compliance_status": "SETUP_REQUIRED",
+  "created_at": "2026-01-01T00:00:00Z"
+}

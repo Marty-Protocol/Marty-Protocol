@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/trust-registry-sync.json",
+  "title": "TrustRegistrySync",
+  "description": "Delta-sync resource for mobile wallet trust registry updates. Provides CSCA/DSC anchor data from the /v1/trust-registry endpoints so wallets can sync incrementally rather than downloading the full trust store on every launch.",
+  "type": "object",
+  "required": ["sync_token", "sequence", "entries", "generated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "sync_token": {
+      "type": "string",
+      "description": "Opaque cursor representing the current sync position. Pass as 'since' on the next request to receive only changes since this point."
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Monotonically increasing sequence number for this registry version"
+    },
+    "entries": {
+      "type": "array",
+      "description": "CSCA/DSC trust anchor entries added or removed since the last sync",
+      "items": {
+        "type": "object",
+        "required": ["entry_id", "anchor_type", "operation", "country_code"],
+        "additionalProperties": false,
+        "properties": {
+          "entry_id": {"type": "string", "format": "uuid"},
+          "anchor_type": {
+            "type": "string",
+            "enum": ["CSCA", "DSC"],
+            "description": "CSCA = Country Signing Certificate Authority. DSC = Document Signer Certificate."
+          },
+          "operation": {
+            "type": "string",
+            "enum": ["ADD", "REMOVE"],
+            "description": "ADD: new trust anchor available. REMOVE: anchor revoked or expired."
+          },
+          "country_code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2,3}$",
+            "description": "ISO 3166-1 alpha-2 or ICAO alpha-3 country code"
+          },
+          "certificate_pem": {
+            "type": ["string", "null"],
+            "description": "PEM-encoded certificate; null for REMOVE operations"
+          },
+          "subject_key_id": {"type": "string"},
+          "not_before": {"type": "string", "format": "date-time"},
+          "not_after": {"type": "string", "format": "date-time"},
+          "source": {
+            "type": "string",
+            "enum": ["ICAO_PKD", "AAMVA", "EUDI_LOTL", "MANUAL"],
+            "description": "Where this entry was sourced from"
+          }
+        }
+      }
+    },
+    "has_more": {
+      "type": "boolean",
+      "default": false,
+      "description": "true if more pages are available; follow sync_token to continue"
+    },
+    "generated_at": {"type": "string", "format": "date-time"}
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "e9f0a1b2-c3d4-4567-8901-23456789abcd",
+  "organization_id": "f1e2d3c4-b5a6-4978-9012-345678901234",
+  "name": "Credential Lifecycle Webhook",
+  "description": "Receives credential issuance and revocation events",
+  "endpoint_url": "https://hooks.example.com/marty/credentials",
+  "events": ["credential.issued", "credential.revoked"],
+  "enabled": true,
+  "status": "ACTIVE",
+  "signing_secret_masked": "sk_whsec_****ab12cd",
+  "filter": {
+    "flow_ids": ["c3d4e5f6-a7b8-4901-cdef-012345678901"],
+    "credential_template_ids": ["d6e7f8a9-b0c1-4234-f012-345678901234"]
+  },
+  "delivery_config": {
+    "timeout_seconds": 10,
+    "max_retries": 3,
+    "retry_backoff_seconds": [5, 15, 60, 300, 900]
+  },
+  "api_version": "2026-01-01",
+  "failure_count": 0,
+  "created_at": "2026-02-01T09:00:00Z",
+  "updated_at": "2026-03-15T14:00:00Z"
+}

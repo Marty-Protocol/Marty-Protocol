@@ -1,0 +1,31 @@
+{
+  "id": "d8e9f0a1-b2c3-4456-7890-123456abcdef",
+  "applicant_id": "b2c3d4e5-f6a7-4890-bcde-f01234567890",
+  "organization_id": "f1e2d3c4-b5a6-4978-9012-345678901234",
+  "check_type": "DOCUMENT_AUTHENTICITY",
+  "status": "PASSED",
+  "provider": "Onfido",
+  "provider_reference_id": "check_abc123",
+  "score": 0.98,
+  "threshold": 0.80,
+  "performed_by": "e5f6a7b8-c9d0-4123-ef01-234567890123",
+  "evidence_refs": [
+    {
+      "ref_type": "DOCUMENT_CAPTURE",
+      "ref_id": "f9a0b1c2-d3e4-4567-8901-234567abcdef"
+    },
+    {
+      "ref_type": "SELFIE_CAPTURE",
+      "ref_id": "a0b1c2d3-e4f5-4678-9012-345678abcdef"
+    }
+  ],
+  "raw_result": {
+    "document_type": "PASSPORT",
+    "mrz_valid": true,
+    "hologram_detected": true
+  },
+  "started_at": "2026-03-15T14:10:00Z",
+  "completed_at": "2026-03-15T14:10:45Z",
+  "created_at": "2026-03-15T14:10:00Z",
+  "updated_at": "2026-03-15T14:10:45Z"
+}

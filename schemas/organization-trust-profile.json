@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/organization-trust-profile.json",
+  "title": "OrganizationTrustProfile",
+  "description": "Organisation-specific overlay of a TrustFramework. Separates shared framework definitions from per-org policy overrides, issuer allow/deny lists, and jurisdiction filters.",
+  "type": "object",
+  "required": ["id", "organization_id", "framework_id", "name", "compliance_status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "framework_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "References TrustFramework.id"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Technical identifier, e.g. 'travel-documents'"
+    },
+    "display_name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string", "maxLength": 1024},
+    "enabled": {"type": "boolean", "default": true},
+    "use_case_tags": {
+      "type": "array",
+      "items": {"type": "string", "maxLength": 64},
+      "uniqueItems": true,
+      "description": "Business context tags, e.g. ['travel_documents', 'age_verification']"
+    },
+    "compliance_status": {
+      "type": "string",
+      "enum": ["COMPLIANT", "NEEDS_ATTENTION", "SETUP_REQUIRED"],
+      "default": "SETUP_REQUIRED"
+    },
+    "auto_generated": {
+      "type": "boolean",
+      "default": false,
+      "description": "true if created by the onboarding wizard rather than manually"
+    },
+    "revocation_policy": {
+      "type": ["object", "null"],
+      "description": "Override the framework's default revocation policy. null = use framework default.",
+      "additionalProperties": false,
+      "properties": {
+        "check_mode": {
+          "type": "string",
+          "enum": ["HARD_FAIL", "SOFT_FAIL", "SKIP"],
+          "description": "HARD_FAIL: reject credential if revocation check fails. SOFT_FAIL: accept with warning. SKIP: bypass check."
+        },
+        "cache_ttl_seconds": {"type": "integer", "minimum": 0}
+      }
+    },
+    "time_policy": {
+      "type": ["object", "null"],
+      "description": "Override the framework's default time policy. null = use framework default.",
+      "additionalProperties": false,
+      "properties": {
+        "clock_skew_seconds": {"type": "integer", "minimum": 0, "maximum": 3600, "default": 300},
+        "max_credential_age_seconds": {"type": ["integer", "null"], "minimum": 1},
+        "require_freshness": {"type": "boolean", "default": false},
+        "freshness_window_seconds": {"type": ["integer", "null"], "minimum": 1}
+      }
+    },
+    "allowed_algorithms": {
+      "type": ["array", "null"],
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "description": "Override allowed algorithms. null = use framework defaults."
+    },
+    "allowed_formats": {
+      "type": ["array", "null"],
+      "items": {"type": "string", "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]},
+      "uniqueItems": true,
+      "description": "Override allowed formats. null = use framework defaults."
+    },
+    "allowed_issuers": {
+      "type": ["array", "null"],
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "description": "Explicit issuer allowlist (DID, domain, or custom ID). null = allow all not in denied_issuers."
+    },
+    "denied_issuers": {
+      "type": ["array", "null"],
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "description": "Explicit issuer denylist. Takes precedence over allowed_issuers."
+    },
+    "jurisdiction_filter": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{2}(-[A-Z0-9]{1,3})?$",
+        "description": "ISO 3166-1 alpha-2 country or ISO 3166-2 subdivision code"
+      },
+      "uniqueItems": true,
+      "description": "Accept credentials only from these jurisdictions. e.g. ['US', 'US-CA', 'DE'].  null = no filter."
+    },
+    "metadata": {"type": "object"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

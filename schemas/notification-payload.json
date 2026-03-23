@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/notification-payload.json",
+  "title": "NotificationPayload",
+  "description": "Message content and routing metadata for multi-channel identity event notification",
+  "type": "object",
+  "required": ["id", "title", "body", "event_type", "priority", "target", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "title": {"type": "string", "minLength": 1, "maxLength": 256},
+    "body": {"type": "string", "minLength": 1, "maxLength": 2048},
+    "data": {
+      "type": "object",
+      "description": "Must not contain raw credential material; use offer URIs only"
+    },
+    "event_type": {"type": "string", "minLength": 1, "maxLength": 128},
+    "priority": {
+      "type": "string",
+      "enum": ["LOW", "NORMAL", "HIGH", "CRITICAL"]
+    },
+    "target": {"$ref": "notification-target.json"},
+    "ttl_seconds": {"type": "integer", "minimum": 1, "default": 86400},
+    "collapse_key": {"type": "string", "maxLength": 64},
+    "correlation_id": {"type": "string"},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

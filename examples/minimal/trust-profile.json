@@ -1,0 +1,16 @@
+{
+  "id": "a1b2c3d4-0003-4000-8000-000000000003",
+  "organization_id": "a1b2c3d4-0000-4000-8000-000000000000",
+  "name": "Minimal Trust Profile",
+  "profile_type": "CUSTOM",
+  "trust_sources": [
+    {
+      "source_type": "TRUST_LIST",
+      "url": "https://trust.example.com/list.json"
+    }
+  ],
+  "allowed_algorithms": ["ES256"],
+  "supported_formats": ["SD_JWT_VC"],
+  "compliance_status": "COMPLIANT",
+  "created_at": "2026-03-11T00:00:00Z"
+}

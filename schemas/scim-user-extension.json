@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/schemas/scim-user-extension.json",
+  "title": "MIP SCIM User Extension",
+  "description": "MIP extension attributes for SCIM 2.0 User resources. Schema URI: urn:mip:scim:schemas:extension:Organization:2.0:User",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "role_ids": {
+      "type": "array",
+      "items": {"type": "string", "format": "uuid"},
+      "uniqueItems": true,
+      "description": "MIP role UUIDs assigned to this member within this organization"
+    },
+    "is_owner": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this user is the organization owner"
+    },
+    "joined_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of when the user joined this organization"
+    }
+  }
+}

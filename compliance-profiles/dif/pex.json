@@ -1,0 +1,80 @@
+{
+  "id": "cp-pex-v2",
+  "name": "DIF Presentation Exchange v2",
+  "compliance_code": "PEX",
+  "version": "2.0.0",
+  "credential_format": "SD_JWT_VC",
+  "description": "Compliance profile for DIF Presentation Exchange 2.0.0. Governs the structure and evaluation of presentation_definition objects used in OID4VP authorization requests. A verifier implementing this profile MUST produce and process PE v2 presentation definitions strictly conformant to the DIF spec, including input_descriptors, constraints, fields, filter (JSON Schema), and submission_requirements. Compatible with OID4VP 1.0 Final's presentation_definition parameter.",
+  "specification_reference": "DIF Presentation Exchange 2.0.0 — https://identity.foundation/presentation-exchange/spec/v2.0.0/",
+  "required_claims": [],
+  "pex_requirements": {
+    "spec_version": "2.0.0",
+    "input_descriptors_required": true,
+    "constraints_fields_required": true,
+    "json_schema_filter_supported": true,
+    "submission_requirements_supported": true,
+    "predicate_supported": true,
+    "limit_disclosure_supported": true,
+    "nested_credentials_supported": false,
+    "claim_format_designations": {
+      "dc+sd-jwt": {"alg": ["ES256", "ES384", "EdDSA"]},
+      "jwt_vc_json": {"alg": ["ES256", "ES384", "EdDSA"]},
+      "mso_mdoc":   {"alg": ["ES256", "ES384"]}
+    }
+  },
+  "supported_algorithms": ["ES256", "ES384", "EdDSA", "PS256"],
+  "key_requirements": {
+    "min_key_size_bits": 256,
+    "key_modes": ["SOFTWARE", "HSM"],
+    "key_algorithm_families": ["EC", "OKP", "RSA"]
+  },
+  "revocation_methods": ["TOKEN_STATUS_LIST", "BITSTRING_STATUS_LIST"],
+  "revocation_required": false,
+  "allow_skip_revocation": true,
+  "trust_source_types": ["ROOT_CA", "PINNED_ISSUER"],
+  "holder_binding_required": false,
+  "selective_disclosure_required": false,
+  "is_system": true,
+  "immutable": true,
+  "status": "ACTIVE",
+  "discoverable": true,
+  "conformance_tests": [
+    {
+      "suite": "pex",
+      "module": "test_verifier_presentation_definition_structure",
+      "spec_ref": "DIF PE v2 §5 — Presentation Definition",
+      "test_file": "marty-integration-tests/tests/integration/test_oid4vp_verifier_conformance.py"
+    },
+    {
+      "suite": "pex",
+      "module": "test_vp_token_submission_matches_definition",
+      "spec_ref": "DIF PE v2 §8 — Presentation Submission",
+      "test_file": "marty-integration-tests/tests/integration/test_oid4vp_verifier_conformance.py"
+    },
+    {
+      "suite": "pex",
+      "module": "PEXFixturesConformanceTest",
+      "spec_ref": "DIF PE v2 Appendix A — Conformance Fixtures",
+      "test_file": "marty-integration-tests/tests/integration/fixtures/conformance/generate_fixtures.py"
+    }
+  ],
+  "api_surface": [
+    {
+      "rel": "oid4vp-request",
+      "path_template": "/v1/flows/instances/{id}/request",
+      "method": "GET",
+      "auth_required": false,
+      "discoverable": false,
+      "standard_ref": "DIF PE v2 §5 / OID4VP 1.0 Final §5 — presentation_definition in Authorization Request"
+    },
+    {
+      "rel": "oid4vp-submit",
+      "path_template": "/v1/flows/instances/{id}/submit",
+      "method": "POST",
+      "auth_required": false,
+      "discoverable": false,
+      "standard_ref": "DIF PE v2 §8 / OID4VP 1.0 Final §6 — presentation_submission in VP Token"
+    }
+  ],
+  "created_at": "2026-03-12T00:00:00Z"
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/did-report/marty-protocol/main/enums/network-modes.json",
+  "title": "NetworkMode",
+  "description": "Network connectivity requirements for a Deployment Profile",
+  "type": "string",
+  "enum": ["ONLINE", "OFFLINE", "HYBRID"],
+  "$defs": {
+    "values": {
+      "ONLINE": {
+        "description": "Full network connectivity required for all operations",
+        "trust_check": "Real-time",
+        "revocation": "Online required",
+        "use_case": "Airport gates with guaranteed connectivity, web portals"
+      },
+      "OFFLINE": {
+        "description": "Operates without network; uses cached trust material and grace periods",
+        "trust_check": "Cached trust material",
+        "revocation": "Grace period; last known state",
+        "use_case": "Remote border checkpoints, aircraft, venues with intermittent connectivity"
+      },
+      "HYBRID": {
+        "description": "Best-effort connectivity; falls back to cached material when offline",
+        "trust_check": "Live where available, cached on failure",
+        "revocation": "Live preferred; cached with retry on failure",
+        "use_case": "Train stations, mobile inspectors, events"
+      }
+    }
+  }
+}
