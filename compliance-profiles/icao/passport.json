@@ -1,0 +1,123 @@
+{
+  "id": "cp-icao-passport",
+  "name": "ICAO Physical ePassport",
+  "compliance_code": "ICAO_PASSPORT",
+  "version": "1.0.0",
+  "credential_format": "PHYSICAL",
+  "issuance_protocol": "PHYSICAL_DOCUMENT",
+  "description": "Compliance profile for ICAO Doc 9303 physical ePassport booklet issuance. Governs the complete lifecycle from application through personalization bureau submission, chip encoding, and activation. Requires physical production by an authorized personalization bureau.",
+  "specification_reference": "ICAO Doc 9303 Parts 1–12 — Machine Readable Travel Documents",
+  "required_claims": [
+    {"name": "data_group_1", "namespace": "com.icao.passport", "description": "Machine Readable Zone (MRZ) data — TD3 format", "required": true},
+    {"name": "data_group_2", "namespace": "com.icao.passport", "description": "Encoded facial image (ISO 19794-5, JPEG/JPEG2000)", "required": true},
+    {"name": "data_group_3", "namespace": "com.icao.passport", "description": "Encoded fingerprint(s) (ISO 19794-4) — requires EAC", "required": false},
+    {"name": "data_group_7", "namespace": "com.icao.passport", "description": "Encoded iris image(s) (ISO 19794-6) — requires EAC", "required": false},
+    {"name": "data_group_11", "namespace": "com.icao.passport", "description": "Additional personal details", "required": false},
+    {"name": "data_group_12", "namespace": "com.icao.passport", "description": "Additional document details", "required": false},
+    {"name": "data_group_14", "namespace": "com.icao.passport", "description": "Security options — Active Authentication or Chip Authentication public key", "required": false},
+    {"name": "data_group_15", "namespace": "com.icao.passport", "description": "Active Authentication public key info", "required": false},
+    {"name": "sod", "namespace": "com.icao.passport", "description": "Document Security Object (EF.SOD) — CMS SignedData with LDSSecurityObject", "required": true}
+  ],
+  "required_namespaces": ["com.icao.passport"],
+  "supported_algorithms": ["ES256", "ES384", "PS256", "PS384"],
+  "key_requirements": {
+    "min_key_size_bits": 256,
+    "key_modes": ["HSM"],
+    "key_algorithm_families": ["EC", "RSA"],
+    "csca_required": true,
+    "dsc_required": true,
+    "csca_validity_years_min": 10,
+    "dsc_validity_years_max": 5
+  },
+  "pki_hierarchy": {
+    "root": "CSCA",
+    "leaf": "DSC",
+    "max_chain_depth": 2,
+    "csca_key_usage": ["keyCertSign", "cRLSign"],
+    "dsc_key_usage": ["digitalSignature"]
+  },
+  "physical_production": {
+    "required": true,
+    "booklet_types": ["TD3"],
+    "chip_standard": "ISO/IEC 14443",
+    "chip_storage_min_kb": 32,
+    "data_group_encoding": "ASN.1 DER (ICAO LDS)",
+    "access_control": {
+      "bac": {"required": true, "description": "Basic Access Control — key derived from MRZ"},
+      "pace": {"required": false, "description": "Password Authenticated Connection Establishment"},
+      "eac": {"required_for": ["DG3", "DG7"], "description": "Extended Access Control for biometric data groups"},
+      "active_authentication": {"required": false, "description": "Chip clone detection via on-chip private key"},
+      "chip_authentication": {"required": false, "description": "Secure channel via ECDH key agreement"}
+    },
+    "personalization_steps": [
+      "print_booklet",
+      "laser_engrave_data_page",
+      "encode_chip_data_groups",
+      "write_ef_sod",
+      "write_ef_com",
+      "set_bac_keys",
+      "quality_assurance_read_back",
+      "laminate_and_bind"
+    ]
+  },
+  "revocation_methods": ["CRL"],
+  "revocation_required": true,
+  "allow_skip_revocation": false,
+  "trust_source_types": ["PKD_URL", "ROOT_CA"],
+  "holder_binding_required": false,
+  "is_system": true,
+  "immutable": true,
+  "status": "ACTIVE",
+  "discoverable": true,
+  "conformance_tests": [
+    {
+      "suite": "icao-passport",
+      "module": "PassportIssuanceConformanceTest",
+      "spec_ref": "ICAO Doc 9303 Part 10 — LDS and PKI Maintenance",
+      "test_file": "marty-integration-tests/tests/integration/test_icao_passport_conformance.py"
+    }
+  ],
+  "api_surface": [
+    {
+      "rel": "passport-application",
+      "path_template": "/v1/passport/applications",
+      "method": "POST",
+      "auth_required": true,
+      "standard_ref": "MIP §9 — Physical Document Issuance Flow"
+    },
+    {
+      "rel": "passport-generate-sod",
+      "path_template": "/v1/passport/applications/{id}/generate-sod",
+      "method": "POST",
+      "auth_required": true,
+      "standard_ref": "ICAO Doc 9303 Part 10"
+    },
+    {
+      "rel": "passport-submit-personalization",
+      "path_template": "/v1/passport/applications/{id}/submit-personalization",
+      "method": "POST",
+      "auth_required": true,
+      "standard_ref": "MIP §9 — Personalization Bureau Integration"
+    },
+    {
+      "rel": "passport-production-status",
+      "path_template": "/v1/passport/applications/{id}/production-status",
+      "method": "GET",
+      "auth_required": true,
+      "standard_ref": "MIP §9 — Production Tracking"
+    },
+    {
+      "rel": "passport-activate",
+      "path_template": "/v1/passport/applications/{id}/activate",
+      "method": "POST",
+      "auth_required": true,
+      "standard_ref": "MIP §9 — Document Activation"
+    }
+  ],
+  "vetting_requirements": {
+    "config_file": "marty-ui/config/vetting_requirements.yaml",
+    "document_type": "PASSPORT",
+    "assurance_level": "IAL2",
+    "required_checks": ["IDENTITY_VERIFICATION", "BIOMETRIC_ENROLLMENT", "CRIMINAL_HISTORY", "DOCUMENT_VERIFICATION"]
+  }
+}

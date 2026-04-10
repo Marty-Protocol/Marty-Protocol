@@ -4,7 +4,7 @@
   "title": "ComplianceCode",
   "description": "Recognized compliance frameworks and identity standards for credential format abstraction",
   "type": "string",
-  "enum": ["ICAO_DTC", "ICAO_MRZ", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "OB2_COMPATIBILITY", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"],
+  "enum": ["ICAO_DTC", "ICAO_MRZ", "ICAO_PASSPORT", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "OB2_COMPATIBILITY", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"],
   "$defs": {
     "values": {
       "ICAO_DTC": {
@@ -72,6 +72,14 @@
         "governed_by": "ICAO",
         "doc_types": ["TD1", "TD2", "TD3"],
         "compatible_profile_types": ["ICAO", "CUSTOM"]
+      },
+      "ICAO_PASSPORT": {
+        "description": "ICAO Physical ePassport — ICAO 9303 Parts 1–12 booklet issuance with chip personalization",
+        "format": "PHYSICAL",
+        "standard": "ICAO Doc 9303 Parts 1–12, ISO/IEC 14443",
+        "governed_by": "ICAO",
+        "compatible_profile_types": ["ICAO", "CUSTOM"],
+        "requires_physical_production": true
       },
       "OID4VC": {
         "description": "Generic OpenID for Verifiable Credentials interoperability profile (OID4VCI + OID4VP)",

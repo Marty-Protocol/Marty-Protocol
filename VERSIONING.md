@@ -86,6 +86,37 @@ Sections of the specification may carry an explicit stability marker:
 
 ---
 
+## Deprecation Schedule
+
+Deprecated protocol features remain documented during the current major version,
+but they are frozen for compatibility only and should not be used in new
+deployments.
+
+Deprecation policy:
+
+- A deprecation is announced in `CHANGELOG.md` and, when applicable, in the
+	affected enum or schema metadata.
+- Deprecated values may remain available for the rest of the current major
+	version to support migrations.
+- Removal happens no earlier than the next MAJOR release unless a security issue
+	requires faster action.
+- Each deprecated item should name a migration target.
+
+### Current Scheduled Deprecations
+
+#### `OB2_COMPATIBILITY`
+
+- **Status:** Deprecated in the `0.x` line
+- **Do not introduce in new integrations after:** `v0.2.0`
+- **Migration target:** `OB3_JWT` or `OB3_JSONLD`
+- **Planned removal:** `v1.0.0`
+
+`OB2_COMPATIBILITY` exists only as a temporary interoperability bridge for
+legacy 1EdTech Open Badges 2.0 implementations. New protocol profiles should
+target Open Badges 3.0 formats directly.
+
+---
+
 ## Publication
 
 Each version is tagged in the repository:

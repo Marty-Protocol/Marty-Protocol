@@ -9,6 +9,12 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 
 ## [Unreleased]
 
+### Deprecated
+- `OB2_COMPATIBILITY` is now on a formal sunset path:
+  - no new integrations should adopt it after `v0.2.0`
+  - migrate to `OB3_JWT` or `OB3_JSONLD`
+  - planned removal in `v1.0.0`
+
 ### Fixed
 - Added `combined` flow type to `enums/flow-types.json` to match Flow entity spec (S1)
 - Aligned webhook signature header to `X-MIP-Signature` across notification-target and subscription specs (S2)

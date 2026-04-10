@@ -66,6 +66,7 @@ class ComplianceCode(str, Enum):
 
     ICAO_DTC = "ICAO_DTC"
     ICAO_MRZ = "ICAO_MRZ"
+    ICAO_PASSPORT = "ICAO_PASSPORT"
     AAMVA_MDL = "AAMVA_MDL"
     EUDI_PID = "EUDI_PID"
     EUDI_MDL = "EUDI_MDL"
@@ -138,6 +139,7 @@ class FlowType(str, Enum):
     APPLICATION_APPROVAL_ISSUANCE = "application_approval_issuance"
     CREDENTIAL_RENEWAL = "credential_renewal"
     CREDENTIAL_REVOCATION = "credential_revocation"
+    PHYSICAL_DOCUMENT_ISSUANCE = "physical_document_issuance"
     COMBINED = "combined"
     SIOPV2 = "siopv2"
 
@@ -148,6 +150,9 @@ class IssuanceProtocol(str, Enum):
     OID4VCI_PRE_AUTH = "OID4VCI_PRE_AUTH"
     OID4VCI_AUTH_CODE = "OID4VCI_AUTH_CODE"
     DIRECT = "DIRECT"
+    PHYSICAL_DOCUMENT = "PHYSICAL_DOCUMENT"
+    CREDENTIAL_MANAGER = "CREDENTIAL_MANAGER"
+    APPLE_WALLET = "APPLE_WALLET"
 
 
 class NetworkMode(str, Enum):

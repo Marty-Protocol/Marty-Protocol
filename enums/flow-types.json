@@ -13,6 +13,7 @@
     "application_approval_issuance",
     "credential_renewal",
     "credential_revocation",
+    "physical_document_issuance",
     "combined",
     "siopv2"
   ],
@@ -69,6 +70,12 @@
         "description": "Self-Issued OpenID Provider v2 authentication flow. Steps: create_request → authentication_submission → verify_id_token.",
         "spec": "Self-Issued OpenID Provider v2",
         "flow_category": "VERIFICATION"
+      },
+      "physical_document_issuance": {
+        "description": "Physical document issuance for ICAO 9303 ePassports. Steps: accept_application → validate_evidence → approval_decision → generate_data_groups → sign_sod → submit_to_personalization → track_production → quality_verify → activate_credential.",
+        "spec": "ICAO Doc 9303 Parts 1–12",
+        "requires": ["credential_template_id", "application_template_id"],
+        "flow_category": "ISSUANCE"
       }
     },
     "step_sequences": {
@@ -80,6 +87,7 @@
       "application_approval_issuance": ["accept_application", "validate_evidence", "approval_decision", "issue_credential", "deliver_credential"],
       "credential_renewal": ["validate_existing", "create_offer", "token_exchange", "credential_request", "issue_renewed_credential", "revoke_old_credential"],
       "credential_revocation": ["validate_revocation_request", "update_status_list", "notify_holder"],
+      "physical_document_issuance": ["accept_application", "validate_evidence", "approval_decision", "generate_data_groups", "sign_sod", "submit_to_personalization", "track_production", "quality_verify", "activate_credential"],
       "combined": ["accept_application", "approval_decision", "issue_credential", "create_request", "presentation_submission", "verify_presentation"],
       "siopv2": ["create_request", "authentication_submission", "verify_id_token"]
     },

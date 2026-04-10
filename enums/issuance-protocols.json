@@ -4,7 +4,7 @@
   "title": "IssuanceProtocol",
   "description": "Protocols used to deliver credentials from issuer to holder",
   "type": "string",
-  "enum": ["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT"],
+  "enum": ["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT", "PHYSICAL_DOCUMENT"],
   "$defs": {
     "values": {
       "OID4VCI_PRE_AUTH": {
@@ -25,6 +25,13 @@
         "description": "Direct API-based credential delivery (non-OID4VCI)",
         "flow": "Issuer pushes credential directly to holder via API; no OID4VCI offer URI.",
         "use_case": "Server-to-server batch issuance, legacy integrations"
+      },
+      "PHYSICAL_DOCUMENT": {
+        "description": "Physical document issuance via personalization bureau — ICAO 9303 ePassport booklet with chip encoding",
+        "flow": "Issuer generates data groups + signs EF.SOD, submits to personalization bureau for booklet printing and chip encoding, tracks production, activates on completion.",
+        "use_case": "Government ePassport, national ID card, and physical travel document production",
+        "holder_auth_required": false,
+        "requires_physical_production": true
       }
     }
   }
