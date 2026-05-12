@@ -364,9 +364,24 @@ A Trust Profile defines **who is trusted** and **how cryptographic validation oc
 | `url` | string (URI) | No | Download URL for trust material |
 | `certificate_pem` | string | No | Pinned root certificate (PEM) |
 | `issuer_did` | string | No | Issuer DID for DID-based trust |
+| `organization_id` | UUID/string | No | Organization scope for DID issuer resolution |
+| `verification_method_ids` | string[] | No | Pinned DID verification method IDs accepted for this issuer |
+| `did_resolution` | DidResolutionPolicy | No | Resolver strategy and cache policy for DID-backed issuers |
 | `description` | string | No | Human-readable label |
 
 Exactly one of `url`, `certificate_pem`, or `issuer_did` MUST be present for each TrustSource.
+
+For `PINNED_ISSUER` sources with `issuer_did`, implementations SHOULD set `organization_id` when the issuer is managed by the relying party's tenant or platform. When `organization_id` is present, verification MUST resolve the issuer DID through that organization's issuer identity registry before using public DID resolution.
+
+### 5.3.1 DidResolutionPolicy
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `resolver_type` | enum | No | `ORGANIZATION_REGISTRY`, `PUBLIC_DID`, or `ORGANIZATION_REGISTRY_WITH_PUBLIC_FALLBACK`; default `ORGANIZATION_REGISTRY` for org-scoped DID sources |
+| `allow_public_fallback` | boolean | No | Whether public DID resolution may be used after org registry lookup fails; default `false` |
+| `cache_ttl_seconds` | integer | No | Maximum age for cached DID/JWKS material; default 300 seconds |
+
+Org-scoped DID resolution is fail-closed by default. A verifier MUST NOT accept a DID-backed issuer merely because the DID resolves publicly when the TrustSource requires organization registry resolution.
 
 ### 5.4 TimePolicy
 
@@ -408,6 +423,8 @@ Trust is anchored in a root Certificate Authority (CA) certificate (e.g., ICAO C
 **DID Model**
 Trust is anchored in a DID Document published to a verifiable data registry. The verifier resolves the issuer DID, retrieves the issuer's public key from the DID Document, and validates the credential signature against that key. Applicable to `PINNED_ISSUER` TrustSource entries with `issuer_did` set.
 
+For KMS-backed issuers, the DID is the public issuer identity and the remote KMS key is an implementation detail behind the DID verification method. Implementations SHOULD model this binding as an issuer identity/profile scoped to the organization: `issuer_did` + `verification_method_id` + private resolver metadata such as a KMS signing service reference. Public trust MUST be evaluated against the DID and its verification methods, not against opaque remote key identifiers.
+
 **Event-Sourced Identifier Model (e.g., KERI)**
 Trust may alternatively be anchored in a cryptographically verifiable key-event log rather than a static registry. [KERI (Key Event Receipt Infrastructure)](https://keri.one/) is a representative example: an issuer's authoritative key state is established and rotated through a self-contained, hash-chained log of signed key events (a KEL), witnessed and replicated independently of any ledger. A MIP implementation that supports this model would resolve the issuer's current key state from its Key Event Log in place of a DID Document lookup, then proceed with signature validation against that key state. This integration point is accommodated via a `CUSTOM` `source_type` `TrustSource` entry; see §25.2 for the extension mechanism.
 
@@ -422,13 +439,27 @@ A Trust Profile with both `ROOT_CA` and `PINNED_ISSUER` (DID) trust sources oper
 - Implementations MAY cache trust anchors for up to 72 hours provided freshness is validated on cache entry creation.
 - DID-based trust anchors are resolved on-demand per the DID Method specification. Implementations SHOULD cache resolved DID Documents per the `cacheControl` metadata in the resolution result.
 
+#### 5.7.2.1 Organization-Scoped DID Resolution
+
+When a TrustSource or Presentation Policy supplies an organization scope for a DID-backed issuer, a verifier MUST resolve the issuer key in this order:
+
+1. Look up the issuer DID in the organization's issuer identity registry.
+2. Confirm the issuer identity is active and bound to a remote signing service/key whose purpose, credential format, and algorithm are compatible with the credential being verified.
+3. Resolve the issuer DID Document from the organization registry or its published DID/JWKS cache.
+4. Match the credential's signing key identifier (`kid` or proof `verificationMethod`) to a DID Document `verificationMethod` that is authorized for assertion.
+5. If `verification_method_ids` are pinned in the TrustSource, require the matched method to appear in that list.
+6. Use the matched verification method's public key to verify the credential signature.
+7. Use public DID resolution only when `did_resolution.allow_public_fallback` is explicitly `true` or `resolver_type` is `PUBLIC_DID` / `ORGANIZATION_REGISTRY_WITH_PUBLIC_FALLBACK`.
+
+If any required lookup, binding check, key match, or signature validation fails, the verifier MUST reject the credential with `error_code: ISSUER_UNTRUSTED` or an implementation-specific cryptographic failure code. Implementations MUST NOT silently downgrade to a raw KMS key lookup or implicit issuer trust.
+
 #### 5.7.3 Trust Evaluation Algorithm (Normative)
 
 A verifier MUST execute the following steps before accepting a credential presentation:
 
 1. **Identify credential format** — determine whether the credential is `MDOC`, `SD_JWT_VC`, `VC_JWT`, or `JSON_LD`.
 2. **Locate trust sources** — retrieve the `trust_sources` array from the Trust Profile linked to the active Presentation Policy.
-3. **Validate issuer identity** — for PKI credentials: verify the issuer certificate chain to a trusted root CA; for DID credentials: resolve the issuer DID and match the signing key identifier to the DID Document's `verificationMethod`.
+3. **Validate issuer identity** — for PKI credentials: verify the issuer certificate chain to a trusted root CA; for DID credentials: resolve the issuer DID using the applicable `did_resolution` policy and match the signing key identifier to an authorized DID Document `verificationMethod`. When an organization scope is present, this step MUST use organization-scoped DID resolution (§5.7.2.1) before public DID resolution.
 4. **Verify credential signature** — validate the credential's cryptographic signature using the issuer's verified public key. The algorithm MUST be in `allowed_algorithms`.
 5. **Check credential validity period** — confirm `not_before ≤ now ≤ expiry` within the clock skew defined by `time_policy.clock_skew_seconds` (default: 300 seconds).
 6. **Check revocation status** — per the Revocation Profile associated with the Trust Profile (see §12 and §20.7).
@@ -486,6 +517,7 @@ A Credential Template is the **master issuance configuration**. It combines sche
 | `key_access_mode` | KeyAccessMode | No | `KEY_VAULT`, `HSM`, `LOCAL` |
 | `issuer_certificate_chain_pem` | string | No | X.509 issuer cert chain (for mDoc/X.509 credentials) |
 | `issuer_did` | string | No | Issuer DID (for DID-based credentials) |
+| `issuer_identity` | IssuerIdentity | No | DID-first issuer identity binding for remote/KMS-backed issuance |
 | `auto_generate_artifacts` | boolean | No | Auto-generate keys/certs for dev environments |
 | `vct` | string | Conditional | Verifiable Credential Type URI (per SD-JWT-VC §3.2.1). REQUIRED when `credential_format` is `SD_JWT_VC`. MUST be an absolute URI identifying the credential type. |
 | `credential_payload_format` | string | No | Payload envelope format: `w3c_vcdm_v2_sd_jwt`, `ietf_sd_jwt_vc`, `iso_mdoc`, `jwt_vc`. Defaults from `credential_format` if omitted. |
@@ -519,12 +551,26 @@ A Credential Template is the **master issuance configuration**. It combines sche
 ### 6.5 Validation Rules
 
 - Exactly one of `issuer_key_id`, `issuer_certificate_chain_pem`, or `issuer_did` MUST be present for `ACTIVE` templates, unless `auto_generate_artifacts` is `true`.
+- DID-backed templates SHOULD use `issuer_identity` instead of raw `issuer_key_id`. When `issuer_identity` is present, `issuer_identity.issuer_did` is the public issuer identity and any `remote_key_binding` fields are private deployment metadata. Implementations MUST resolve signing through the organization issuer identity registry and MUST NOT expose opaque KMS key IDs as public trust anchors.
 - `compliance_profile_id` MUST reference an existing Compliance Profile by ID. Embedding a compliance profile object MUST be rejected.
 - `claims` MUST contain at least one entry.
 - `vct` MUST be present and MUST be an absolute URI when `credential_format` is `SD_JWT_VC`.
 - A template with `status: DRAFT` MUST NOT be used in an active issuance.
 - `application_template_id` MUST be null when the template is used for direct/batch issuance.
 - Derived claims MUST reference an existing claim in the same template via `derived_from`.
+
+### 6.5.1 IssuerIdentity
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `issuer_did` | string | Yes | Public issuer DID that appears in issued credentials |
+| `issuer_profile_id` | string | No | Organization issuer profile binding the DID to a signing service |
+| `verification_method_id` | string | No | DID URL of the verification method used for signing (`kid`) |
+| `key_purpose` | string | No | Purpose such as `vc_jwt_issuer`, `mdoc_dsc`, or `vdsnc_signing` |
+| `algorithm` | Algorithm | No | Expected signing algorithm |
+| `remote_key_binding` | object | No | Private resolver metadata for the deployment, such as organization registry or signing service references |
+
+The `remote_key_binding` object is not a portable trust anchor. It MAY contain implementation-specific references such as `signing_service_id`, `signing_key_reference`, or `kms_provider`, but verifiers MUST validate credentials through the issuer DID and DID verification method. This preserves interoperability while allowing deployments to keep private keys in KMS/HSM backends.
 
 ### 6.6 API
 

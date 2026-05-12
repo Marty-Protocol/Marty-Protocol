@@ -28,6 +28,30 @@
           "url": {"type": "string", "format": "uri", "pattern": "^https://"},
           "certificate_pem": {"type": "string", "pattern": "^-----BEGIN CERTIFICATE-----"},
           "issuer_did": {"type": "string", "pattern": "^did:"},
+          "organization_id": {
+            "type": "string",
+            "description": "Optional organization scope for DID issuer resolution. When present, verifiers MUST resolve issuer_did through that organization's issuer identity registry before public DID fallback."
+          },
+          "verification_method_ids": {
+            "type": "array",
+            "items": {"type": "string", "pattern": "^did:.+#.+"},
+            "uniqueItems": true,
+            "description": "Optional pinned DID verification method IDs accepted for this issuer DID."
+          },
+          "did_resolution": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "resolver_type": {
+                "type": "string",
+                "enum": ["ORGANIZATION_REGISTRY", "PUBLIC_DID", "ORGANIZATION_REGISTRY_WITH_PUBLIC_FALLBACK"],
+                "default": "ORGANIZATION_REGISTRY"
+              },
+              "allow_public_fallback": {"type": "boolean", "default": false},
+              "cache_ttl_seconds": {"type": "integer", "minimum": 0, "default": 300}
+            },
+            "description": "DID resolution policy for DID-backed trust sources. The default is fail-closed org-scoped resolution."
+          },
           "description": {"type": "string", "maxLength": 256}
         },
         "oneOf": [

@@ -1,6 +1,6 @@
-"""MIP Protocol Models — generated from marty-protocol/schemas/*.json
-Generated: 2026-03-15
-DO NOT EDIT — regenerate with: python scripts/codegen.py python
+"""MIP Protocol Models � generated from marty-protocol/schemas/*.json
+Generated: 2026-05-11
+DO NOT EDIT � regenerate with: python scripts/codegen.py python
 """
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 from .enums import (
     ApiKeyScope,
+    ApplicantStatus,
     ApprovalStrategy,
     ChannelType,
     ComplianceCode,
@@ -70,7 +71,7 @@ issuance, rejection, or withdrawal."""
     family_name: str | None = None
     email: str | None = None
     phone: str | None = None
-    status: Literal["DRAFT", "SUBMITTED", "UNDER_REVIEW", "PENDING_INFORMATION", "APPROVED", "REJECTED", "WITHDRAWN", "CREDENTIALED", "SUSPENDED"]
+    status: ApplicantStatus
     reviewer_id: str | None = None
     reviewer_lock_expires_at: datetime | None = None
     submitted_at: datetime | None = None
@@ -199,9 +200,11 @@ materials"""
     validity_rules: dict[str, Any]
     issuer_key_id: str | None = None
     issuer_algorithm: str | None = None
-    key_access_mode: Literal["KEY_VAULT", "HSM", "LOCAL"] | None = None
+    key_access_mode: Literal["KEY_VAULT", "HSM", "LOCAL", "REMOTE_SIGNING"] | None = None
     issuer_certificate_chain_pem: str | None = None
     issuer_did: str | None = None
+    issuer_identity: dict[str, Any] | None = None
+    remote_signing_config: dict[str, Any] | None = None
     auto_generate_artifacts: bool | None = None
     privacy_posture: dict[str, Any] | None = None
     status: Literal["DRAFT", "ACTIVE", "DEPRECATED"]
@@ -210,20 +213,26 @@ materials"""
 
 
 class DeploymentProfile(BaseModel):
-    """Runtime configuration for a physical or logical identity verification endpoint. Enables
-specific Flows and governs network mode, key access, UX, and device grouping via Lanes.
-Lanes are managed as sub-resources via POST /v1/identity/deployment-profiles/{id}/lanes."""
+    """Runtime configuration for a physical or logical identity verification endpoint. Packages
+trust, policies, issuance capability, network mode, UX, and device grouping via Lanes.
+Compatibility extensions may additionally expose rollout and operational fields."""
 
     id: str
     organization_id: str
     name: str
     description: str | None = None
+    trust_profile_id: str
+    presentation_policy_ids: list[str]
+    credential_template_ids: list[str] | None = None
+    default_policy_id: str | None = None
     site_id: str | None = None
-    enabled_flow_ids: list[str]
+    enabled_flow_ids: list[str] | None = None
     default_presentation_policy_id: str | None = None
     network_mode: Literal["ONLINE", "OFFLINE", "HYBRID"]
     key_access_mode: Literal["KEY_VAULT", "HSM", "DEVICE_KEYSTORE"] | None = None
+    environment_config: dict[str, Any] | None = None
     ux_config: dict[str, Any] | None = None
+    update_channel: Literal["stable", "beta", "pinned"] | None = None
     update_policy: dict[str, Any] | None = None
     offline_cache_ttl_hours: int | None = None
     biometric_required: bool | None = None
@@ -645,8 +654,8 @@ OrganizationTrustProfile."""
 
 class TrustProfileIssuer(BaseModel):
     """Join entity between TrustProfile and IssuerEntity with trust scoring and cascade
-revocation policy. trust_level is a 0–100 score; future versions will auto-adjust based
-on issuer history (failed validations, revocation events, compliance lapses)."""
+revocation policy. trust_level is a 0–100 score; future versions will auto-adjust
+based on issuer history (failed validations, revocation events, compliance lapses)."""
 
     id: str
     trust_profile_id: str
@@ -682,6 +691,7 @@ OrganizationTrustProfile."""
     compliance_status: Literal["COMPLIANT", "NEEDS_ATTENTION", "SETUP_REQUIRED"]
     revocation_profile_id: str | None = None
     verification_policy_set_id: str | None = None
+    compatible_compliance_codes: list[str] | None = None
     auto_generated: bool | None = None
     created_at: datetime
     updated_at: datetime | None = None
@@ -744,12 +754,13 @@ step."""
 
 
 class WalletProfile(BaseModel):
-    """Wallet compatibility record for a credential format × protocol × compliance combination.
-The canonical wallet profile set is auto-derived from CredentialTemplate configuration
-via the derivation key (credential_format, issuance_protocol, compliance_profile_code).
-Organizations MAY store override entries at /v1/wallet-registry to extend or customise
-the derived profile for their specific deployment. GET /v1/wallet-registry returns
-merged results: derived profiles supplemented (or overridden) by stored entries."""
+    """Wallet compatibility record for a credential format × protocol × compliance
+combination. The canonical wallet profile set is auto-derived from CredentialTemplate
+configuration via the derivation key (credential_format, issuance_protocol,
+compliance_profile_code). Organizations MAY store override entries at /v1/wallet-
+registry to extend or customise the derived profile for their specific deployment. GET
+/v1/wallet-registry returns merged results: derived profiles supplemented (or
+overridden) by stored entries."""
 
     id: str | None = None
     organization_id: str | None = None

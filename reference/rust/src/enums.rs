@@ -1,6 +1,6 @@
-//! MIP Protocol Enums â€” generated from marty-protocol/enums/*.json
-//! Generated: 2026-03-14
-//! DO NOT EDIT â€” regenerate with: python scripts/codegen.py rust
+//! MIP Protocol Enums — generated from marty-protocol/enums/*.json
+//! Generated: 2026-05-11
+//! DO NOT EDIT — regenerate with: python scripts/codegen.py rust
 
 use serde::{Deserialize, Serialize};
 
@@ -73,6 +73,29 @@ pub enum ApiKeyScope {
     AdminFull,
 }
 
+/// Lifecycle status of an Applicant. Terminal states: REJECTED, WITHDRAWN, CREDENTIALED, SUSPENDED.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum ApplicantStatus {
+    #[serde(rename = "DRAFT")]
+    Draft,
+    #[serde(rename = "SUBMITTED")]
+    Submitted,
+    #[serde(rename = "UNDER_REVIEW")]
+    UnderReview,
+    #[serde(rename = "PENDING_INFORMATION")]
+    PendingInformation,
+    #[serde(rename = "APPROVED")]
+    Approved,
+    #[serde(rename = "REJECTED")]
+    Rejected,
+    #[serde(rename = "WITHDRAWN")]
+    Withdrawn,
+    #[serde(rename = "CREDENTIALED")]
+    Credentialed,
+    #[serde(rename = "SUSPENDED")]
+    Suspended,
+}
+
 /// How credential applications are reviewed and approved
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ApprovalStrategy {
@@ -108,6 +131,8 @@ pub enum ComplianceCode {
     IcaoDtc,
     #[serde(rename = "ICAO_MRZ")]
     IcaoMrz,
+    #[serde(rename = "ICAO_PASSPORT")]
+    IcaoPassport,
     #[serde(rename = "AAMVA_MDL")]
     AamvaMdl,
     #[serde(rename = "EUDI_PID")]
@@ -180,7 +205,7 @@ pub enum FallbackPolicy {
     Deny,
 }
 
-/// Lifecycle status of a FlowInstance. Aligned with Â§9.9.2 state machine. Terminal states: COMPLETED, FAILED, EXPIRED, CANCELLED.
+/// Lifecycle status of a FlowInstance. Aligned with §9.9.2 state machine. Terminal states: COMPLETED, FAILED, EXPIRED, CANCELLED.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FlowInstanceStatus {
     #[serde(rename = "PENDING")]
@@ -222,6 +247,8 @@ pub enum FlowType {
     CredentialRenewal,
     #[serde(rename = "credential_revocation")]
     CredentialRevocation,
+    #[serde(rename = "physical_document_issuance")]
+    PhysicalDocumentIssuance,
     #[serde(rename = "combined")]
     Combined,
     #[serde(rename = "siopv2")]
@@ -237,6 +264,8 @@ pub enum IssuanceProtocol {
     Oid4vciAuthCode,
     #[serde(rename = "DIRECT")]
     Direct,
+    #[serde(rename = "PHYSICAL_DOCUMENT")]
+    PhysicalDocument,
 }
 
 /// Network connectivity requirements for a Deployment Profile

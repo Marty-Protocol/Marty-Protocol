@@ -1,6 +1,6 @@
-// MIP Protocol Enums â€” generated from marty-protocol/enums/*.json
-// Generated: 2026-03-14
-// DO NOT EDIT â€” regenerate with: python scripts/codegen.py typescript
+// MIP Protocol Enums — generated from marty-protocol/enums/*.json
+// Generated: 2026-05-11
+// DO NOT EDIT — regenerate with: python scripts/codegen.py typescript
 
 /** Formal permission scope strings for MIP API keys. Scopes follow the pattern '{resource}:{action}'. Organization-scoped keys may hold any of these scopes. Deployment-scoped keys are restricted to a subset appropriate for a single deployment profile. */
 export enum ApiKeyScope {
@@ -38,6 +38,19 @@ export enum ApiKeyScope {
   ADMIN_FULL = 'admin:full',
 }
 
+/** Lifecycle status of an Applicant. Terminal states: REJECTED, WITHDRAWN, CREDENTIALED, SUSPENDED. */
+export enum ApplicantStatus {
+  DRAFT = 'DRAFT',
+  SUBMITTED = 'SUBMITTED',
+  UNDER_REVIEW = 'UNDER_REVIEW',
+  PENDING_INFORMATION = 'PENDING_INFORMATION',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  WITHDRAWN = 'WITHDRAWN',
+  CREDENTIALED = 'CREDENTIALED',
+  SUSPENDED = 'SUSPENDED',
+}
+
 /** How credential applications are reviewed and approved */
 export enum ApprovalStrategy {
   AUTO = 'AUTO',
@@ -59,6 +72,7 @@ export enum ChannelType {
 export enum ComplianceCode {
   ICAO_DTC = 'ICAO_DTC',
   ICAO_MRZ = 'ICAO_MRZ',
+  ICAO_PASSPORT = 'ICAO_PASSPORT',
   AAMVA_MDL = 'AAMVA_MDL',
   EUDI_PID = 'EUDI_PID',
   EUDI_MDL = 'EUDI_MDL',
@@ -102,7 +116,7 @@ export enum FallbackPolicy {
   DENY = 'DENY',
 }
 
-/** Lifecycle status of a FlowInstance. Aligned with Â§9.9.2 state machine. Terminal states: COMPLETED, FAILED, EXPIRED, CANCELLED. */
+/** Lifecycle status of a FlowInstance. Aligned with §9.9.2 state machine. Terminal states: COMPLETED, FAILED, EXPIRED, CANCELLED. */
 export enum FlowInstanceStatus {
   PENDING = 'PENDING',
   IN_PROGRESS = 'IN_PROGRESS',
@@ -125,6 +139,7 @@ export enum FlowType {
   APPLICATION_APPROVAL_ISSUANCE = 'application_approval_issuance',
   CREDENTIAL_RENEWAL = 'credential_renewal',
   CREDENTIAL_REVOCATION = 'credential_revocation',
+  PHYSICAL_DOCUMENT_ISSUANCE = 'physical_document_issuance',
   COMBINED = 'combined',
   SIOPV2 = 'siopv2',
 }
@@ -134,6 +149,7 @@ export enum IssuanceProtocol {
   OID4VCI_PRE_AUTH = 'OID4VCI_PRE_AUTH',
   OID4VCI_AUTH_CODE = 'OID4VCI_AUTH_CODE',
   DIRECT = 'DIRECT',
+  PHYSICAL_DOCUMENT = 'PHYSICAL_DOCUMENT',
 }
 
 /** Network connectivity requirements for a Deployment Profile */

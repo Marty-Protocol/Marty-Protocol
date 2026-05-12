@@ -1,6 +1,6 @@
-"""MIP Protocol Enums â€” generated from marty-protocol/enums/*.json
-Generated: 2026-03-15
-DO NOT EDIT â€” regenerate with: python scripts/codegen.py python
+"""MIP Protocol Enums — generated from marty-protocol/enums/*.json
+Generated: 2026-05-11
+DO NOT EDIT — regenerate with: python scripts/codegen.py python
 """
 from enum import Enum
 
@@ -40,6 +40,20 @@ class ApiKeyScope(str, Enum):
     DEPLOYMENT_READ = "deployment:read"
     DEPLOYMENT_WRITE = "deployment:write"
     ADMIN_FULL = "admin:full"
+
+
+class ApplicantStatus(str, Enum):
+    """Lifecycle status of an Applicant. Terminal states: REJECTED, WITHDRAWN, CREDENTIALED, SUSPENDED."""
+
+    DRAFT = "DRAFT"
+    SUBMITTED = "SUBMITTED"
+    UNDER_REVIEW = "UNDER_REVIEW"
+    PENDING_INFORMATION = "PENDING_INFORMATION"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    WITHDRAWN = "WITHDRAWN"
+    CREDENTIALED = "CREDENTIALED"
+    SUSPENDED = "SUSPENDED"
 
 
 class ApprovalStrategy(str, Enum):
@@ -115,7 +129,7 @@ class FallbackPolicy(str, Enum):
 
 
 class FlowInstanceStatus(str, Enum):
-    """Lifecycle status of a FlowInstance. Aligned with Â§9.9.2 state machine. Terminal states: COMPLETED, FAILED, EXPIRED, CANCELLED."""
+    """Lifecycle status of a FlowInstance. Aligned with §9.9.2 state machine. Terminal states: COMPLETED, FAILED, EXPIRED, CANCELLED."""
 
     PENDING = "PENDING"
     IN_PROGRESS = "IN_PROGRESS"
@@ -151,8 +165,6 @@ class IssuanceProtocol(str, Enum):
     OID4VCI_AUTH_CODE = "OID4VCI_AUTH_CODE"
     DIRECT = "DIRECT"
     PHYSICAL_DOCUMENT = "PHYSICAL_DOCUMENT"
-    CREDENTIAL_MANAGER = "CREDENTIAL_MANAGER"
-    APPLE_WALLET = "APPLE_WALLET"
 
 
 class NetworkMode(str, Enum):

@@ -50,9 +50,22 @@ A Trust Profile defines **who is trusted** and **how cryptographic validation oc
 | `url` | string | Conditional | HTTPS URI; required for `TRUST_LIST` and `PKD_URL` |
 | `certificate_pem` | string | Conditional | PEM-encoded cert; required for `ROOT_CA` and `PINNED_ISSUER` when no URL |
 | `issuer_did` | string | Conditional | DID URI; required for DID-based trust |
+| `organization_id` | UUID/string | No | Organization scope for issuer DID resolution |
+| `verification_method_ids` | DID URL[] | No | Pinned DID verification methods accepted for this issuer |
+| `did_resolution` | DidResolutionPolicy | No | Resolver strategy and cache/fallback policy |
 | `description` | string | No | Human-readable label |
 
 Exactly one of `url`, `certificate_pem`, or `issuer_did` MUST be present per TrustSource.
+
+For `PINNED_ISSUER` entries with `issuer_did`, verifiers SHOULD set `organization_id` when the issuer is managed by the relying party's tenant or platform. When `organization_id` is present, verification MUST resolve the DID through the organization's issuer identity registry before using public DID resolution. Public fallback is allowed only when `did_resolution.allow_public_fallback` is true or `resolver_type` is `PUBLIC_DID` / `ORGANIZATION_REGISTRY_WITH_PUBLIC_FALLBACK`.
+
+### DidResolutionPolicy Fields
+
+| Property | Type | Default | Constraint |
+|----------|------|---------|------------|
+| `resolver_type` | enum | `ORGANIZATION_REGISTRY` | `ORGANIZATION_REGISTRY`, `PUBLIC_DID`, `ORGANIZATION_REGISTRY_WITH_PUBLIC_FALLBACK` |
+| `allow_public_fallback` | boolean | `false` | Fail closed unless explicitly enabled |
+| `cache_ttl_seconds` | integer | `300` | >= 0 |
 
 ### TimePolicy Fields
 
@@ -71,6 +84,7 @@ Exactly one of `url`, `certificate_pem`, or `issuer_did` MUST be present per Tru
 4. A Trust Profile with `compliance_status: SETUP_REQUIRED` MUST NOT be referenced by an active Flow.
 5. If `revocation_profile_id` is set, the referenced RevocationProfile MUST exist in the same organization.
 6. When `time_policy.require_freshness` is `true`, `time_policy.freshness_window_seconds` MUST be a positive integer.
+7. DID-backed `PINNED_ISSUER` sources MUST match the credential issuer DID and, when `verification_method_ids` are present, the credential signing method/kid MUST be one of those DID URLs.
 
 ## Validation Configuration — Normative Field Placement
 

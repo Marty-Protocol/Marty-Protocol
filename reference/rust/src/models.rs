@@ -1,6 +1,6 @@
-//! MIP Protocol Models — generated from marty-protocol/schemas/*.json
-//! Generated: 2026-03-14
-//! DO NOT EDIT — regenerate with: python scripts/codegen.py rust
+//! MIP Protocol Models � generated from marty-protocol/schemas/*.json
+//! Generated: 2026-05-11
+//! DO NOT EDIT � regenerate with: python scripts/codegen.py rust
 
 use serde::{Deserialize, Serialize};
 
@@ -54,7 +54,7 @@ pub struct Applicant {
     pub email: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub phone: Option<String>,
-    pub status: String,
+    pub status: ApplicantStatus,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reviewer_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -251,6 +251,10 @@ pub struct CredentialTemplate {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub issuer_did: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub issuer_identity: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub remote_signing_config: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub auto_generate_artifacts: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub privacy_posture: Option<serde_json::Value>,
@@ -260,9 +264,9 @@ pub struct CredentialTemplate {
     pub updated_at: Option<String>,
 }
 
-/// Runtime configuration for a physical or logical identity verification endpoint. Enables
-/// specific Flows and governs network mode, key access, UX, and device grouping via Lanes.
-/// Lanes are managed as sub-resources via POST /v1/identity/deployment-profiles/{id}/lanes.
+/// Runtime configuration for a physical or logical identity verification endpoint. Packages
+/// trust, policies, issuance capability, network mode, UX, and device grouping via Lanes.
+/// Compatibility extensions may additionally expose rollout and operational fields.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DeploymentProfile {
     pub id: String,
@@ -270,16 +274,27 @@ pub struct DeploymentProfile {
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+    pub trust_profile_id: String,
+    pub presentation_policy_ids: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_template_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub default_policy_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub site_id: Option<String>,
-    pub enabled_flow_ids: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled_flow_ids: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub default_presentation_policy_id: Option<String>,
     pub network_mode: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub key_access_mode: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub environment_config: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ux_config: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub update_channel: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub update_policy: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -868,8 +883,8 @@ pub struct TrustFramework {
 }
 
 /// Join entity between TrustProfile and IssuerEntity with trust scoring and cascade
-/// revocation policy. trust_level is a 0–100 score; future versions will auto-adjust based
-/// on issuer history (failed validations, revocation events, compliance lapses).
+/// revocation policy. trust_level is a 0–100 score; future versions will auto-adjust
+/// based on issuer history (failed validations, revocation events, compliance lapses).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TrustProfileIssuer {
     pub id: String,
@@ -917,6 +932,8 @@ pub struct TrustProfile {
     pub revocation_profile_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub verification_policy_set_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub compatible_compliance_codes: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub auto_generated: Option<bool>,
     pub created_at: String,
@@ -1002,12 +1019,13 @@ pub struct VettingCheck {
     pub updated_at: Option<String>,
 }
 
-/// Wallet compatibility record for a credential format × protocol × compliance combination.
-/// The canonical wallet profile set is auto-derived from CredentialTemplate configuration
-/// via the derivation key (credential_format, issuance_protocol, compliance_profile_code).
-/// Organizations MAY store override entries at /v1/wallet-registry to extend or customise
-/// the derived profile for their specific deployment. GET /v1/wallet-registry returns
-/// merged results: derived profiles supplemented (or overridden) by stored entries.
+/// Wallet compatibility record for a credential format × protocol × compliance
+/// combination. The canonical wallet profile set is auto-derived from CredentialTemplate
+/// configuration via the derivation key (credential_format, issuance_protocol,
+/// compliance_profile_code). Organizations MAY store override entries at /v1/wallet-
+/// registry to extend or customise the derived profile for their specific deployment. GET
+/// /v1/wallet-registry returns merged results: derived profiles supplemented (or
+/// overridden) by stored entries.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WalletProfile {
     #[serde(skip_serializing_if = "Option::is_none")]

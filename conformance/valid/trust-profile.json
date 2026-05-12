@@ -7,6 +7,17 @@
     {
       "source_type": "TRUST_LIST",
       "url": "https://trust.example.com/list.json"
+    },
+    {
+      "source_type": "PINNED_ISSUER",
+      "issuer_did": "did:web:conformance.example.com",
+      "organization_id": "org-conformance",
+      "verification_method_ids": ["did:web:conformance.example.com#cred-issuer-conformance-es256"],
+      "did_resolution": {
+        "resolver_type": "ORGANIZATION_REGISTRY",
+        "allow_public_fallback": false,
+        "cache_ttl_seconds": 300
+      }
     }
   ],
   "allowed_algorithms": ["ES256"],

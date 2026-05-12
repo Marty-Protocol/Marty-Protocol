@@ -1,9 +1,10 @@
-// MIP Protocol Models â€” generated from marty-protocol/schemas/*.json
-// Generated: 2026-03-14
-// DO NOT EDIT â€” regenerate with: python scripts/codegen.py typescript
+// MIP Protocol Models — generated from marty-protocol/schemas/*.json
+// Generated: 2026-05-11
+// DO NOT EDIT — regenerate with: python scripts/codegen.py typescript
 
 import {
   ApiKeyScope,
+  ApplicantStatus,
   ApprovalStrategy,
   ChannelType,
   ComplianceCode,
@@ -55,7 +56,7 @@ export interface Applicant {
   family_name?: string;
   email?: string | null;
   phone?: string | null;
-  status: 'DRAFT' | 'SUBMITTED' | 'UNDER_REVIEW' | 'PENDING_INFORMATION' | 'APPROVED' | 'REJECTED' | 'WITHDRAWN' | 'CREDENTIALED' | 'SUSPENDED';
+  status: ApplicantStatus;
   reviewer_id?: string | null;
   reviewer_lock_expires_at?: string | null;
   submitted_at?: string | null;
@@ -172,9 +173,11 @@ export interface CredentialTemplate {
   validity_rules: Record<string, unknown>;
   issuer_key_id?: string;
   issuer_algorithm?: string;
-  key_access_mode?: 'KEY_VAULT' | 'HSM' | 'LOCAL';
+  key_access_mode?: 'KEY_VAULT' | 'HSM' | 'LOCAL' | 'REMOTE_SIGNING';
   issuer_certificate_chain_pem?: string;
   issuer_did?: string;
+  issuer_identity?: Record<string, unknown>;
+  remote_signing_config?: Record<string, unknown>;
   auto_generate_artifacts?: boolean;
   privacy_posture?: Record<string, unknown>;
   status: 'DRAFT' | 'ACTIVE' | 'DEPRECATED';
@@ -182,18 +185,24 @@ export interface CredentialTemplate {
   updated_at?: string;
 }
 
-/** Runtime configuration for a physical or logical identity verification endpoint. Enables specific Flows and governs network mode, key access, UX, and device grouping via Lanes. Lanes are managed as sub-resources via POST /v1/identity/deployment-profiles/{id}/lanes. */
+/** Runtime configuration for a physical or logical identity verification endpoint. Packages trust, policies, issuance capability, network mode, UX, and device grouping via Lanes. Compatibility extensions may additionally expose rollout and operational fields. */
 export interface DeploymentProfile {
   id: string;
   organization_id: string;
   name: string;
   description?: string;
+  trust_profile_id: string;
+  presentation_policy_ids: string[];
+  credential_template_ids?: string[];
+  default_policy_id?: string | null;
   site_id?: string | null;
-  enabled_flow_ids: string[];
+  enabled_flow_ids?: string[];
   default_presentation_policy_id?: string | null;
   network_mode: 'ONLINE' | 'OFFLINE' | 'HYBRID';
   key_access_mode?: 'KEY_VAULT' | 'HSM' | 'DEVICE_KEYSTORE';
+  environment_config?: Record<string, unknown>;
   ux_config?: Record<string, unknown>;
+  update_channel?: 'stable' | 'beta' | 'pinned';
   update_policy?: Record<string, unknown>;
   offline_cache_ttl_hours?: number;
   biometric_required?: boolean;
@@ -252,7 +261,7 @@ export interface Flow {
   organization_id: string;
   name: string;
   description?: string;
-  flow_type: 'oid4vci_pre_authorized' | 'oid4vci_authorization_code' | 'mdl_issuance' | 'oid4vp_presentation' | 'mdl_presentation' | 'application_approval_issuance' | 'credential_renewal' | 'credential_revocation' | 'combined';
+  flow_type: 'oid4vci_pre_authorized' | 'oid4vci_authorization_code' | 'mdl_issuance' | 'oid4vp_presentation' | 'mdl_presentation' | 'siopv2' | 'application_approval_issuance' | 'credential_renewal' | 'credential_revocation' | 'combined';
   flow_category?: 'ISSUANCE' | 'VERIFICATION' | 'RENEWAL' | 'REVOCATION' | 'COMBINED';
   trust_profile_id?: string | null;
   credential_template_id?: string | null;
@@ -595,6 +604,7 @@ export interface TrustProfile {
   compliance_status: 'COMPLIANT' | 'NEEDS_ATTENTION' | 'SETUP_REQUIRED';
   revocation_profile_id?: string | null;
   verification_policy_set_id?: string | null;
+  compatible_compliance_codes?: string[];
   auto_generated?: boolean;
   created_at: string;
   updated_at?: string;
