@@ -1,0 +1,89 @@
+{
+  "id": "33333333-3333-4333-8333-333333333333",
+  "organization_id": "00000000-0000-4000-8000-000000000001",
+  "name": "Passport External API Evidence Application",
+  "description": "Application template using a declarative API check to create an EvidenceFact.",
+  "approval_strategy": "RULES_BASED",
+  "approval_policy_set_id": "44444444-4444-4444-8444-444444444444",
+  "status": "ACTIVE",
+  "form_fields": [
+    {
+      "field_id": "passport_number",
+      "label": "Passport number",
+      "field_type": "TEXT",
+      "required": true,
+      "claim_mapping": "passport_number"
+    },
+    {
+      "field_id": "birth_date",
+      "label": "Birth date",
+      "field_type": "DATE",
+      "required": true,
+      "claim_mapping": "birth_date"
+    }
+  ],
+  "evidence_requirements": [
+    {
+      "evidence_id": "passport-document-check",
+      "evidence_type": "EXTERNAL_API",
+      "description": "Verify passport document authenticity through a configured provider API.",
+      "required": true,
+      "provider": "passport_verifier",
+      "fact_type": "passport.document_verified",
+      "scope": {
+        "document_type": "passport"
+      },
+      "api": {
+        "method": "POST",
+        "url": "https://verify.example.test/passports",
+        "timeout_seconds": 10,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "secret_headers": {
+          "authorization": "PASSPORT_VERIFY_API_TOKEN"
+        },
+        "body": {
+          "passport_number": "{{application.form_data.passport_number}}",
+          "birth_date": "{{application.form_data.birth_date}}"
+        }
+      },
+      "expected_response": {
+        "status_codes": [200],
+        "json": {
+          "all": [
+            {"path": "$.status", "op": "eq", "value": "verified"},
+            {"path": "$.checks.passive_auth_valid", "op": "eq", "value": true},
+            {"path": "$.biometric.face_match_score", "op": ">=", "value": 0.85}
+          ]
+        }
+      },
+      "response_mapping": {
+        "provider_event_id_path": "$.id",
+        "verification_status_path": "$.status",
+        "verification_verified_values": ["verified"],
+        "scope": {
+          "document_type": "passport",
+          "issuing_country": "$.document.issuing_country"
+        },
+        "assertion": {
+          "passive_auth_valid": "$.checks.passive_auth_valid",
+          "face_match_score": "$.biometric.face_match_score",
+          "document_not_expired": "$.document.not_expired"
+        }
+      },
+      "pass_rule": {
+        "all": [
+          {"path": "assertion.passive_auth_valid", "op": "eq", "value": true},
+          {"path": "assertion.face_match_score", "op": ">=", "value": 0.85},
+          {"path": "assertion.document_not_expired", "op": "eq", "value": true}
+        ]
+      },
+      "verification_method": "EXTERNAL_API_RESPONSE",
+      "auto_issue_on_permit": true
+    }
+  ],
+  "claim_collection_rules": [],
+  "created_at": "2026-05-18T12:00:00Z",
+  "updated_at": "2026-05-18T12:00:00Z"
+}

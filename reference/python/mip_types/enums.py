@@ -1,5 +1,5 @@
 """MIP Protocol Enums — generated from marty-protocol/enums/*.json
-Generated: 2026-05-11
+Generated: 2026-05-14
 DO NOT EDIT — regenerate with: python scripts/codegen.py python
 """
 from enum import Enum

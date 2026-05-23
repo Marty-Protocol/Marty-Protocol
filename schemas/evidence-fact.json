@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/evidence-fact.json",
+  "title": "EvidenceFact",
+  "description": "Immutable normalized fact derived from verified evidence. Provider adapters create EvidenceFacts from receipts so approval policy can evaluate facts without parsing provider payloads.",
+  "type": "object",
+  "required": [
+    "id",
+    "organization_id",
+    "application_id",
+    "subject_id",
+    "provider",
+    "fact_type",
+    "scope",
+    "assertion",
+    "verification",
+    "source",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "application_id": {"type": "string", "format": "uuid"},
+    "subject_id": {"type": "string", "minLength": 1},
+    "provider": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$",
+      "description": "External evidence provider, for example canvas."
+    },
+    "fact_type": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*\\.[a-z][a-z0-9_]*(\\.[a-z0-9_-]+)*$",
+      "description": "Provider-qualified fact type, for example canvas.course_completion or canvas.assignment_score."
+    },
+    "scope": {
+      "type": "object",
+      "description": "Provider-specific scope identifiers such as course_id, module_id, assignment_id, or quiz_id.",
+      "additionalProperties": {
+        "type": ["string", "number", "integer", "boolean", "null"]
+      }
+    },
+    "assertion": {
+      "type": "object",
+      "description": "Normalized factual assertions such as completed, submitted, score_percent, passed, or completed_at.",
+      "additionalProperties": {
+        "type": ["string", "number", "integer", "boolean", "null"]
+      }
+    },
+    "verification": {
+      "type": "object",
+      "required": ["method", "status", "verified_at"],
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["SIGNED_WEBHOOK", "REST_PULL", "LTI_CLAIM", "INSTRUCTOR_APPROVAL", "SYSTEM"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["VERIFIED", "UNVERIFIED", "FAILED"]
+        },
+        "verified_at": {"type": "string", "format": "date-time"},
+        "details": {"type": "object"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["provider_event_id"],
+      "additionalProperties": false,
+      "properties": {
+        "receipt_id": {"type": ["string", "null"], "format": "uuid"},
+        "provider_event_id": {"type": "string", "minLength": 1},
+        "payload_hash": {"type": ["string", "null"]},
+        "mip_receipt": {"type": "object"}
+      }
+    },
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

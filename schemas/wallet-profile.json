@@ -33,7 +33,7 @@
     "description": {"type": "string"},
     "credential_format": {
       "type": "string",
-      "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]
+      "enum": ["MDOC", "MSO_MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]
     },
     "issuance_protocol": {
       "type": "string",
@@ -60,6 +60,14 @@
       "items": {"type": "string", "enum": ["ios", "android", "web"]}
     },
     "deep_link_pattern": {"type": "string"},
+    "format_variant": {
+      "type": "string",
+      "description": "Optional wallet-specific format variant such as dc+sd-jwt or mso_mdoc."
+    },
+    "deep_link_scheme": {
+      "type": "string",
+      "description": "Optional scheme used by older wallet registry fixtures. Prefer deep_link_pattern for new entries."
+    },
     "created_at": {"type": "string", "format": "date-time"},
     "updated_at": {"type": "string", "format": "date-time"}
   },

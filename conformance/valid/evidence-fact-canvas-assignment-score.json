@@ -1,0 +1,31 @@
+{
+  "id": "33333333-3333-4333-8333-333333333333",
+  "organization_id": "00000000-0000-4000-8000-000000000001",
+  "application_id": "22222222-3333-4444-8555-666666666666",
+  "subject_id": "learner@example.edu",
+  "provider": "canvas",
+  "fact_type": "canvas.assignment_score",
+  "scope": {
+    "course_id": "course-42",
+    "assignment_id": "assignment-9",
+    "user_id": "user-7"
+  },
+  "assertion": {
+    "submitted": true,
+    "completed": true,
+    "score": 46,
+    "score_percent": 92,
+    "passed": true
+  },
+  "verification": {
+    "method": "SIGNED_WEBHOOK",
+    "status": "VERIFIED",
+    "verified_at": "2026-05-15T12:01:00Z"
+  },
+  "source": {
+    "receipt_id": "44444444-4444-4444-8444-444444444444",
+    "provider_event_id": "evt-assignment-score-1",
+    "payload_hash": "payload-sha256"
+  },
+  "created_at": "2026-05-15T12:01:00Z"
+}

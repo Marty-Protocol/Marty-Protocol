@@ -1228,10 +1228,42 @@ Application Templates are **purely user-facing**. They have no cryptographic con
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `evidence_id` | string | Yes | Unique identifier |
-| `evidence_type` | EvidenceType | Yes | `DOCUMENT_SCAN`, `BIOMETRIC`, `SELFIE`, `THIRD_PARTY_VERIFICATION` |
+| `evidence_type` | EvidenceType | Yes | `DOCUMENT_SCAN`, `BIOMETRIC`, `SELFIE`, `THIRD_PARTY_VERIFICATION`, `EXTERNAL_FACT`, `EXTERNAL_API` |
 | `description` | string | Yes | User-facing instructions |
 | `required` | boolean | Yes | Whether the evidence is mandatory |
 | `accepted_formats` | string[] | No | Accepted file formats (for `DOCUMENT_SCAN`) |
+| `provider` | string | Conditional | Required for `EXTERNAL_FACT` and `EXTERNAL_API`. Provider namespace that emits or owns the fact |
+| `fact_type` | string | Conditional | Required for `EXTERNAL_FACT` and `EXTERNAL_API`. Normalized fact type used by policy |
+| `scope` | object | No | Required fact scope values that must match before approval policy evaluation |
+| `pass_rule` | object | No | Provider-neutral assertions evaluated against the normalized `EvidenceFact` |
+| `verification_method` | string | No | Expected verification method, such as `SIGNED_WEBHOOK`, `REST_PULL`, or `EXTERNAL_API_RESPONSE` |
+| `api` | object | Conditional | Required for `EXTERNAL_API`. Declarative request contract for a provider API call |
+| `expected_response` | object | Conditional | Required for `EXTERNAL_API`. HTTP status and JSON/path conditions that make the response acceptable |
+| `response_mapping` | object | Conditional | Required for `EXTERNAL_API`. Mapping from provider response to `EvidenceFact` fields |
+| `auto_issue_on_permit` | boolean | No | Allows automatic approval/issuance when the evidence fact satisfies requirements and Cedar permits |
+
+`EXTERNAL_FACT` is for facts produced by adapters, signed webhooks, standards-specific event lanes, or manual trusted review. `EXTERNAL_API` is for request/response checks that an organization can configure without implementation work, such as passport verification, license checks, employment checks, sanctions checks, or other provider lookups.
+
+`EXTERNAL_API.api` supports:
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `method` | string | No | `GET`, `POST`, `PUT`, or `PATCH`; default is implementation-defined |
+| `url` | URI | Yes | Provider endpoint. Implementations MUST restrict unsafe schemes and private-network targets unless explicitly allowed by deployment policy |
+| `timeout_seconds` | number | No | Bounded request timeout |
+| `headers` | object | No | Non-secret request headers |
+| `secret_headers` | object | No | Header name to deployment secret reference map. Secret values MUST NOT be stored in application templates or evidence facts |
+| `params` | object | No | Query parameters, with template interpolation allowed |
+| `body` / `json` | object/string | No | Request body, with template interpolation allowed |
+
+`EXTERNAL_API.expected_response` SHOULD declare accepted `status_codes` and JSON/path predicates. `response_mapping` MUST normalize provider responses into the MIP `EvidenceFact` shape: `provider`, `fact_type`, `subject_id`, `scope`, `assertion`, `verification`, and `source`. Approval policies MUST evaluate normalized fact summaries and MUST NOT parse raw provider responses.
+
+Operator/reviewer surfaces MAY expose configured `EXTERNAL_API` checks by
+`evidence_id`/`check_id`, provider, fact type, scope, method, and auto-issue
+eligibility. They MUST NOT expose resolved secret values, `api.secret_headers`,
+or raw provider responses. Running a configured check MUST create a normalized
+`EvidenceFact` and evaluate the same approval policy path used by
+adapter-generated facts.
 
 ### 11.5 Validation Rules
 
@@ -1522,6 +1554,27 @@ POST   /v1/wallet-registry                                   Create override ent
 GET    /v1/wallet-registry/{id}                              Get override entry
 PATCH  /v1/wallet-registry/{id}                              Update override entry
 DELETE /v1/wallet-registry/{id}                              Delete override entry
+```
+
+### 13.7 Delivery Destination Boundary
+
+A Wallet Profile describes holder-wallet compatibility. It MUST NOT be used to represent every post-issuance delivery channel.
+
+Delivery Destination Profiles describe operational destinations that may receive, import, or mirror an issued credential. They cover:
+
+- holder wallets selected during claim,
+- learner-owned backpacks,
+- organization-managed mirrors such as Canvas Credentials,
+- direct delivery channels such as partner APIs or webhooks.
+
+Canvas Credentials institutional publishing is an organization-managed delivery destination. A student MAY consent to showing a credential in Canvas Credentials, but MUST NOT be able to configure the organization issuer/API connection. See `schemas/delivery-destination-profile.json` and `protocol/delivery-destination-profile/SPECIFICATION.md`.
+
+```
+GET    /v1/delivery-destinations
+POST   /v1/delivery-destinations
+GET    /v1/delivery-destinations/{id}
+PATCH  /v1/delivery-destinations/{id}
+DELETE /v1/delivery-destinations/{id}
 ```
 
 ---

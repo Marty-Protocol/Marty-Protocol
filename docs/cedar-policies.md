@@ -61,13 +61,14 @@ The MIP Cedar schema is defined in [`cedar/mip.cedarschema`](../cedar/mip.cedars
 | `CredentialTemplate` | Claim template | `Organization` |
 | `PresentationPolicy` | Verification requirements | `Organization` |
 | `Application` | Credential application | `Organization`, `Flow` |
+| `EvidenceFact` | Normalized evidence fact | `Application`, `Organization` |
 
 ### Context types
 | Context | Used by | Fields |
 |---|---|---|
 | `RequestContext` | API access actions | `ip_address`, `timestamp`, `mfa_authenticated`, `session_id`, `user_agent` |
 | `CredentialContext` | `credentials:verify` | `credential_format`, `compliance_code`, `issuer_id`, `issuer_trust_level`, `credential_age_seconds`, `is_revoked`, `is_expired`, `holder_binding_present`, `algorithm` |
-| `ApprovalContext` | `applications:approve` | `risk_score`, `document_verification_passed`, `biometric_match_score`, `evidence_count`, `applicant_country` |
+| `ApprovalContext` | `applications:approve` | `risk_score`, `document_verification_passed`, `biometric_match_score`, `evidence_count`, `applicant_country`, evidence fact summary fields |
 
 ### Actions
 All 32 API key scope strings are registered as Cedar actions (e.g., `MIP::Action::"credentials:issue"`). Each action declares which principal and resource types it applies to.
@@ -138,6 +139,66 @@ when {
 ```
 
 See: [`cedar/policies/approval_rules.cedar`](../cedar/policies/approval_rules.cedar)
+
+Provider adapters SHOULD normalize external evidence into `EvidenceFact`
+records before evaluating approval rules. Cedar approval policies receive a
+summary in `ApprovalContext`, including provider, fact type, verification
+status, requirement counts, and scope-match flags. Policies MUST NOT parse raw
+provider payloads.
+
+Application templates can declare fact-backed requirements using
+`evidence_type: "EXTERNAL_FACT"` plus `provider`, `fact_type`, `scope`, and
+optional `pass_rule` metadata. They can also declare `evidence_type:
+"EXTERNAL_API"` when a simple provider HTTP check can be configured without a
+custom adapter. In that mode, templates provide an `api` request contract,
+`expected_response` conditions, and `response_mapping` rules that normalize the
+provider response into an `EvidenceFact`.
+
+The fact layer evaluates provider-neutral requirement matching first, then
+Cedar decides whether `applications:approve` is permitted. Custom adapters
+remain appropriate for signed/eventful protocols such as Canvas LTI, AGS, NRPS,
+or provider webhooks; declarative API checks are for request/response evidence
+sources such as passport verification, license checks, employment checks, or
+sanctions lookups.
+
+**Example - approve verified external evidence:**
+```cedar
+permit (
+    principal is MIP::ServiceAccount,
+    action == MIP::Action::"applications:approve",
+    resource
+)
+when {
+    principal.service_name == "canvas-evidence-policy" &&
+    context.evidence_verification_status == "VERIFIED" &&
+    context.evidence_scope_matched &&
+    context.all_required_evidence_satisfied
+};
+```
+
+`canvas-evidence-policy` is the legacy service account name for the MIP evidence
+approval evaluator. Policies should prefer the evidence context fields over the
+service account label when distinguishing providers.
+
+Canvas authoring examples for common LMS requirements live in
+[`cedar/policies/canvas_approval_examples.cedar`](../cedar/policies/canvas_approval_examples.cedar).
+The examples cover:
+
+- `canvas.course_completion`
+- `canvas.assignment_completion`
+- `canvas.assignment_score`
+- `canvas.quiz_completion`
+- `canvas.quiz_score`
+- `canvas.module_completion`
+- `canvas.manual_instructor_approval`
+
+Use the bundled approval policy when a connector only needs the default
+"verified Canvas fact satisfies all requirements" behavior. Use an
+organization-owned `approval_policy_set_id` when a program needs fact-type
+specific approval, extra forbid rules, or a human-review fallback. In both
+cases, score thresholds and scope matching should be declared in
+`ApplicationTemplate.evidence_requirements[]` as `EXTERNAL_FACT` requirements
+and evaluated by the fact layer before Cedar runs.
 
 ## PolicySet Entity
 

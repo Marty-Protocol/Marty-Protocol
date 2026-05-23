@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/delivery-destination-profile.json",
+  "title": "DeliveryDestinationProfile",
+  "description": "A delivery destination describes where an issued credential can be delivered, opened, imported, or mirrored. Unlike WalletProfile, it can represent holder wallets, learner-owned backpacks, organization-managed mirrors such as Canvas Credentials, or custom delivery channels.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "provider",
+    "mode",
+    "setup_actor",
+    "delivery_target",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "organization_id": {
+      "type": ["string", "null"],
+      "description": "Organization that configured this destination. Null for system-provided destination profiles."
+    },
+    "is_system": {
+      "type": "boolean",
+      "default": false,
+      "description": "True for built-in destination profiles maintained by the MIP implementation."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "description": {
+      "type": ["string", "null"]
+    },
+    "provider": {
+      "type": "string",
+      "enum": [
+        "elevenid_wallet",
+        "oid4vci_wallet",
+        "didcomm_v2",
+        "canvas_credentials",
+        "canvas_credentials_backpack",
+        "open_badges_backpack",
+        "custom"
+      ]
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["holder_wallet", "learner_backpack", "organization_mirror", "direct_delivery"]
+    },
+    "setup_actor": {
+      "type": "string",
+      "enum": ["learner", "org_admin", "system"]
+    },
+    "delivery_target": {
+      "type": "string",
+      "enum": ["wallet", "didcomm_v2", "canvas_credentials", "external_api", "webhook"]
+    },
+    "wallet_profile_id": {
+      "type": ["string", "null"],
+      "description": "Optional WalletProfile or wallet-registry id when the destination is also a holder wallet."
+    },
+    "credential_format": {
+      "type": ["string", "null"],
+      "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD", null]
+    },
+    "issuance_protocol": {
+      "type": ["string", "null"],
+      "enum": ["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT", null]
+    },
+    "compliance_profile_code": {
+      "type": ["string", "null"]
+    },
+    "connector_type": {
+      "type": ["string", "null"],
+      "description": "Optional connector kind required to operate this destination, for example canvas_platform."
+    },
+    "connector_id": {
+      "type": ["string", "null"],
+      "description": "Optional configured connector id for organization-owned destinations."
+    },
+    "requires_consent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the holder must opt in before this destination receives the issued credential."
+    },
+    "claim_projection_policy": {
+      "type": "object",
+      "description": "Rules for which claims or badge fields may be sent to this destination. Organization mirrors should use explicit projection policies rather than forwarding the full credential payload.",
+      "additionalProperties": true,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["public_badge", "allow_list", "deny_list", "full_credential_reference"]
+        },
+        "allowed_claims": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "denied_claims": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "setup_requirements": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Human-readable setup requirements or capability flags needed before this destination can be used."
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": {"type": "boolean"}
+    },
+    "docs_url": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "is_enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"is_system": {"const": false}},
+        "required": ["is_system"]
+      },
+      "then": {
+        "required": ["organization_id"],
+        "properties": {
+          "organization_id": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {"mode": {"const": "organization_mirror"}},
+        "required": ["mode"]
+      },
+      "then": {
+        "properties": {
+          "setup_actor": {"const": "org_admin"},
+          "requires_consent": {"type": "boolean"}
+        }
+      }
+    }
+  ]
+}

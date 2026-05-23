@@ -1,5 +1,5 @@
 //! MIP Protocol Models — generated from marty-protocol/schemas/*.json
-//! Generated: 2026-05-11
+//! Generated: 2026-05-14
 //! DO NOT EDIT — regenerate with: python scripts/codegen.py rust
 
 use serde::{Deserialize, Serialize};
@@ -343,6 +343,24 @@ pub struct DeviceRegistration {
     pub updated_at: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub last_seen_at: Option<String>,
+}
+
+/// Immutable normalized fact derived from verified evidence. Provider adapters create
+/// EvidenceFacts from receipts so approval policy can evaluate facts without parsing
+/// provider payloads.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EvidenceFact {
+    pub id: String,
+    pub organization_id: String,
+    pub application_id: String,
+    pub subject_id: String,
+    pub provider: String,
+    pub fact_type: String,
+    pub scope: serde_json::Value,
+    pub assertion: serde_json::Value,
+    pub verification: serde_json::Value,
+    pub source: serde_json::Value,
+    pub created_at: String,
 }
 
 /// Runtime state of a single flow instance. Tracks current step, step results, context

@@ -1,0 +1,136 @@
+{
+  "id": "11111111-1111-4111-8111-111111111111",
+  "organization_id": "00000000-0000-4000-8000-000000000001",
+  "name": "Canvas Evidence Credential Application",
+  "description": "Application template using typed Canvas EvidenceFact requirements.",
+  "approval_strategy": "RULES_BASED",
+  "approval_policy_set_id": "22222222-2222-4222-8222-222222222222",
+  "status": "ACTIVE",
+  "form_fields": [
+    {
+      "field_id": "email",
+      "label": "Email",
+      "field_type": "TEXT",
+      "required": true,
+      "claim_mapping": "email"
+    }
+  ],
+  "evidence_requirements": [
+    {
+      "evidence_id": "canvas-course-completion",
+      "evidence_type": "EXTERNAL_FACT",
+      "description": "Canvas course completion for a specific course.",
+      "required": true,
+      "provider": "canvas",
+      "fact_type": "canvas.course_completion",
+      "scope": {
+        "course_id": "course-42"
+      },
+      "pass_rule": {
+        "completed": true
+      },
+      "verification_method": "SIGNED_WEBHOOK"
+    },
+    {
+      "evidence_id": "canvas-assignment-completion",
+      "evidence_type": "EXTERNAL_FACT",
+      "description": "Canvas assignment submitted and completed.",
+      "required": true,
+      "provider": "canvas",
+      "fact_type": "canvas.assignment_completion",
+      "scope": {
+        "course_id": "course-42",
+        "assignment_id": "assignment-9"
+      },
+      "pass_rule": {
+        "submitted": true,
+        "completed": true
+      },
+      "verification_method": "SIGNED_WEBHOOK"
+    },
+    {
+      "evidence_id": "canvas-assignment-score",
+      "evidence_type": "EXTERNAL_FACT",
+      "description": "Canvas assignment score meets the configured threshold.",
+      "required": true,
+      "provider": "canvas",
+      "fact_type": "canvas.assignment_score",
+      "scope": {
+        "course_id": "course-42",
+        "assignment_id": "assignment-9"
+      },
+      "pass_rule": {
+        "min_score_percent": 80
+      },
+      "verification_method": "SIGNED_WEBHOOK"
+    },
+    {
+      "evidence_id": "canvas-quiz-completion",
+      "evidence_type": "EXTERNAL_FACT",
+      "description": "Canvas quiz completed.",
+      "required": true,
+      "provider": "canvas",
+      "fact_type": "canvas.quiz_completion",
+      "scope": {
+        "course_id": "course-42",
+        "quiz_id": "quiz-3"
+      },
+      "pass_rule": {
+        "completed": true
+      },
+      "verification_method": "SIGNED_WEBHOOK"
+    },
+    {
+      "evidence_id": "canvas-quiz-score",
+      "evidence_type": "EXTERNAL_FACT",
+      "description": "Canvas quiz score meets the configured threshold.",
+      "required": true,
+      "provider": "canvas",
+      "fact_type": "canvas.quiz_score",
+      "scope": {
+        "course_id": "course-42",
+        "quiz_id": "quiz-3"
+      },
+      "pass_rule": {
+        "min_score_percent": 85,
+        "passed": true
+      },
+      "verification_method": "SIGNED_WEBHOOK"
+    },
+    {
+      "evidence_id": "canvas-module-completion",
+      "evidence_type": "EXTERNAL_FACT",
+      "description": "Canvas module completed.",
+      "required": true,
+      "provider": "canvas",
+      "fact_type": "canvas.module_completion",
+      "scope": {
+        "course_id": "course-42",
+        "module_id": "module-7"
+      },
+      "pass_rule": {
+        "completed": true
+      },
+      "verification_method": "SIGNED_WEBHOOK"
+    },
+    {
+      "evidence_id": "canvas-manual-instructor-approval",
+      "evidence_type": "EXTERNAL_FACT",
+      "description": "Instructor manually approved the learner in Canvas.",
+      "required": false,
+      "provider": "canvas",
+      "fact_type": "canvas.manual_instructor_approval",
+      "scope": {
+        "course_id": "course-42"
+      },
+      "pass_rule": {
+        "passed": true
+      },
+      "verification_method": "INSTRUCTOR_APPROVAL",
+      "manual_fallback": true
+    }
+  ],
+  "claim_collection_rules": [],
+  "created_at": "2026-05-15T12:00:00Z",
+  "updated_at": "2026-05-15T12:00:00Z"
+}

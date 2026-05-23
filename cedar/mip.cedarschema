@@ -45,6 +45,15 @@ namespace MIP {
     biometric_match_score: Long,   // 0–100
     evidence_count: Long,
     applicant_country: String,     // ISO 3166-1 alpha-2
+    evidence_provider?: String,
+    evidence_fact_type?: String,
+    evidence_verification_status?: String,
+    evidence_scope_matched?: Bool,
+    verified_evidence_count?: Long,
+    required_evidence_count?: Long,
+    satisfied_requirement_count?: Long,
+    all_required_evidence_satisfied?: Bool,
+    auto_issue_eligible?: Bool,
   };
 
   // ========================================================================
@@ -131,6 +140,14 @@ namespace MIP {
   entity Application in [Organization, Flow] {
     risk_score: Long,
     status: String,                // PENDING | APPROVED | REJECTED
+  };
+
+  /// Normalized fact derived from verified external evidence.
+  entity EvidenceFact in [Application, Organization] {
+    provider: String,
+    fact_type: String,
+    subject_id: String,
+    verification_status: String,
   };
 
   /// Webhook or notification target.

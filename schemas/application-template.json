@@ -38,11 +38,94 @@
         "additionalProperties": false,
         "properties": {
           "evidence_id": {"type": "string"},
-          "evidence_type": {"type": "string", "enum": ["DOCUMENT_SCAN", "BIOMETRIC", "SELFIE", "THIRD_PARTY_VERIFICATION"]},
+          "evidence_type": {"type": "string", "enum": ["DOCUMENT_SCAN", "BIOMETRIC", "SELFIE", "THIRD_PARTY_VERIFICATION", "EXTERNAL_FACT", "EXTERNAL_API"]},
           "description": {"type": "string"},
           "required": {"type": "boolean"},
           "accepted_formats": {"type": "array", "items": {"type": "string"}},
-          "max_file_size_bytes": {"type": "integer", "minimum": 1}
+          "max_file_size_bytes": {"type": "integer", "minimum": 1},
+          "provider": {
+            "type": "string",
+            "description": "Provider namespace expected to produce the fact, for example canvas."
+          },
+          "fact_type": {
+            "type": "string",
+            "description": "Normalized fact type required by policy, for example canvas.course_completion."
+          },
+          "scope": {
+            "type": "object",
+            "description": "Required fact scope keys such as course_id, assignment_id, quiz_id, or module_id."
+          },
+          "pass_rule": {
+            "type": "object",
+            "description": "Optional provider-neutral pass rule evaluated by the fact layer before policy context is built."
+          },
+          "verification_method": {
+            "type": "string",
+            "description": "Expected verification method, for example SIGNED_WEBHOOK, REST_PULL, LTI_CLAIM, or INSTRUCTOR_APPROVAL."
+          },
+          "freshness": {
+            "type": "object",
+            "description": "Optional freshness constraints for when the fact was created or verified."
+          },
+          "manual_fallback": {
+            "type": "boolean",
+            "description": "Whether this requirement may be satisfied by manual review if provider evidence is unavailable."
+          },
+          "api": {
+            "type": "object",
+            "description": "Declarative HTTP API call used to create this evidence fact when no custom adapter is required.",
+            "additionalProperties": false,
+            "properties": {
+              "method": {"type": "string", "enum": ["GET", "POST", "PUT", "PATCH"]},
+              "url": {"type": "string", "format": "uri"},
+              "timeout_seconds": {"type": "number", "minimum": 1, "maximum": 20},
+              "headers": {"type": "object"},
+              "secret_headers": {
+                "type": "object",
+                "description": "Header name to deployment secret/env-var name mappings. Secret values are resolved at runtime and are not stored in facts."
+              },
+              "params": {"type": "object"},
+              "body": {},
+              "json": {},
+              "allow_private_network": {"type": "boolean"}
+            }
+          },
+          "expected_response": {
+            "type": "object",
+            "description": "Expected HTTP status codes and JSON/path conditions that must hold before the response is treated as verified.",
+            "properties": {
+              "status_codes": {"type": "array", "items": {"type": "integer"}},
+              "json": {"type": "object"},
+              "conditions": {"type": "object"},
+              "body": {"type": "object"}
+            }
+          },
+          "response_mapping": {
+            "type": "object",
+            "description": "Mapping from the provider response into EvidenceFact provider, fact_type, subject_id, scope, assertion, verification, and source metadata.",
+            "properties": {
+              "provider": {},
+              "fact_type": {},
+              "subject_id": {},
+              "subject_id_path": {"type": "string"},
+              "provider_event_id": {},
+              "provider_event_id_path": {"type": "string"},
+              "source_event_id_path": {"type": "string"},
+              "verification_status_path": {"type": "string"},
+              "verification_verified_values": {"type": "array"},
+              "scope": {"type": "object"},
+              "assertion": {"type": "object"},
+              "assertions": {"type": "object"}
+            }
+          },
+          "auto_approve_on_evidence": {
+            "type": "boolean",
+            "description": "Whether a permit decision may automatically approve and issue after this requirement is satisfied."
+          },
+          "auto_issue_on_permit": {
+            "type": "boolean",
+            "description": "Alias for auto_approve_on_evidence used by generic external API checks."
+          }
         }
       }
     },

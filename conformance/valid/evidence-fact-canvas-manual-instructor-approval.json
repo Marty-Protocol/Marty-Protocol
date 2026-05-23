@@ -1,0 +1,31 @@
+{
+  "id": "55555555-5555-4555-8555-555555555555",
+  "organization_id": "00000000-0000-4000-8000-000000000001",
+  "application_id": "22222222-3333-4444-8555-666666666666",
+  "subject_id": "learner@example.edu",
+  "provider": "canvas",
+  "fact_type": "canvas.manual_instructor_approval",
+  "scope": {
+    "course_id": "course-42",
+    "user_id": "user-7"
+  },
+  "assertion": {
+    "passed": true,
+    "approved_by": "instructor@example.edu",
+    "approved_at": "2026-05-15T12:02:00Z"
+  },
+  "verification": {
+    "method": "INSTRUCTOR_APPROVAL",
+    "status": "VERIFIED",
+    "verified_at": "2026-05-15T12:02:15Z",
+    "details": {
+      "approver_role": "TeacherEnrollment"
+    }
+  },
+  "source": {
+    "receipt_id": null,
+    "provider_event_id": "manual-approval-1",
+    "payload_hash": null
+  },
+  "created_at": "2026-05-15T12:02:15Z"
+}

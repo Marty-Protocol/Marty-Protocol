@@ -11,6 +11,8 @@
 
 A Wallet Profile describes **which wallet applications can receive and hold** a specific credential configuration. The canonical set of wallet profiles is **derived** from the combination of credential format, issuance protocol, and compliance profile code. However, organisations with specialised deployment requirements MAY store **override entries** in the wallet registry to extend or customise derived profiles.
 
+Wallet Profile is intentionally narrow. It does **not** represent every place a credential can be published after issuance. Organization-managed destinations such as Canvas Credentials institutional mirroring are modeled as **Delivery Destination Profiles**, because the holder is not opening an OID4VCI offer in a holder-controlled wallet. A learner-owned Canvas/Parchment backpack may be represented as a delivery destination with `mode = learner_backpack` when OAuth setup is available.
+
 ---
 
 ## Derivation vs. Override

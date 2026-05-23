@@ -15,7 +15,7 @@ A Trust Profile defines **who is trusted** and **how cryptographic validation oc
 
 | Dimension | Description |
 |-----------|-------------|
-| Trust Sources | Certificate roots, DID registries, trust list URLs |
+| Trust Sources | Certificate roots, DID registries, trust list URLs, or pinned issuer URLs |
 | Algorithms | Accepted cryptographic signature algorithms |
 | Formats | Accepted credential encoding formats |
 | Revocation | Optional link to a Revocation Profile |
@@ -33,6 +33,8 @@ A Trust Profile defines **who is trusted** and **how cryptographic validation oc
 | `description` | string | No | Max 1024 characters |
 | `profile_type` | TrustProfileType | Yes | See enum |
 | `trust_sources` | TrustSource[] | Yes | At least one entry required |
+| `allowed_issuers` | string[] | No | Explicit allowlist of issuer DID, HTTPS issuer URL, or issuer domain |
+| `denied_issuers` | string[] | No | Explicit denylist of issuer DID, HTTPS issuer URL, or issuer domain |
 | `allowed_algorithms` | Algorithm[] | Yes | At least one; from `validation-algorithms` enum |
 | `supported_formats` | CredentialFormat[] | Yes | At least one; from `credential-formats` enum |
 | `compliance_status` | ComplianceStatus | Yes | Default `SETUP_REQUIRED` |
@@ -47,7 +49,7 @@ A Trust Profile defines **who is trusted** and **how cryptographic validation oc
 | Property | Type | Required | Constraint |
 |----------|------|----------|------------|
 | `source_type` | TrustSourceType | Yes | From `trust-source-types` enum |
-| `url` | string | Conditional | HTTPS URI; required for `TRUST_LIST` and `PKD_URL` |
+| `url` | string | Conditional | HTTPS URI; required for `TRUST_LIST` and `PKD_URL`, and MAY be used as a pinned issuer URL for web-native badge issuers |
 | `certificate_pem` | string | Conditional | PEM-encoded cert; required for `ROOT_CA` and `PINNED_ISSUER` when no URL |
 | `issuer_did` | string | Conditional | DID URI; required for DID-based trust |
 | `organization_id` | UUID/string | No | Organization scope for issuer DID resolution |
@@ -56,6 +58,8 @@ A Trust Profile defines **who is trusted** and **how cryptographic validation oc
 | `description` | string | No | Human-readable label |
 
 Exactly one of `url`, `certificate_pem`, or `issuer_did` MUST be present per TrustSource.
+
+Entries in `allowed_issuers` and `denied_issuers` MAY be issuer DIDs, HTTPS issuer URLs, or issuer domains. Verifiers SHOULD match exact issuer identifiers and normalized aliases (for example, matching an issuer URL by its domain, or deriving the host domain from a `did:web` issuer) so badges encountered in public ecosystems such as Canvas Credentials remain trustable without requiring a second trust model.
 
 For `PINNED_ISSUER` entries with `issuer_did`, verifiers SHOULD set `organization_id` when the issuer is managed by the relying party's tenant or platform. When `organization_id` is present, verification MUST resolve the DID through the organization's issuer identity registry before using public DID resolution. Public fallback is allowed only when `did_resolution.allow_public_fallback` is true or `resolver_type` is `PUBLIC_DID` / `ORGANIZATION_REGISTRY_WITH_PUBLIC_FALLBACK`.
 

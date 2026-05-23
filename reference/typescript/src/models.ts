@@ -1,5 +1,5 @@
 // MIP Protocol Models — generated from marty-protocol/schemas/*.json
-// Generated: 2026-05-11
+// Generated: 2026-05-14
 // DO NOT EDIT — regenerate with: python scripts/codegen.py typescript
 
 import {
@@ -232,6 +232,21 @@ export interface DeviceRegistration {
   created_at: string;
   updated_at?: string;
   last_seen_at?: string;
+}
+
+/** Immutable normalized fact derived from verified evidence. Provider adapters create EvidenceFacts from receipts so approval policy can evaluate facts without parsing provider payloads. */
+export interface EvidenceFact {
+  id: string;
+  organization_id: string;
+  application_id: string;
+  subject_id: string;
+  provider: string;
+  fact_type: string;
+  scope: Record<string, unknown>;
+  assertion: Record<string, unknown>;
+  verification: Record<string, unknown>;
+  source: Record<string, unknown>;
+  created_at: string;
 }
 
 /** Runtime state of a single flow instance. Tracks current step, step results, context data, and lifecycle transitions. Created when a flow is initiated; updated as steps complete. */

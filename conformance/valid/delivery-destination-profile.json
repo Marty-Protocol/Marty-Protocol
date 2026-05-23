@@ -1,0 +1,41 @@
+{
+  "id": "dd-canvas-credentials-institutional",
+  "organization_id": null,
+  "is_system": true,
+  "name": "Canvas Credentials",
+  "description": "Publish a public Open Badge view to Canvas Credentials after canonical ElevenID issuance.",
+  "provider": "canvas_credentials",
+  "mode": "organization_mirror",
+  "setup_actor": "org_admin",
+  "delivery_target": "canvas_credentials",
+  "wallet_profile_id": null,
+  "credential_format": "VC_JWT",
+  "issuance_protocol": "DIRECT",
+  "compliance_profile_code": "OB3_JWT",
+  "connector_type": "canvas_platform",
+  "connector_id": null,
+  "requires_consent": true,
+  "claim_projection_policy": {
+    "mode": "public_badge",
+    "allowed_claims": [
+      "achievement",
+      "issuer",
+      "credentialSubject",
+      "credentialStatus"
+    ]
+  },
+  "setup_requirements": [
+    "Canvas Credentials issuer/API access configured by an organization admin",
+    "Canvas program binding selects wallet_plus_canvas_mirror or an equivalent delivery policy"
+  ],
+  "capabilities": {
+    "post_issuance_publish": true,
+    "status_sync": true,
+    "holder_wallet": false,
+    "org_managed": true
+  },
+  "docs_url": "https://developerdocs.instructure.com/services/credentials",
+  "is_enabled": true,
+  "created_at": "2026-05-20T00:00:00Z",
+  "updated_at": null
+}

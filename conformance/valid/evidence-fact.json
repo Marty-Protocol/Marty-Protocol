@@ -1,0 +1,27 @@
+{
+  "id": "11111111-2222-4333-8444-555555555555",
+  "organization_id": "00000000-0000-4000-8000-000000000001",
+  "application_id": "22222222-3333-4444-8555-666666666666",
+  "subject_id": "learner@example.edu",
+  "provider": "canvas",
+  "fact_type": "canvas.course_completion",
+  "scope": {
+    "course_id": "course-42",
+    "enrollment_id": "enroll-9"
+  },
+  "assertion": {
+    "completed": true,
+    "completion_at": "2026-05-07T12:34:56Z"
+  },
+  "verification": {
+    "method": "SIGNED_WEBHOOK",
+    "status": "VERIFIED",
+    "verified_at": "2026-05-07T12:35:01Z"
+  },
+  "source": {
+    "receipt_id": "33333333-4444-4555-8666-777777777777",
+    "provider_event_id": "evt-123",
+    "payload_hash": "payload-sha256"
+  },
+  "created_at": "2026-05-07T12:35:01Z"
+}

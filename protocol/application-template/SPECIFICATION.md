@@ -67,6 +67,56 @@ An Application Template defines **how users apply for credentials**. It covers t
 | `required` | boolean | Yes | |
 | `accepted_formats` | string[] | No | For `DOCUMENT_SCAN`: `jpg`, `png`, `pdf` |
 | `max_file_size_bytes` | integer | No | For `DOCUMENT_SCAN` |
+| `provider` | string | No | Provider namespace for normalized external facts |
+| `fact_type` | string | No | Required normalized fact type, such as `passport.document_verified` |
+| `scope` | object | No | Required fact scope keys and values |
+| `pass_rule` | object | No | Provider-neutral fact assertions that must pass before Cedar evaluation |
+| `api` | object | No | Declarative HTTP request for `EXTERNAL_API` requirements |
+| `expected_response` | object | No | HTTP status and JSON/path conditions expected from the provider response |
+| `response_mapping` | object | No | Mapping from provider response fields into a MIP `EvidenceFact` |
+| `auto_issue_on_permit` | boolean | No | Allows automatic approval/issuance after Cedar permits |
+
+`provider` and `fact_type` are required when `evidence_type` is
+`EXTERNAL_FACT` or `EXTERNAL_API`. `api`, `expected_response`, and
+`response_mapping` are required when `evidence_type` is `EXTERNAL_API`.
+
+`EXTERNAL_API` evidence is intended for request/response provider checks an
+organization can configure without writing a provider adapter. Examples include
+passport checks, professional license checks, sanctions checks, employment
+verification, or other authoritative lookups. Signed protocols, event streams,
+LTI/AGS/NRPS integrations, and provider-specific replay semantics should still
+use adapters that emit `EvidenceFact` records.
+
+#### EXTERNAL_API Contract
+
+| Property | Type | Required | Constraint |
+|----------|------|----------|------------|
+| `api.method` | string | No | `GET`, `POST`, `PUT`, or `PATCH` |
+| `api.url` | URI | Yes | Implementations MUST restrict unsafe schemes and private-network targets unless deployment policy allows them |
+| `api.timeout_seconds` | number | No | MUST be bounded by implementation limits |
+| `api.headers` | object | No | Non-secret static or templated headers |
+| `api.secret_headers` | object | No | Header name to deployment secret reference map; secret values MUST NOT be persisted in facts |
+| `api.params` | object | No | Query parameters with template interpolation |
+| `api.body` / `api.json` | object/string | No | Request body with template interpolation |
+| `expected_response.status_codes` | integer[] | No | Defaults to implementation-defined success range when omitted |
+| `expected_response.json` | object | No | Provider response path predicates using `all`, `any`, `not`, `path`, `op`, and `value` |
+| `response_mapping.scope` | object | No | Constants or response paths mapped to `EvidenceFact.scope` |
+| `response_mapping.assertion` | object | No | Constants or response paths mapped to `EvidenceFact.assertion` |
+| `response_mapping.verification_status_path` | string | No | Provider response path used to derive `EvidenceFact.verification.status` |
+| `response_mapping.provider_event_id_path` | string | No | Provider response path used for source idempotency/audit metadata |
+
+`pass_rule` is evaluated over the normalized `EvidenceFact`, not the raw
+provider response. Path rules may refer to `assertion.*`, `scope.*`,
+`verification.*`, or `source.*` fields. Approval policies receive only the fact
+summary in `ApprovalContext`; they MUST NOT depend on raw API responses.
+
+Implementations MAY expose operator/reviewer run controls for configured
+`EXTERNAL_API` requirements. Those surfaces SHOULD identify checks by
+`evidence_id`/`check_id` and MAY show provider, fact type, scope, method, and
+auto-issue eligibility. They MUST NOT expose resolved secret values,
+`api.secret_headers`, or raw provider responses. Running a check MUST produce a
+normalized `EvidenceFact` and evaluate the same approval policy path as
+adapter-generated facts.
 
 ### EvidenceType Values
 
@@ -76,6 +126,8 @@ An Application Template defines **how users apply for credentials**. It covers t
 | `BIOMETRIC` | Face scan or fingerprint |
 | `SELFIE` | Selfie-with-document capture |
 | `THIRD_PARTY_VERIFICATION` | External identity verification (e.g., Persona, Jumio) |
+| `EXTERNAL_FACT` | Requirement satisfied by a normalized `EvidenceFact` from an adapter or event source |
+| `EXTERNAL_API` | Requirement satisfied by running a declarative provider API check that emits an `EvidenceFact` |
 
 ### ClaimCollectionRule Fields
 
@@ -95,11 +147,13 @@ An Application Template defines **how users apply for credentials**. It covers t
 
 ## Constraints
 
-1. `approval_strategy: RULES_BASED` MUST have non-empty `approval_rules`.
+1. `approval_strategy: RULES_BASED` MUST have a non-null `approval_policy_set_id` or non-empty `approval_rules` (legacy). Cedar PolicySets take precedence when both are present.
 2. All `form_field.claim_mapping` values MUST reference valid claim `name` values in the associated Credential Template.
 3. `SELECT` field_type MUST have non-empty `options`.
-4. A `DEPRECATED` Application Template MUST NOT be the target of new applications.
-5. A `DRAFT` Application Template MUST NOT be referenced by an `ACTIVE` Credential Template.
+4. `EXTERNAL_API` requirements MUST NOT store secret values directly. Store only deployment secret references in `api.secret_headers`.
+5. `EXTERNAL_API` implementations MUST persist only normalized `EvidenceFact` and audit metadata, not raw provider secrets.
+6. A `DEPRECATED` Application Template MUST NOT be the target of new applications.
+7. A `DRAFT` Application Template MUST NOT be referenced by an `ACTIVE` Credential Template.
 
 ## Application Lifecycle
 

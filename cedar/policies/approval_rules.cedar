@@ -14,9 +14,58 @@
 
 // ── Auto-approve: low-risk applications with verified documents ──────────
 
+// External evidence: verified evidence can approve when all required facts are
+// satisfied by the normalized EvidenceFact layer.
+
+@id("auto-approve-verified-external-evidence")
+permit (
+    principal is MIP::ServiceAccount,
+    action == MIP::Action::"applications:approve",
+    resource
+)
+when {
+    principal.service_name == "canvas-evidence-policy" &&
+    context has evidence_provider &&
+    context has evidence_verification_status &&
+    context has evidence_scope_matched &&
+    context has all_required_evidence_satisfied &&
+    context has satisfied_requirement_count &&
+    context has required_evidence_count &&
+    context.evidence_verification_status == "VERIFIED" &&
+    context.evidence_scope_matched &&
+    context.all_required_evidence_satisfied &&
+    context.satisfied_requirement_count >= context.required_evidence_count
+};
+
+@id("deny-unverified-external-evidence")
+forbid (
+    principal is MIP::ServiceAccount,
+    action == MIP::Action::"applications:approve",
+    resource
+)
+when {
+    principal.service_name == "canvas-evidence-policy" &&
+    context has evidence_provider &&
+    context has evidence_verification_status &&
+    context.evidence_verification_status != "VERIFIED"
+};
+
+@id("deny-wrong-scope-external-evidence")
+forbid (
+    principal is MIP::ServiceAccount,
+    action == MIP::Action::"applications:approve",
+    resource
+)
+when {
+    principal.service_name == "canvas-evidence-policy" &&
+    context has evidence_provider &&
+    context has evidence_scope_matched &&
+    !context.evidence_scope_matched
+};
+
 @id("auto-approve-low-risk")
 permit (
-    principal,
+    principal is MIP::User,
     action == MIP::Action::"applications:approve",
     resource
 )
@@ -31,7 +80,7 @@ when {
 
 @id("auto-approve-strong-biometrics")
 permit (
-    principal,
+    principal is MIP::User,
     action == MIP::Action::"applications:approve",
     resource
 )
