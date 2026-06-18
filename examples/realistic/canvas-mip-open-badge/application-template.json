@@ -1,0 +1,33 @@
+{
+  "id": "70000000-0000-4000-8000-000000000041",
+  "organization_id": "00000000-0000-0000-0000-000000000001",
+  "name": "Canvas Interoperability Badge Application",
+  "description": "Rules-based badge application satisfied by a verified Canvas quiz score fact.",
+  "form_fields": [],
+  "evidence_requirements": [
+    {
+      "evidence_id": "canvas-quiz-score-80",
+      "evidence_type": "EXTERNAL_FACT",
+      "description": "Learner completed the Canvas interoperability quiz with a passing score.",
+      "required": true,
+      "provider": "canvas",
+      "fact_type": "canvas.quiz_score",
+      "scope": {
+        "course_id": "canvas-course-interoperability-101",
+        "quiz_id": "canvas-quiz-open-badge-101"
+      },
+      "pass_rule": {
+        "min_score_percent": 80,
+        "passed": true
+      },
+      "verification_method": "SIGNED_WEBHOOK",
+      "manual_fallback": false,
+      "auto_approve_on_evidence": true
+    }
+  ],
+  "approval_strategy": "RULES_BASED",
+  "approval_policy_set_id": "70000000-0000-4000-8000-000000000042",
+  "status": "ACTIVE",
+  "created_at": "2026-05-24T00:00:00Z"
+}
+

@@ -1,0 +1,38 @@
+{
+  "id": "dd-canvas-credentials-marty-interoperability",
+  "organization_id": "00000000-0000-0000-0000-000000000001",
+  "is_system": false,
+  "name": "Canvas Credentials",
+  "description": "Publish a public Open Badge projection to Canvas Credentials after canonical ElevenID issuance.",
+  "provider": "canvas_credentials",
+  "mode": "organization_mirror",
+  "setup_actor": "org_admin",
+  "delivery_target": "canvas_credentials",
+  "connector_type": "canvas_platform",
+  "requires_consent": true,
+  "claim_projection_policy": {
+    "mode": "public_badge",
+    "allowed_claims": [
+      "achievement",
+      "issuer",
+      "credentialSubject",
+      "credentialStatus",
+      "provenance"
+    ]
+  },
+  "setup_requirements": [
+    "Canvas Credentials issuer and badgeclass selected by an organization admin",
+    "Canvas Credentials API token stored outside MIP and referenced by secret name",
+    "Canvas program binding enabled for wallet plus Canvas mirror delivery"
+  ],
+  "capabilities": {
+    "holder_wallet": false,
+    "org_managed": true,
+    "post_issuance_publish": true,
+    "status_sync": true,
+    "provenance": true
+  },
+  "is_enabled": true,
+  "created_at": "2026-05-24T00:00:00Z"
+}
+

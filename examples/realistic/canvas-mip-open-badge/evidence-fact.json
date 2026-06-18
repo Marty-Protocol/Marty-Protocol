@@ -1,0 +1,37 @@
+{
+  "id": "70000000-0000-4000-8000-000000000047",
+  "organization_id": "00000000-0000-0000-0000-000000000001",
+  "application_id": "70000000-0000-4000-8000-000000000048",
+  "subject_id": "canvas-user-learner-123",
+  "provider": "canvas",
+  "fact_type": "canvas.quiz_score",
+  "scope": {
+    "course_id": "canvas-course-interoperability-101",
+    "quiz_id": "canvas-quiz-open-badge-101",
+    "canvas_account_id": "canvas-real-account-1"
+  },
+  "assertion": {
+    "passed": true,
+    "score_percent": 92,
+    "points_possible": 100,
+    "points_earned": 92,
+    "completed_at": "2026-05-24T18:30:00Z"
+  },
+  "verification": {
+    "method": "SIGNED_WEBHOOK",
+    "status": "VERIFIED",
+    "verified_at": "2026-05-24T18:30:10Z",
+    "details": {
+      "source": "Canvas AGS score event",
+      "lti_deployment_id": "canvas-lti-deployment-marty",
+      "signature_checked": true
+    }
+  },
+  "source": {
+    "receipt_id": "70000000-0000-4000-8000-000000000049",
+    "provider_event_id": "canvas-ags-score-event-20260524-001",
+    "payload_hash": "sha256:9f8b7c5d4e3a29181716151413121110fedcba0987654321abcdef0123456789"
+  },
+  "created_at": "2026-05-24T18:30:10Z"
+}
+

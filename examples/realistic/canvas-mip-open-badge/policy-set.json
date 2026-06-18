@@ -1,0 +1,25 @@
+{
+  "id": "70000000-0000-4000-8000-000000000042",
+  "organization_id": "00000000-0000-0000-0000-000000000001",
+  "name": "Canvas Interoperability Badge Approval",
+  "description": "Permit approval when the MIP fact layer verifies the required Canvas quiz score fact.",
+  "policy_type": "APPROVAL_RULES",
+  "cedar_policies": [
+    {
+      "policy_id": "deny-unverified-canvas-facts",
+      "effect": "forbid",
+      "description": "Canvas facts must be verified before approval.",
+      "cedar_text": "@id(\"deny-unverified-canvas-facts\")\nforbid (\n    principal,\n    action == MIP::Action::\"applications:approve\",\n    resource\n)\nwhen {\n    context.evidence_provider == \"canvas\" &&\n    context.evidence_verification_status != \"VERIFIED\"\n};"
+    },
+    {
+      "policy_id": "permit-canvas-quiz-score",
+      "effect": "permit",
+      "description": "Approve once the verified Canvas quiz score requirement is satisfied.",
+      "cedar_text": "@id(\"permit-canvas-quiz-score\")\npermit (\n    principal,\n    action == MIP::Action::\"applications:approve\",\n    resource\n)\nwhen {\n    principal.service_name == \"canvas-evidence-policy\" &&\n    context.evidence_provider == \"canvas\" &&\n    context.evidence_fact_type == \"canvas.quiz_score\" &&\n    context.evidence_scope_matched &&\n    context.all_required_evidence_satisfied &&\n    context.auto_issue_eligible\n};"
+    }
+  ],
+  "cedar_schema_version": "MIP/1.0",
+  "status": "ACTIVE",
+  "created_at": "2026-05-24T00:00:00Z"
+}
+

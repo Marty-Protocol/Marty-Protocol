@@ -1,0 +1,20 @@
+{
+  "id": "70000000-0000-4000-8000-000000000046",
+  "organization_id": "00000000-0000-0000-0000-000000000001",
+  "name": "Canvas Open Badge Status List",
+  "revocation_mechanism": [
+    "BITSTRING_STATUS_LIST"
+  ],
+  "mechanism_priority": [
+    "BITSTRING_STATUS_LIST"
+  ],
+  "check_mode": "ALWAYS",
+  "issuer_config": {
+    "auto_allocate_index": true,
+    "batch_update_interval_seconds": 300,
+    "list_size": 131072,
+    "uri_template": "https://beta.elevenidllc.com/orgs/marty/status-lists/{list_id}"
+  },
+  "status_list_url": "https://beta.elevenidllc.com/orgs/marty/status-lists/openbadge-2026",
+  "created_at": "2026-05-24T00:00:00Z"
+}

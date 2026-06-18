@@ -1,0 +1,44 @@
+{
+  "id": "70000000-0000-4000-8000-000000000052",
+  "organization_id": "00000000-0000-0000-0000-000000000001",
+  "name": "Employer Canvas Badge Verification",
+  "description": "Employer policy for verifying the learner's portable Canvas-earned badge outside Canvas.",
+  "purpose": "Verify that the learner holds an active Canvas Interoperability Foundations badge issued by ElevenID.",
+  "required_claims": [
+    {
+      "claim_name": "achievement_name",
+      "credential_type": "CanvasInteroperabilityCredential",
+      "value_constraint": {
+        "equals": "Canvas Interoperability Foundations"
+      }
+    },
+    {
+      "claim_name": "provenance_url",
+      "credential_type": "CanvasInteroperabilityCredential"
+    }
+  ],
+  "accepted_credential_types": [
+    "CanvasInteroperabilityCredential"
+  ],
+  "trust_profile_id": "70000000-0000-4000-8000-000000000045",
+  "holder_binding": {
+    "required": true,
+    "binding_methods": [
+      "DEVICE_KEY"
+    ],
+    "nonce_required": true
+  },
+  "freshness": {
+    "max_age_seconds": 31536000,
+    "require_not_revoked": true,
+    "revocation_grace_seconds": 300
+  },
+  "issuer_constraints": {
+    "min_trust_level": 90,
+    "required_compliance_statuses": [
+      "COMPLIANT"
+    ]
+  },
+  "created_at": "2026-05-24T00:00:00Z"
+}
+

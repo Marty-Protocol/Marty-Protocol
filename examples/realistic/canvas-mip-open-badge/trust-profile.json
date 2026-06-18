@@ -1,0 +1,55 @@
+{
+  "id": "70000000-0000-4000-8000-000000000045",
+  "organization_id": "00000000-0000-0000-0000-000000000001",
+  "name": "Marty Canvas Open Badge Issuer Trust",
+  "description": "Pins the ElevenID DID used to issue portable badges that may also be mirrored to Canvas Credentials.",
+  "profile_type": "CUSTOM",
+  "trust_sources": [
+    {
+      "source_type": "PINNED_ISSUER",
+      "issuer_did": "did:web:beta.elevenidllc.com:orgs:marty",
+      "organization_id": "00000000-0000-0000-0000-000000000001",
+      "verification_method_ids": [
+        "did:web:beta.elevenidllc.com:orgs:marty#openbao-transit-2026"
+      ],
+      "did_resolution": {
+        "resolver_type": "ORGANIZATION_REGISTRY",
+        "allow_public_fallback": false,
+        "cache_ttl_seconds": 300
+      },
+      "description": "Marty organization remote DID issuer."
+    }
+  ],
+  "allowed_algorithms": [
+    "ES256"
+  ],
+  "revocation_policy": {
+    "check_mode": "HARD_FAIL",
+    "cache_ttl_seconds": 300
+  },
+  "revocation_services": {
+    "enabled_methods": [
+      "STATUS_LIST"
+    ],
+    "auto_discover": true,
+    "merge_discovered": true,
+    "status_list_urls": [
+      "https://beta.elevenidllc.com/orgs/marty/status-lists/openbadge-2026"
+    ]
+  },
+  "supported_formats": [
+    "SD_JWT_VC"
+  ],
+  "allowed_issuers": [
+    "did:web:beta.elevenidllc.com:orgs:marty",
+    "beta.elevenidllc.com"
+  ],
+  "compliance_status": "COMPLIANT",
+  "revocation_profile_id": "70000000-0000-4000-8000-000000000046",
+  "compatible_compliance_codes": [
+    "OB3_JWT",
+    "SD_JWT_VC"
+  ],
+  "created_at": "2026-05-24T00:00:00Z"
+}
+
