@@ -1,22 +1,22 @@
 {
   "id": "d1e2f3a4-b5c6-4789-0123-456789abcdef",
   "organization_id": "f1e2d3c4-b5a6-4978-9012-345678901234",
-  "name": "Badge Access Control",
-  "description": "Cedar policy set for employee badge access decisions",
+  "name": "PolicySet Governance",
+  "description": "Cedar policy set for managing MIP PolicySet lifecycle access",
   "policy_type": "ACCESS_CONTROL",
   "cedar_policies": [
     {
-      "policy_id": "allow-valid-badge-entry",
+      "policy_id": "allow-policy-set-read",
       "effect": "permit",
-      "cedar_text": "permit(principal, action == Action::\"enter\", resource) when { principal.badge_status == \"ACTIVE\" };",
-      "description": "Allow entry when badge is active",
+      "cedar_text": "@id(\"allow-policy-set-read\")\npermit (\n    principal is MIP::User,\n    action == MIP::Action::\"policy_sets:read\",\n    resource is MIP::PolicySet\n);",
+      "description": "Allow users to read PolicySets",
       "enabled": true
     },
     {
-      "policy_id": "deny-expired-badge",
+      "policy_id": "deny-deployment-key-policy-set-delete",
       "effect": "forbid",
-      "cedar_text": "forbid(principal, action == Action::\"enter\", resource) when { principal.badge_status == \"EXPIRED\" };",
-      "description": "Deny entry when badge is expired",
+      "cedar_text": "@id(\"deny-deployment-key-policy-set-delete\")\nforbid (\n    principal is MIP::ApiKey,\n    action == MIP::Action::\"policy_sets:delete\",\n    resource is MIP::PolicySet\n)\nwhen {\n    principal.scope_type == \"DEPLOYMENT\"\n};",
+      "description": "Deployment-scoped API keys cannot delete PolicySets",
       "enabled": true
     }
   ],

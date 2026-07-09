@@ -10,6 +10,26 @@
 // The ApprovalContext is passed in context{} during evaluation, providing:
 //   - risk_score, document_verification_passed, biometric_match_score
 //   - evidence_count, applicant_country
+//
+// Separation of duties: the user who submitted or created an application cannot
+// approve that same application. Implementations should map the applicant or
+// internal submitter identity onto resource.submitted_by or resource.created_by
+// before evaluation.
+//
+
+@id("deny-self-approval")
+forbid (
+    principal is MIP::User,
+    action == MIP::Action::"applications:approve",
+    resource is MIP::Application
+)
+when {
+    principal has user_id &&
+    (
+        (resource has submitted_by && principal.user_id == resource.submitted_by) ||
+        (resource has created_by && principal.user_id == resource.created_by)
+    )
+};
 // ============================================================================
 
 // ── Auto-approve: low-risk applications with verified documents ──────────

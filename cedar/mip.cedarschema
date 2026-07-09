@@ -45,6 +45,8 @@ namespace MIP {
     biometric_match_score: Long,   // 0–100
     evidence_count: Long,
     applicant_country: String,     // ISO 3166-1 alpha-2
+    submitter_id?: String,
+    approver_id?: String,
     evidence_provider?: String,
     evidence_fact_type?: String,
     evidence_verification_status?: String,
@@ -64,6 +66,7 @@ namespace MIP {
   entity User in [Organization, Role] {
     email: String,
     status: String,                // ACTIVE | SUSPENDED | DEACTIVATED
+    user_id?: String,
   };
 
   /// An API key for programmatic access.
@@ -136,10 +139,19 @@ namespace MIP {
   /// Presentation policy defining verification requirements.
   entity PresentationPolicy in [Organization] {};
 
+  /// A named collection of Cedar policies for MIP authorization decisions.
+  entity PolicySet in [Organization] {
+    policy_type: String,           // ACCESS_CONTROL | CREDENTIAL_VERIFICATION | APPROVAL_RULES | CUSTOM
+    status: String,                // DRAFT | ACTIVE | ARCHIVED
+    cedar_schema_version: String,
+  };
+
   /// A credential application submitted by an applicant.
   entity Application in [Organization, Flow] {
     risk_score: Long,
     status: String,                // PENDING | APPROVED | REJECTED
+    submitted_by?: String,
+    created_by?: String,
   };
 
   /// Normalized fact derived from verified external evidence.
@@ -220,6 +232,12 @@ namespace MIP {
     context: ApprovalContext,
   };
 
+  action "applications:reject" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Application],
+    context: ApprovalContext,
+  };
+
   // ── Trust management actions ────────────────────────────────────────────
 
   action "trust:read" appliesTo {
@@ -265,6 +283,50 @@ namespace MIP {
   action "templates:write" appliesTo {
     principal: [User, ApiKey, ServiceAccount],
     resource: [CredentialTemplate],
+    context: RequestContext,
+  };
+
+  // ── PolicySet lifecycle actions ─────────────────────────────────────────
+
+  action "policy_sets:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [PolicySet, Organization],
+    context: RequestContext,
+  };
+
+  action "policy_sets:create" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [Organization],
+    context: RequestContext,
+  };
+
+  action "policy_sets:update" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [PolicySet],
+    context: RequestContext,
+  };
+
+  action "policy_sets:delete" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [PolicySet],
+    context: RequestContext,
+  };
+
+  action "policy_sets:activate" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [PolicySet],
+    context: RequestContext,
+  };
+
+  action "policy_sets:archive" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [PolicySet],
+    context: RequestContext,
+  };
+
+  action "policy_sets:validate" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [PolicySet, Organization],
     context: RequestContext,
   };
 

@@ -50,7 +50,8 @@ permit (
         MIP::Action::"credentials:read",
         MIP::Action::"flows:read",
         MIP::Action::"trust:read",
-        MIP::Action::"compliance:read"
+        MIP::Action::"compliance:read",
+        MIP::Action::"policy_sets:read"
     ],
     resource
 )
@@ -89,6 +90,7 @@ permit (
         MIP::Action::"flows:execute",
         MIP::Action::"applications:read",
         MIP::Action::"applications:approve",
+        MIP::Action::"applications:reject",
         MIP::Action::"trust:read",
         MIP::Action::"compliance:read",
         MIP::Action::"templates:read",
@@ -137,6 +139,11 @@ forbid (
         MIP::Action::"trust:write",
         MIP::Action::"trust:admin",
         MIP::Action::"compliance:write",
+        MIP::Action::"policy_sets:create",
+        MIP::Action::"policy_sets:update",
+        MIP::Action::"policy_sets:delete",
+        MIP::Action::"policy_sets:activate",
+        MIP::Action::"policy_sets:archive",
         MIP::Action::"roles:write",
         MIP::Action::"keys:write",
         MIP::Action::"deployment:write"

@@ -132,7 +132,7 @@ def build_user_entity(user_id: str, org_id: str, role: str, status: str = "ACTIV
         parents.append({"type": "MIP::Role", "id": f"{org_id}:{role}"})
     return {
         "uid": {"type": "MIP::User", "id": user_id},
-        "attrs": {"status": status, "email": email},
+        "attrs": {"status": status, "email": email, "user_id": user_id},
         "parents": parents,
     }
 
@@ -142,7 +142,7 @@ def build_apikey_entity(key_id: str, org_id: str, scope: str, enabled: bool, dep
         parents.append({"type": "MIP::DeploymentProfile", "id": deployment_id})
     return {
         "uid": {"type": "MIP::ApiKey", "id": key_id},
-        "attrs": {"scope": scope, "enabled": enabled},
+        "attrs": {"scope_type": scope, "enabled": enabled},
         "parents": parents,
     }
 
@@ -165,6 +165,23 @@ def build_resource_entity(resource_type: str, resource_id: str, org_id: str) -> 
     return {
         "uid": {"type": f"MIP::{resource_type}", "id": resource_id},
         "attrs": {},
+        "parents": [{"type": "MIP::Organization", "id": org_id}],
+    }
+
+def build_policy_set_entity(
+    policy_set_id: str,
+    org_id: str,
+    policy_type: str = "CUSTOM",
+    status: str = "ACTIVE",
+    cedar_schema_version: str = "MIP/1.0",
+) -> dict:
+    return {
+        "uid": {"type": "MIP::PolicySet", "id": policy_set_id},
+        "attrs": {
+            "policy_type": policy_type,
+            "status": status,
+            "cedar_schema_version": cedar_schema_version,
+        },
         "parents": [{"type": "MIP::Organization", "id": org_id}],
     }
 ```
@@ -190,6 +207,14 @@ MIP actions follow a `resource-domain:verb` convention. Map your API routes to C
 | Read applications | `MIP::Action::"applications:read"` |
 | Write / submit applications | `MIP::Action::"applications:write"` |
 | Approve an application | `MIP::Action::"applications:approve"` |
+| Reject an application | `MIP::Action::"applications:reject"` |
+| Read PolicySets | `MIP::Action::"policy_sets:read"` |
+| Create PolicySets | `MIP::Action::"policy_sets:create"` |
+| Update PolicySets | `MIP::Action::"policy_sets:update"` |
+| Delete PolicySets | `MIP::Action::"policy_sets:delete"` |
+| Activate PolicySets | `MIP::Action::"policy_sets:activate"` |
+| Archive PolicySets | `MIP::Action::"policy_sets:archive"` |
+| Validate PolicySet Cedar | `MIP::Action::"policy_sets:validate"` |
 | Read API keys | `MIP::Action::"keys:read"` |
 | Write API keys | `MIP::Action::"keys:write"` |
 | Read org members | `MIP::Action::"users:read"` |
@@ -295,7 +320,7 @@ if trust_profile.verification_policy_set_id:
 
 ### Application Approval Flow
 
-When `ApplicationTemplate.approval_strategy == "EXTERNAL"` and an `approval_policy_set_id` is set:
+When `ApplicationTemplate.approval_strategy` is `RULES_BASED` or `EXTERNAL` and an `approval_policy_set_id` is set:
 
 ```python
 if application_template.approval_policy_set_id:
@@ -312,10 +337,17 @@ if application_template.approval_policy_set_id:
             "biometric_match_score": application.biometric_score,
             "evidence_count": len(application.evidence),
             "applicant_country": application.country,
+            "submitter_id": application.submitted_by,
+            "approver_id": reviewer_id,
         },
         entities=entities,
     )
 ```
+
+Include the `MIP::Application` entity in `entities` with `submitted_by` and/or
+`created_by` when those values are known. That lets approval PolicySets express
+separation-of-duties rules such as "the submitter cannot approve the same
+application."
 
 ---
 
@@ -333,6 +365,11 @@ POST   /v1/policy-sets/{id}/activate    DRAFT → ACTIVE
 POST   /v1/policy-sets/{id}/archive     ACTIVE → ARCHIVED
 POST   /v1/policy-sets/{id}/validate    Dry-run: validate Cedar text, return errors
 ```
+
+These routes must authorize against the `policy_sets:*` Cedar actions, not a
+generic trust-profile permission bucket. `POST /v1/policy-sets` evaluates
+against the owning `MIP::Organization`; item operations evaluate against
+`MIP::PolicySet`.
 
 Always validate Cedar text against `cedar/mip.cedarschema` before persisting:
 

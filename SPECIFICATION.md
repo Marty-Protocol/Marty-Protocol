@@ -1058,7 +1058,7 @@ Terminal states are `COMPLETED`, `FAILED`, `EXPIRED`, and `CANCELLED`. Implement
 - Implementations MUST NOT skip states (e.g., transition directly from `PENDING` to `COMPLETED`).
 - Every state transition MUST be persisted atomically. Partial transitions are not permitted.
 - `AWAITING_WALLET` MUST have a configured timeout. If no timeout is explicitly configured, implementations MUST default to 600 seconds (10 minutes).
-- `AWAITING_APPROVAL` has no mandatory timeout but the instance MUST appear in the reviewer queue within 60 seconds of state entry.
+- `AWAITING_APPROVAL` has no mandatory timeout, but the instance MUST appear in the reviewer queue within 60 seconds of state entry.
 - A Flow Instance MUST inherit `flow_definition_id`, `flow_type`, and `organization_id` from the definition that created it. These fields are immutable after creation.
 - Instances with `status: EXPIRED` or `status: FAILED` MUST be retained in the audit log and MUST NOT be deleted.
 
@@ -1792,9 +1792,9 @@ Each entry in `cedar_policies` defines a single Cedar permit or forbid rule:
 
 The MIP Cedar schema is defined in `cedar/mip.cedarschema` under the `MIP` namespace. It declares:
 
-- **Entity types** corresponding to MIP protocol entities (User, ApiKey, ServiceAccount, Organization, Role, Credential, Flow, TrustProfile, ComplianceProfile, etc.)
-- **Action declarations** corresponding to API key scopes and operational permissions (e.g., `Action::"credential_templates:read"`, `Action::"flows:execute"`)
-- **Context types** for runtime evaluation: `RequestContext` (IP address, timestamp, MFA status), `CredentialContext` (format, compliance, issuer trust, revocation/expiry, binding, algorithm), `ApprovalContext` (risk score, document verification, biometric match score)
+- **Entity types** corresponding to MIP protocol entities (User, ApiKey, ServiceAccount, Organization, Role, Credential, Flow, TrustProfile, ComplianceProfile, PolicySet, etc.)
+- **Action declarations** corresponding to API key scopes and operational permissions (e.g., `MIP::Action::"templates:read"`, `MIP::Action::"flows:execute"`, `MIP::Action::"policy_sets:create"`)
+- **Context types** for runtime evaluation: `RequestContext` (IP address, timestamp, MFA status), `CredentialContext` (format, compliance, issuer trust, revocation/expiry, binding, algorithm), `ApprovalContext` (risk score, document verification, biometric match score, evidence summary, optional submitter/approver identifiers)
 
 Implementations MUST validate Cedar policy text against the MIP Cedar schema before persisting a PolicySet.
 
@@ -1828,6 +1828,7 @@ When both legacy fields and Cedar PolicySet references are present, the Cedar Po
 - `policy_type: ACCESS_CONTROL` PolicySets MUST only be referenced by ScimRole entities.
 - `policy_type: CREDENTIAL_VERIFICATION` PolicySets MUST only be referenced by TrustProfile or ComplianceProfile entities.
 - `policy_type: APPROVAL_RULES` PolicySets MUST only be referenced by ApplicationTemplate entities.
+- Approval rules MUST be able to enforce separation of duties. Implementations SHOULD populate `Application.submitted_by` or `Application.created_by`, and MAY also populate `ApprovalContext.submitter_id` and `ApprovalContext.approver_id`, so Cedar policies can deny self-approval before any permit rule is considered.
 
 ### 16.8 API
 
@@ -1842,6 +1843,18 @@ POST   /v1/policy-sets/{id}/archive
 POST   /v1/policy-sets/{id}/validate          Validate Cedar text against schema
 ```
 
+PolicySet endpoints map to Cedar actions as follows:
+
+| API operation | Cedar action | Cedar resource |
+|---------------|--------------|----------------|
+| List/get PolicySets | `MIP::Action::"policy_sets:read"` | `MIP::PolicySet` or `MIP::Organization` |
+| Create PolicySet | `MIP::Action::"policy_sets:create"` | `MIP::Organization` |
+| Update PolicySet | `MIP::Action::"policy_sets:update"` | `MIP::PolicySet` |
+| Delete PolicySet | `MIP::Action::"policy_sets:delete"` | `MIP::PolicySet` |
+| Activate PolicySet | `MIP::Action::"policy_sets:activate"` | `MIP::PolicySet` |
+| Archive PolicySet | `MIP::Action::"policy_sets:archive"` | `MIP::PolicySet` |
+| Validate PolicySet Cedar | `MIP::Action::"policy_sets:validate"` | `MIP::PolicySet` or `MIP::Organization` |
+
 ### 16.9 Reference Policies
 
 MIP provides reference Cedar policies in `cedar/policies/`:
@@ -1850,7 +1863,7 @@ MIP provides reference Cedar policies in `cedar/policies/`:
 |------|--------|-------------|
 | `api_access.cedar` | Access Control | RBAC + ABAC for API authorization (org-admin, role-based, API key scoping, MFA requirements) |
 | `credential_verification.cedar` | Credential Verification | Trust evaluation rules (revoked/expired deny, compliance-specific format + binding requirements, weak algorithm denial, freshness enforcement) |
-| `approval_rules.cedar` | Approval Rules | Application approval policies (risk-based auto-approve, biometric threshold, evidence verification) |
+| `approval_rules.cedar` | Approval Rules | Application approval policies (separation of duties, risk-based auto-approve, biometric threshold, evidence verification) |
 
 See [Cedar Policies Documentation](docs/cedar-policies.md) for detailed architecture, migration guide, and SDK integration instructions.
 

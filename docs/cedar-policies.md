@@ -60,6 +60,7 @@ The MIP Cedar schema is defined in [`cedar/mip.cedarschema`](../cedar/mip.cedars
 | `ComplianceProfile` | Compliance abstraction | `Organization` |
 | `CredentialTemplate` | Claim template | `Organization` |
 | `PresentationPolicy` | Verification requirements | `Organization` |
+| `PolicySet` | Cedar policy collection | `Organization` |
 | `Application` | Credential application | `Organization`, `Flow` |
 | `EvidenceFact` | Normalized evidence fact | `Application`, `Organization` |
 
@@ -68,10 +69,10 @@ The MIP Cedar schema is defined in [`cedar/mip.cedarschema`](../cedar/mip.cedars
 |---|---|---|
 | `RequestContext` | API access actions | `ip_address`, `timestamp`, `mfa_authenticated`, `session_id`, `user_agent` |
 | `CredentialContext` | `credentials:verify` | `credential_format`, `compliance_code`, `issuer_id`, `issuer_trust_level`, `credential_age_seconds`, `is_revoked`, `is_expired`, `holder_binding_present`, `algorithm` |
-| `ApprovalContext` | `applications:approve` | `risk_score`, `document_verification_passed`, `biometric_match_score`, `evidence_count`, `applicant_country`, evidence fact summary fields |
+| `ApprovalContext` | `applications:approve`, `applications:reject` | `risk_score`, `document_verification_passed`, `biometric_match_score`, `evidence_count`, `applicant_country`, evidence fact summary fields, optional `submitter_id` and `approver_id` |
 
 ### Actions
-All 32 API key scope strings are registered as Cedar actions (e.g., `MIP::Action::"credentials:issue"`). Each action declares which principal and resource types it applies to.
+MIP operations are registered as Cedar actions (e.g., `MIP::Action::"credentials:issue"`, `MIP::Action::"policy_sets:create"`). Each action declares which principal and resource types it applies to.
 
 ## Policy Domains
 
@@ -139,6 +140,28 @@ when {
 ```
 
 See: [`cedar/policies/approval_rules.cedar`](../cedar/policies/approval_rules.cedar)
+
+Approval policies SHOULD include separation-of-duties denies before approval
+permits. The reference schema supports this with `MIP::User.user_id`,
+`MIP::Application.submitted_by`, `MIP::Application.created_by`, and optional
+identity fields on `ApprovalContext`.
+
+**Example - deny self-approval:**
+```cedar
+@id("deny-self-approval")
+forbid (
+    principal is MIP::User,
+    action == MIP::Action::"applications:approve",
+    resource is MIP::Application
+)
+when {
+    principal has user_id &&
+    (
+        (resource has submitted_by && principal.user_id == resource.submitted_by) ||
+        (resource has created_by && principal.user_id == resource.created_by)
+    )
+};
+```
 
 Provider adapters SHOULD normalize external evidence into `EvidenceFact`
 records before evaluating approval rules. Cedar approval policies receive a
@@ -214,6 +237,12 @@ PolicySets are referenced by other entities via UUID foreign keys:
 - `TrustProfile.verification_policy_set_id` — issuer trust and verification rules
 - `ComplianceProfile.verification_policy_set_id` — compliance-level verification constraints
 - `ScimRole.policy_set_id` — fine-grained ABAC rules augmenting the permissions array
+
+PolicySet lifecycle operations are governed by the `policy_sets:*` Cedar action
+family: `read`, `create`, `update`, `delete`, `activate`, `archive`, and
+`validate`. Create and validation against new text may authorize against the
+owning `MIP::Organization`; item operations authorize against the
+`MIP::PolicySet` resource.
 
 ## Evaluation Semantics
 

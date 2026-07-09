@@ -10,32 +10,38 @@ The **Marty Identity Protocol (MIP)** is a formal specification for representing
 
 ## Architecture
 
-```
-┌────────────────────────────────────────────────────┐
-│              Marty Identity Protocol                │
-│                                                    │
-│  ┌────────────┐  ┌───────────────────────────────┐ │
-│  │ Trust      │  │ Credential Template            │ │
-│  │ Profile    │  │ (schema + compliance + crypto) │ │
-│  └─────┬──────┘  └──────────────┬────────────────┘ │
-│        │                        │                  │
-│        ▼                        ▼                  │
-│  ┌─────────────────────────────────────────────┐   │
-│  │                   Flow                      │   │
-│  │   apply → approve → issue → present → verify│   │
-│  └──────────────────┬──────────────────────────┘   │
-│                     │                              │
-│  ┌──────────────────┤──────────────────────────┐   │
-│  │ Presentation     │ Deployment Profile        │   │
-│  │ Policy           │ (lanes + devices + UX)    │   │
-│  └──────────────────┘──────────────────────────┘   │
-│                                                    │
-│  Supporting Abstractions:                          │
-│  Compliance Profile │ Application Template         │
-│  Revocation Profile │ Wallet Profile               │
-│  Device Registration│ Notification Target          │
-│  Policy Set (Cedar) │                              │
-└────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+  subgraph MIP["Marty Identity Protocol"]
+    TP["Trust Profile"]
+    CT["Credential Template"]
+    F["Flow: apply -> approve -> issue -> present -> verify"]
+    PP["Presentation Policy"]
+    DP["Deployment Profile"]
+
+    TP --> F
+    CT --> F
+    F --> PP
+    F --> DP
+
+    subgraph Support["Supporting Abstractions"]
+      CP["Compliance Profile"]
+      AT["Application Template"]
+      RP["Revocation Profile"]
+      WP["Wallet Profile"]
+      DR["Device Registration"]
+      NT["Notification Target"]
+      PS["Policy Set (Cedar)"]
+    end
+
+    CP -. supports .-> CT
+    AT -. configures .-> F
+    RP -. governs .-> TP
+    WP -. delivers .-> F
+    DR -. enables .-> DP
+    NT -. notifies .-> F
+    PS -. authorizes .-> F
+  end
 ```
 
 ---
@@ -55,7 +61,7 @@ This model aligns with international standards (EUDI Wallet, ICAO DTC, ISO 18013
 | **Credential Template** | What is issued; schema + compliance + crypto + validity | Moderate | Program/Compliance |
 | **Presentation Policy** | What must be shown; minimum disclosure + ZK predicates | Dynamic | Business/Compliance |
 | **Deployment Profile** | Where it runs; lanes + devices + network mode + UX | Operational | Operations |
-| **Flow** | How identity moves; apply → approve → issue → present → verify | Per use-case | All stakeholders |
+| **Flow** | How identity moves; apply -> approve -> issue -> present -> verify | Per use-case | All stakeholders |
 
 ### Supporting Abstractions
 
@@ -168,7 +174,7 @@ The canonical normative document is [SPECIFICATION.md](SPECIFICATION.md).
 
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE).
+Apache 2.0 - see [LICENSE](LICENSE).
 
 Originally created by Elevenid LLC. Copyright 2026 The MIP Authors.
 
