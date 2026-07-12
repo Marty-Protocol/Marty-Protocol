@@ -1,7 +1,7 @@
 # Protocol Messages — Specification
 
 **Entity:** Protocol Messages
-**Version:** 0.1.0
+**Version:** 0.3.0
 **Stability:** Draft
 **Section in root spec:** §4 (Message Layer)
 
@@ -241,6 +241,8 @@ When processing fails, the responding party MUST return a structured error:
 | `policy_not_satisfied` | Required claims missing or predicates failed |
 | `expired_message` | `timestamp` is outside allowed clock skew |
 | `unauthorized` | Sender is not authorized to perform this operation |
+| `FIELD_VALIDATION_FAILED` | Application form data failed authoritative field validation |
+| `NO_ACTIVE_ISSUANCE_FLOW` | An approved application cannot produce an offer until the issuer activates a compatible issuance flow |
 
 ---
 

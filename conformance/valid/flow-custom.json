@@ -1,0 +1,24 @@
+{
+  "id": "3fa85f64-5717-4562-b3fc-2d7a2bcf1234",
+  "organization_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "name": "Conditional Badge Issuance Extension",
+  "flow_type": "custom",
+  "flow_category": "ISSUANCE",
+  "credential_template_id": "4bd47e7a-3a4f-4e6b-b8e2-5d7a2bcf1234",
+  "approval_strategy": "RULES_BASED",
+  "extension": {
+    "extension_uri": "urn:elevenid:flow-extension:conditional-orchestration:v1",
+    "extension_version": "1.0.0",
+    "extends_flow_type": "oid4vci_pre_authorized",
+    "entry_step_id": "policy_gate",
+    "steps": [
+      {"step_id": "policy_gate", "action": "elevenid.policy_gate", "config": {"policy_set_id": "policy-set-1"}},
+      {"step_id": "issue", "action": "mip.oid4vci_pre_authorized"}
+    ],
+    "transitions": [
+      {"from_step_id": "policy_gate", "to_step_id": "issue", "outcome": "APPROVED"}
+    ]
+  },
+  "status": "DRAFT",
+  "created_at": "2026-07-11T00:00:00Z"
+}

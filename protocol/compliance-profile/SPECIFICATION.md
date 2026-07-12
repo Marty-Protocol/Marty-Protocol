@@ -1,7 +1,7 @@
 # Compliance Profile — Entity Specification
 
 **Entity:** Compliance Profile
-**Version:** 0.1.0
+**Version:** 0.3.0
 **Stability:** Stable (system profiles), Moderate (custom)
 **Section in root spec:** §10
 

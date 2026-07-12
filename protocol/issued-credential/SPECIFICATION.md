@@ -1,7 +1,7 @@
 # Issued Credential — Entity Specification
 
 **Entity:** IssuedCredential
-**Version:** 0.1.0
+**Version:** 0.3.0
 **Stability:** Stable
 **Section in root spec:** §10
 
@@ -61,8 +61,13 @@ IssuedCredential does **not** store the credential payload. It stores only metad
 | POST | `/v1/issued-credentials/{id}/revoke` | Revoke a credential |
 | POST | `/v1/issued-credentials/{id}/suspend` | Suspend a credential |
 | POST | `/v1/issued-credentials/{id}/reinstate` | Reinstate a suspended credential |
+| GET | `/v1/issued-credentials/mine?status&limit&offset` | Authenticated holder inventory |
 
 IssuedCredentials are never created directly via API; they are created by the system when a FlowExecution completes.
+
+### Holder Inventory
+
+`GET /v1/issued-credentials/mine` derives the holder from authenticated request state and returns `HolderCredentialInventory`. The response is display and lifecycle metadata only. It MUST NOT include credential material, subject claims, subject identifiers, credential hashes, claims hashes, signing-key references, or status-list internals. See `schemas/holder-credential-inventory.json`.
 
 ---
 

@@ -75,7 +75,7 @@
       },
       "ICAO_PASSPORT": {
         "description": "ICAO Physical ePassport — ICAO 9303 Parts 1–12 booklet issuance with chip personalization",
-        "format": "PHYSICAL",
+        "format": "ICAO_EMRTD",
         "standard": "ICAO Doc 9303 Parts 1–12, ISO/IEC 14443",
         "governed_by": "ICAO",
         "compatible_profile_types": ["ICAO", "CUSTOM"],

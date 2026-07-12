@@ -1,6 +1,6 @@
-"""MIP Protocol Models � generated from marty-protocol/schemas/*.json
-Generated: 2026-05-14
-DO NOT EDIT � regenerate with: python scripts/codegen.py python
+"""MIP Protocol Models — generated from marty-protocol/schemas/*.json
+Protocol version: 0.3.0
+DO NOT EDIT — regenerate with: python scripts/codegen.py python
 """
 from __future__ import annotations
 
@@ -56,52 +56,49 @@ creation; subsequent reads show a masked representation. Managed via /v1/api-key
     updated_at: datetime | None = None
 
 
-class Applicant(BaseModel):
-    """A person or entity that has applied for a credential through an application-approval
-flow. Applicants are a first-class entity with a lifecycle that terminates in credential
-issuance, rejection, or withdrawal."""
+class ApplicantApplication(BaseModel):
+    """A holder-owned credential application created from an active ApplicationTemplate.
+Identity, credential policy, checks, and issuer data are server-derived."""
 
     id: str
+    applicant_id: str
     organization_id: str
-    flow_id: str
-    credential_template_id: str | None = None
-    user_id: str | None = None
-    external_id: str | None = None
-    given_name: str | None = None
-    family_name: str | None = None
-    email: str | None = None
-    phone: str | None = None
-    status: ApplicantStatus
-    reviewer_id: str | None = None
-    reviewer_lock_expires_at: datetime | None = None
+    reference_number: str | None = None
+    application_template_id: str
+    credential_template_id: str
+    form_data: dict[str, Any]
+    integration_context: dict[str, Any]
+    status: Literal["DRAFT", "SUBMITTED", "UNDER_REVIEW", "PENDING_INFORMATION", "APPROVED", "REJECTED", "WITHDRAWN", "OFFERED", "CREDENTIALED", "SUSPENDED"]
+    claim_state: Literal["NOT_READY", "BLOCKED", "OFFER_READY", "CLAIMED", "EXPIRED"]
+    claim_blocker: Any | None = None
+    credential_display_name: str | None = None
+    credential_offer_uri: str | None = None
+    credential_offer_uris: dict[str, Any] | None = None
+    credential_offer_labels: dict[str, Any] | None = None
+    offer_expires_at: datetime | None = None
     submitted_at: datetime | None = None
     reviewed_at: datetime | None = None
-    approved_at: datetime | None = None
-    credentialed_at: datetime | None = None
-    rejection_reason: str | None = None
-    rejection_code: Literal["IDENTITY_UNVERIFIABLE", "DOCUMENT_INVALID", "DOCUMENT_EXPIRED", "BIOMETRIC_MISMATCH", "POLICY_VIOLATION", "INCOMPLETE_APPLICATION", "DUPLICATE_APPLICATION", "OTHER", "None"] | None = None
-    application_data: dict[str, Any] | None = None
-    vetting_checks: list[dict[str, Any]] | None = None
-    issued_credential_id: str | None = None
-    metadata: dict[str, Any] | None = None
+    issued_at: datetime | None = None
     created_at: datetime
-    updated_at: datetime | None = None
+    updated_at: datetime
 
 
 class ApplicationTemplate(BaseModel):
-    """User-facing credential application workflow with form fields, evidence, and approval
-config"""
+    """MIP 0.3 user-facing credential application workflow with canonical form fields,
+evidence, checks, approval policy, and lifecycle state"""
 
     id: str
     organization_id: str
     name: str
     description: str | None = None
+    credential_template_id: str | None = None
     form_fields: list[dict[str, Any]] | None = None
     evidence_requirements: list[dict[str, Any]] | None = None
     claim_collection_rules: list[dict[str, Any]] | None = None
+    required_checks: list[dict[str, Any]] | None = None
     approval_strategy: Literal["AUTO", "MANUAL", "RULES_BASED", "EXTERNAL"]
-    approval_rules: dict[str, Any] | None = None
     approval_policy_set_id: str | None = None
+    application_validity_days: int | None = None
     notification_config: dict[str, Any] | None = None
     ui_config: dict[str, Any] | None = None
     status: Literal["DRAFT", "ACTIVE", "DEPRECATED"]
@@ -166,11 +163,11 @@ class ComplianceProfile(BaseModel):
 
     id: str
     organization_id: str | None = None
-    compliance_code: Literal["ICAO_DTC", "ICAO_MRZ", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "OB2_COMPATIBILITY", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
+    compliance_code: Literal["ICAO_DTC", "ICAO_MRZ", "ICAO_PASSPORT", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "OB2_COMPATIBILITY", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
     name: str
     description: str | None = None
-    credential_format: Literal["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD", "ZK_MDOC"]
-    issuance_protocol: Literal["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT"] | None = None
+    credential_format: CredentialFormat
+    issuance_protocol: IssuanceProtocol | None = None
     issuer_artifact_requirements: dict[str, Any] | None = None
     default_verification_rules: dict[str, Any] | None = None
     verification_policy_set_id: str | None = None
@@ -192,7 +189,7 @@ materials"""
     description: str | None = None
     compliance_profile_id: str
     vct: str | None = None
-    credential_payload_format: Literal["SD_JWT_VC", "MDOC", "VC_JWT", "JSON_LD"] | None = None
+    credential_payload_format: CredentialFormat | None = None
     application_template_id: str | None = None
     trust_profile_id: str | None = None
     revocation_profile_id: str | None = None
@@ -208,6 +205,37 @@ materials"""
     auto_generate_artifacts: bool | None = None
     privacy_posture: dict[str, Any] | None = None
     status: Literal["DRAFT", "ACTIVE", "DEPRECATED"]
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
+class DeliveryDestinationProfile(BaseModel):
+    """A delivery destination describes where an issued credential can be delivered, opened,
+imported, or mirrored. Unlike WalletProfile, it can represent holder wallets, learner-
+owned backpacks, organization-managed mirrors such as Canvas Credentials, or custom
+delivery channels."""
+
+    id: str
+    organization_id: str | None = None
+    is_system: bool | None = None
+    name: str
+    description: str | None = None
+    provider: Literal["elevenid_wallet", "oid4vci_wallet", "didcomm_v2", "canvas_credentials", "canvas_credentials_backpack", "open_badges_backpack", "physical_personalization_bureau", "custom"]
+    mode: Literal["holder_wallet", "learner_backpack", "organization_mirror", "direct_delivery", "physical_production"]
+    setup_actor: Literal["learner", "org_admin", "system"]
+    delivery_target: Literal["wallet", "didcomm_v2", "canvas_credentials", "external_api", "webhook", "physical_document"]
+    wallet_profile_id: str | None = None
+    credential_format: Literal["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD", "ICAO_EMRTD", "None"] | None = None
+    issuance_protocol: Literal["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT", "PHYSICAL_DOCUMENT", "None"] | None = None
+    compliance_profile_code: str | None = None
+    connector_type: str | None = None
+    connector_id: str | None = None
+    requires_consent: bool | None = None
+    claim_projection_policy: dict[str, Any] | None = None
+    setup_requirements: list[str] | None = None
+    capabilities: dict[str, Any] | None = None
+    docs_url: str | None = None
+    is_enabled: bool | None = None
     created_at: datetime
     updated_at: datetime | None = None
 
@@ -307,29 +335,52 @@ complete."""
     updated_at: datetime | None = None
 
 
+class FlowExtension(BaseModel):
+    """Versioned non-standard orchestration envelope. A custom Flow uses this object so it
+cannot claim the conformance semantics of a standard FlowType."""
+
+    extension_uri: str
+    extension_version: str
+    extends_flow_type: FlowType
+    entry_step_id: str
+    steps: list[dict[str, Any]]
+    transitions: list[dict[str, Any]]
+    config: dict[str, Any] | None = None
+
+
 class Flow(BaseModel):
-    """End-to-end identity lifecycle orchestration. Each flow_type maps to a fixed protocol
-step sequence defined by OID4VCI, OID4VP, mDL ISO 18013-5, or application-approval
-workflows."""
+    """End-to-end identity lifecycle orchestration. Standard FlowTypes have fixed protocol
+sequences; non-standard graphs use flow_type custom with a versioned extension envelope."""
 
     id: str
     organization_id: str
     name: str
     description: str | None = None
-    flow_type: Literal["oid4vci_pre_authorized", "oid4vci_authorization_code", "mdl_issuance", "oid4vp_presentation", "mdl_presentation", "siopv2", "application_approval_issuance", "credential_renewal", "credential_revocation", "combined"]
+    flow_type: FlowType
     flow_category: Literal["ISSUANCE", "VERIFICATION", "RENEWAL", "REVOCATION", "COMBINED"] | None = None
     trust_profile_id: str | None = None
     credential_template_id: str | None = None
     application_template_id: str | None = None
     presentation_policy_id: str | None = None
+    delivery_destination_profile_id: str | None = None
     deployment_profile_ids: list[str] | None = None
     approval_strategy: ApprovalStrategy
-    enabled: bool
     hooks: dict[str, Any] | None = None
     trigger: dict[str, Any] | None = None
+    extension: FlowExtension | None = None
     status: Literal["DRAFT", "ACTIVE", "PAUSED", "ARCHIVED"]
     created_at: datetime
     updated_at: datetime | None = None
+
+
+class HolderCredentialInventory(BaseModel):
+    """Privacy-filtered response from GET /v1/issued-credentials/mine. Credential material,
+claims, hashes, signing references, and opaque subject identifiers are prohibited."""
+
+    items: list[dict[str, Any]]
+    total: int
+    limit: int
+    offset: int
 
 
 class IssuanceRecord(BaseModel):
@@ -517,13 +568,37 @@ organization."""
     updated_at: datetime | None = None
 
 
+class PhysicalDocumentJob(BaseModel):
+    """Auditable production state for one physical ICAO eMRTD document. Sensitive data groups,
+biometrics, signing keys, and connector secrets are referenced but never embedded."""
+
+    id: str
+    organization_id: str
+    flow_execution_id: str
+    application_id: str
+    credential_template_id: str
+    delivery_destination_profile_id: str
+    document_type: Literal["TD1", "TD2", "TD3"]
+    country_code: str | None = None
+    secure_artifact_reference: str | None = None
+    bureau_job_id: str | None = None
+    tracking_number: str | None = None
+    status: Literal["DRAFT", "DATA_GENERATED", "SOD_SIGNED", "SUBMITTED", "IN_PRODUCTION", "QUALITY_CHECK", "READY_FOR_ACTIVATION", "ACTIVE", "FAILED", "CANCELLED"]
+    quality_result: dict[str, Any] | None = None
+    error_code: str | None = None
+    error_message: str | None = None
+    submitted_at: datetime | None = None
+    completed_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
 class PolicySet(BaseModel):
     """A named collection of Cedar policies that governs authorization decisions within the MIP
-platform. PolicySets are referenced by ApplicationTemplate (approval_rules),
-TrustProfile (issuer trust), ComplianceProfile (verification rules), and the API gateway
-(access control). Each PolicySet contains one or more Cedar policy statements evaluated
-using deny-by-default semantics: at least one permit must match and zero forbid policies
-may match for the request to be authorized."""
+platform. PolicySets are referenced by ApplicationTemplate (approval_policy_set_id),
+TrustProfile, ComplianceProfile, and the API gateway. Each PolicySet is evaluated using
+deny-by-default semantics: at least one permit must match and zero forbid policies may
+match."""
 
     id: str
     organization_id: str
@@ -672,7 +747,7 @@ OrganizationTrustProfile."""
 
 class TrustProfileIssuer(BaseModel):
     """Join entity between TrustProfile and IssuerEntity with trust scoring and cascade
-revocation policy. trust_level is a 0–100 score; future versions will auto-adjust
+revocation policy. trust_level is a 0â€“100 score; future versions will auto-adjust
 based on issuer history (failed validations, revocation events, compliance lapses)."""
 
     id: str
@@ -772,7 +847,7 @@ step."""
 
 
 class WalletProfile(BaseModel):
-    """Wallet compatibility record for a credential format × protocol × compliance
+    """Wallet compatibility record for a credential format Ã— protocol Ã— compliance
 combination. The canonical wallet profile set is auto-derived from CredentialTemplate
 configuration via the derivation key (credential_format, issuance_protocol,
 compliance_profile_code). Organizations MAY store override entries at /v1/wallet-
@@ -786,7 +861,7 @@ overridden) by stored entries."""
     override_precedence: int | None = None
     name: str
     description: str | None = None
-    credential_format: Literal["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]
+    credential_format: Literal["MDOC", "MSO_MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]
     issuance_protocol: Literal["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT"]
     compliance_profile_code: str | None = None
     wallet_apps: list[str] | None = None
@@ -794,6 +869,8 @@ overridden) by stored entries."""
     specifications: list[str] | None = None
     supported_platforms: list[str] | None = None
     deep_link_pattern: str | None = None
+    format_variant: str | None = None
+    deep_link_scheme: str | None = None
     created_at: datetime
     updated_at: datetime | None = None
 
@@ -825,17 +902,20 @@ operator-controlled endpoint when specified identity lifecycle events occur. Man
 
 # Rebuild models with forward references
 ApiKey.model_rebuild()
-Applicant.model_rebuild()
+ApplicantApplication.model_rebuild()
 ApplicationTemplate.model_rebuild()
 BiometricEnrollment.model_rebuild()
 CascadeRevocationOperation.model_rebuild()
 ComplianceProfile.model_rebuild()
 CredentialTemplate.model_rebuild()
+DeliveryDestinationProfile.model_rebuild()
 DeploymentProfile.model_rebuild()
 DeviceRegistration.model_rebuild()
 EvidenceFact.model_rebuild()
 FlowExecution.model_rebuild()
+FlowExtension.model_rebuild()
 Flow.model_rebuild()
+HolderCredentialInventory.model_rebuild()
 IssuanceRecord.model_rebuild()
 IssuedCredential.model_rebuild()
 IssuerEntity.model_rebuild()
@@ -845,6 +925,7 @@ NotificationPayload.model_rebuild()
 NotificationTarget.model_rebuild()
 OrganizationTrustProfile.model_rebuild()
 Organization.model_rebuild()
+PhysicalDocumentJob.model_rebuild()
 PolicySet.model_rebuild()
 PresentationPolicy.model_rebuild()
 ReviewerLock.model_rebuild()

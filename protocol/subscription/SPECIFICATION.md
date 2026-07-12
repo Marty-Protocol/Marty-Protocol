@@ -1,7 +1,7 @@
 # Subscription, Webhook & API Key — Entity Specification
 
 **Entity:** Subscription, ApiKey
-**Version:** 0.1.0
+**Version:** 0.3.0
 **Stability:** Stable
 **Section in root spec:** §13
 

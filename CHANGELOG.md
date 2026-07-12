@@ -9,6 +9,15 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-11
+
+### Changed
+- Replaced applicant-ID and legacy `/v1/applicants/*` APIs with canonical organization-scoped reviewer and `/v1/me/*` self-service contracts.
+- Application creation now accepts only `organization_id`, `application_template_id`, `form_data`, and `integration_context`; policy and identity fields are server-derived.
+- Added independent `claim_state` and privacy-safe `claim_blocker` semantics.
+- Added authenticated holder inventory at `/v1/issued-credentials/mine`.
+- Added `FIELD_VALIDATION_FAILED` and `NO_ACTIVE_ISSUANCE_FLOW` errors.
+
 ### Deprecated
 - `OB2_COMPATIBILITY` is now on a formal sunset path:
   - no new integrations should adopt it after `v0.2.0`

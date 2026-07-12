@@ -1,7 +1,7 @@
 # Device Registration — Entity Specification
 
 **Entity:** Device Registration
-**Version:** 0.1.0
+**Version:** 0.3.0
 **Stability:** Operational
 **Section in root spec:** §14
 

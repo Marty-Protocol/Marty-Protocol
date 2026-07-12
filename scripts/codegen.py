@@ -17,11 +17,14 @@ from __future__ import annotations
 import json
 import re
 import sys
+import filecmp
+import tempfile
 import textwrap
-from datetime import datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+OUTPUT_ROOT = REPO_ROOT
+PROTOCOL_VERSION = "0.3.0"
 SCHEMAS_DIR = REPO_ROOT / "schemas"
 ENUMS_DIR = REPO_ROOT / "enums"
 
@@ -44,7 +47,8 @@ def build_ref_map(enums: list[dict], schemas: list[dict]) -> None:
 
 def resolve_ref(ref_path: str) -> str:
     """Resolve a $ref path like '../enums/approval-strategies.json' to its type name."""
-    filename = ref_path.split("/")[-1].replace(".json", "")
+    document_path = ref_path.split("#", 1)[0]
+    filename = document_path.split("/")[-1].replace(".json", "")
     if filename in REF_MAP:
         return REF_MAP[filename]
     return sanitize_class_name(kebab_to_pascal(filename))
@@ -272,13 +276,13 @@ def json_type_to_ts(prop: dict, prop_name: str, required: bool) -> str:
 
 
 def generate_python(enums: list[dict], schemas: list[dict]) -> None:
-    out_dir = REPO_ROOT / "reference" / "python" / "mip_types"
+    out_dir = OUTPUT_ROOT / "reference" / "python" / "mip_types"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Generate enums module
     lines = [
         '"""MIP Protocol Enums — generated from marty-protocol/enums/*.json',
-        f'Generated: {datetime.now().strftime("%Y-%m-%d")}',
+        f'Protocol version: {PROTOCOL_VERSION}',
         'DO NOT EDIT — regenerate with: python scripts/codegen.py python',
         '"""',
         "from enum import Enum",
@@ -305,12 +309,12 @@ def generate_python(enums: list[dict], schemas: list[dict]) -> None:
             lines.append(f'    {safe_name} = "{v}"')
         lines.append("")
 
-    (out_dir / "enums.py").write_text("\n".join(lines) + "\n")
+    (out_dir / "enums.py").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     # Generate models module
     lines = [
         '"""MIP Protocol Models — generated from marty-protocol/schemas/*.json',
-        f'Generated: {datetime.now().strftime("%Y-%m-%d")}',
+        f'Protocol version: {PROTOCOL_VERSION}',
         'DO NOT EDIT — regenerate with: python scripts/codegen.py python',
         '"""',
         "from __future__ import annotations",
@@ -374,7 +378,7 @@ def generate_python(enums: list[dict], schemas: list[dict]) -> None:
         for name in model_names:
             lines.append(f"{name}.model_rebuild()")
 
-    (out_dir / "models.py").write_text("\n".join(lines) + "\n")
+    (out_dir / "models.py").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     # Generate __init__.py
     init_lines = [
@@ -383,10 +387,10 @@ def generate_python(enums: list[dict], schemas: list[dict]) -> None:
         "from .models import *  # noqa: F401,F403",
         "",
     ]
-    (out_dir / "__init__.py").write_text("\n".join(init_lines))
+    (out_dir / "__init__.py").write_text("\n".join(init_lines), encoding="utf-8")
 
     # Generate py.typed marker
-    (out_dir / "py.typed").write_text("")
+    (out_dir / "py.typed").write_text("", encoding="utf-8")
 
     print(f"  Python: {out_dir}")
 
@@ -395,13 +399,13 @@ def generate_python(enums: list[dict], schemas: list[dict]) -> None:
 
 
 def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
-    out_dir = REPO_ROOT / "reference" / "rust" / "src"
+    out_dir = OUTPUT_ROOT / "reference" / "rust" / "src"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Generate enums
     lines = [
         "//! MIP Protocol Enums — generated from marty-protocol/enums/*.json",
-        f"//! Generated: {datetime.now().strftime('%Y-%m-%d')}",
+        f"//! Protocol version: {PROTOCOL_VERSION}",
         "//! DO NOT EDIT — regenerate with: python scripts/codegen.py rust",
         "",
         "use serde::{Deserialize, Serialize};",
@@ -431,12 +435,12 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
         lines.append("}")
         lines.append("")
 
-    (out_dir / "enums.rs").write_text("\n".join(lines) + "\n")
+    (out_dir / "enums.rs").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     # Generate models
     lines = [
         "//! MIP Protocol Models — generated from marty-protocol/schemas/*.json",
-        f"//! Generated: {datetime.now().strftime('%Y-%m-%d')}",
+        f"//! Protocol version: {PROTOCOL_VERSION}",
         "//! DO NOT EDIT — regenerate with: python scripts/codegen.py rust",
         "",
         "use serde::{Deserialize, Serialize};",
@@ -481,7 +485,7 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
         lines.append("}")
         lines.append("")
 
-    (out_dir / "models.rs").write_text("\n".join(lines) + "\n")
+    (out_dir / "models.rs").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     # Generate lib.rs
     lib_lines = [
@@ -491,13 +495,13 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
         "pub mod models;",
         "",
     ]
-    (out_dir / "lib.rs").write_text("\n".join(lib_lines))
+    (out_dir / "lib.rs").write_text("\n".join(lib_lines), encoding="utf-8")
 
     # Generate Cargo.toml
     cargo = textwrap.dedent("""\
         [package]
         name = "mip-protocol-types"
-        version = "0.1.0"
+        version = "0.3.0"
         edition = "2021"
         description = "Generated Rust types for the Marty Identity Protocol"
         license = "Apache-2.0"
@@ -506,7 +510,7 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
         serde = { version = "1", features = ["derive"] }
         serde_json = "1"
     """)
-    (out_dir.parent / "Cargo.toml").write_text(cargo)
+    (out_dir.parent / "Cargo.toml").write_text(cargo, encoding="utf-8")
 
     print(f"  Rust: {out_dir}")
 
@@ -515,13 +519,13 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
 
 
 def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
-    out_dir = REPO_ROOT / "reference" / "typescript" / "src"
+    out_dir = OUTPUT_ROOT / "reference" / "typescript" / "src"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Generate enums
     lines = [
         "// MIP Protocol Enums — generated from marty-protocol/enums/*.json",
-        f"// Generated: {datetime.now().strftime('%Y-%m-%d')}",
+        f"// Protocol version: {PROTOCOL_VERSION}",
         "// DO NOT EDIT — regenerate with: python scripts/codegen.py typescript",
         "",
     ]
@@ -544,12 +548,12 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
         lines.append("}")
         lines.append("")
 
-    (out_dir / "enums.ts").write_text("\n".join(lines) + "\n")
+    (out_dir / "enums.ts").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     # Generate models
     lines = [
         "// MIP Protocol Models — generated from marty-protocol/schemas/*.json",
-        f"// Generated: {datetime.now().strftime('%Y-%m-%d')}",
+        f"// Protocol version: {PROTOCOL_VERSION}",
         "// DO NOT EDIT — regenerate with: python scripts/codegen.py typescript",
         "",
         "import {",
@@ -587,7 +591,7 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
         lines.append("}")
         lines.append("")
 
-    (out_dir / "models.ts").write_text("\n".join(lines) + "\n")
+    (out_dir / "models.ts").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     # Generate index.ts
     index_lines = [
@@ -596,12 +600,12 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
         "export * from './models';",
         "",
     ]
-    (out_dir / "index.ts").write_text("\n".join(index_lines))
+    (out_dir / "index.ts").write_text("\n".join(index_lines), encoding="utf-8")
 
     # Generate package.json
     pkg = {
         "name": "@mip-protocol/types",
-        "version": "0.1.0",
+        "version": PROTOCOL_VERSION,
         "description": "Generated TypeScript types for the Marty Identity Protocol",
         "main": "dist/index.js",
         "types": "dist/index.d.ts",
@@ -614,7 +618,7 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
             "typescript": "^5.0.0"
         }
     }
-    (out_dir.parent / "package.json").write_text(json.dumps(pkg, indent=2) + "\n")
+    (out_dir.parent / "package.json").write_text(json.dumps(pkg, indent=2) + "\n", encoding="utf-8")
 
     # Generate tsconfig.json
     tsconfig = {
@@ -630,7 +634,7 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
         },
         "include": ["src/**/*"]
     }
-    (out_dir.parent / "tsconfig.json").write_text(json.dumps(tsconfig, indent=2) + "\n")
+    (out_dir.parent / "tsconfig.json").write_text(json.dumps(tsconfig, indent=2) + "\n", encoding="utf-8")
 
     print(f"  TypeScript: {out_dir}")
 
@@ -638,8 +642,35 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
 
-def main():
-    targets = set(sys.argv[1:]) if len(sys.argv) > 1 else {"python", "rust", "typescript"}
+def _generated_paths(targets: set[str]) -> list[Path]:
+    paths: list[Path] = []
+    if "python" in targets:
+        paths.extend([
+            Path("reference/python/mip_types/enums.py"),
+            Path("reference/python/mip_types/models.py"),
+            Path("reference/python/mip_types/__init__.py"),
+            Path("reference/python/mip_types/py.typed"),
+        ])
+    if "rust" in targets:
+        paths.extend([
+            Path("reference/rust/src/enums.rs"),
+            Path("reference/rust/src/models.rs"),
+            Path("reference/rust/src/lib.rs"),
+            Path("reference/rust/Cargo.toml"),
+        ])
+    if "typescript" in targets:
+        paths.extend([
+            Path("reference/typescript/src/enums.ts"),
+            Path("reference/typescript/src/models.ts"),
+            Path("reference/typescript/src/index.ts"),
+            Path("reference/typescript/package.json"),
+            Path("reference/typescript/tsconfig.json"),
+        ])
+    return paths
+
+
+def _generate(targets: set[str]) -> None:
+    global OUTPUT_ROOT
 
     enums = load_all_enums()
     schemas = load_all_schemas()
@@ -660,6 +691,41 @@ def main():
 
     print()
     print("Done. Generated types are in reference/{python,rust,typescript}/")
+
+
+def main():
+    global OUTPUT_ROOT
+
+    args = set(sys.argv[1:])
+    check = "--check" in args
+    args.discard("--check")
+    targets = args or {"python", "rust", "typescript"}
+    unknown = targets - {"python", "rust", "typescript"}
+    if unknown:
+        raise SystemExit(f"Unknown generation target(s): {', '.join(sorted(unknown))}")
+
+    if not check:
+        _generate(targets)
+        return
+
+    with tempfile.TemporaryDirectory(prefix="mip-codegen-") as temp_dir:
+        OUTPUT_ROOT = Path(temp_dir)
+        _generate(targets)
+        stale = []
+        for relative_path in _generated_paths(targets):
+            expected = REPO_ROOT / relative_path
+            generated = OUTPUT_ROOT / relative_path
+            if not expected.exists() or not generated.exists() or not filecmp.cmp(expected, generated, shallow=False):
+                stale.append(str(relative_path))
+
+    OUTPUT_ROOT = REPO_ROOT
+    if stale:
+        print("Generated bindings are stale:")
+        for path in stale:
+            print(f"  - {path}")
+        print("Run: python scripts/codegen.py")
+        raise SystemExit(1)
+    print("Generated bindings are current.")
 
 
 if __name__ == "__main__":

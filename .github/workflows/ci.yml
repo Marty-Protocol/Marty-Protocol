@@ -28,6 +28,9 @@ jobs:
       - name: Run tests
         run: uv run pytest tests/ -v
 
+      - name: Verify generated bindings
+        run: uv run python scripts/codegen.py --check
+
   lint-json:
     name: JSON Schema Lint
     runs-on: ubuntu-latest

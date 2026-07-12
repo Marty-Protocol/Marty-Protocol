@@ -1,0 +1,5 @@
+{
+  "pointer": "/delivery_destination_profile_id",
+  "error_code": "REQUIRED_REFERENCE",
+  "message": "Physical document issuance requires a physical-production Delivery Destination Profile."
+}

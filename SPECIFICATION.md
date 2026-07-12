@@ -1,8 +1,8 @@
 # Marty Identity Protocol — Normative Specification
 
-**Version:** 0.1.0
+**Version:** 0.3.0
 **Status:** Draft
-**Date:** 2026-03-11
+**Date:** 2026-07-11
 **Organization:** The MIP Authors
 
 ---
@@ -58,7 +58,7 @@ MIP's trust model is intentionally infrastructure-neutral. The `TrustSource` abs
 
 MIP specifies:
 
-- The data model and constraints for 11 protocol entities
+- The data model and constraints for protocol entities defined in `/schemas/`
 - The relationships between those entities
 - API resource naming and endpoint conventions
 - Validation rules for each entity
@@ -795,10 +795,12 @@ A Flow orchestrates the **end-to-end identity lifecycle**: application → appro
 | `credential_template_id` | UUID | No | Required for issuance flow types |
 | `presentation_policy_id` | UUID | No | Required for verification flow types |
 | `application_template_id` | UUID | No | Required for `application_approval_issuance` |
+| `delivery_destination_profile_id` | string | No | Required for `physical_document_issuance` |
 | `deployment_profile_ids` | UUID[] | No | Where this flow runs |
-| `approval_strategy` | ApprovalStrategy | Yes | `AUTO`, `MANUAL`, `RULES_BASED` |
+| `approval_strategy` | ApprovalStrategy | Yes | `AUTO`, `MANUAL`, `RULES_BASED`, `EXTERNAL` |
 | `trigger` | FlowTrigger | No | What initiates the flow |
 | `hooks` | object | No | Pre/post step hooks keyed by step name |
+| `extension` | FlowExtension | Conditional | Required only for `flow_type: custom` |
 | `status` | FlowStatus | Yes | `DRAFT`, `ACTIVE`, `PAUSED`, `ARCHIVED` |
 | `created_at` | datetime | Yes | ISO 8601 |
 | `updated_at` | datetime | No | ISO 8601 |
@@ -815,6 +817,10 @@ A Flow orchestrates the **end-to-end identity lifecycle**: application → appro
 | `credential_revocation` | REVOCATION | `credential_template_id` | MIP §12 |
 | `oid4vp_presentation` | VERIFICATION | `presentation_policy_id` | OID4VP |
 | `mdl_presentation` | VERIFICATION | `presentation_policy_id` | ISO 18013-5 |
+| `siopv2` | VERIFICATION | `presentation_policy_id` | SIOPv2 |
+| `combined` | COMBINED | `credential_template_id`, `presentation_policy_id` | MIP Section 9 |
+| `physical_document_issuance` | ISSUANCE | `credential_template_id`, `application_template_id`, `delivery_destination_profile_id` | ICAO 9303 |
+| `custom` | Derived | `extension` | MIP extension mechanism |
 
 #### 9.2.2 FlowCategory Values (Non-Normative)
 
@@ -822,10 +828,13 @@ A Flow orchestrates the **end-to-end identity lifecycle**: application → appro
 
 | `flow_category` | Included `flow_type` values |
 |-----------------|-----------------------------|
-| `ISSUANCE` | `oid4vci_pre_authorized`, `oid4vci_authorization_code`, `mdl_issuance`, `application_approval_issuance` |
-| `VERIFICATION` | `oid4vp_presentation`, `mdl_presentation` |
+| `ISSUANCE` | `oid4vci_pre_authorized`, `oid4vci_authorization_code`, `mdl_issuance`, `application_approval_issuance`, `physical_document_issuance` |
+| `VERIFICATION` | `oid4vp_presentation`, `mdl_presentation`, `siopv2` |
 | `RENEWAL` | `credential_renewal` |
 | `REVOCATION` | `credential_revocation` |
+| `COMBINED` | `combined` |
+
+For `custom`, the category is derived from `extension.extends_flow_type`.
 
 ### 9.3 FlowTrigger
 
@@ -859,6 +868,10 @@ Flows support pre/post hooks on named steps via the `hooks` object. Keys are `pr
 | `siopv2` | `create_request → authentication_submission → verify_id_token` |
 | `combined` | `accept_application → approval_decision → issue_credential → create_request → presentation_submission → verify_presentation` |
 
+| `physical_document_issuance` | `accept_application -> validate_evidence -> approval_decision -> generate_data_groups -> sign_sod -> submit_to_personalization -> track_production -> quality_verify -> activate_credential` |
+
+Standard sequences are immutable. A non-standard sequence MUST use `flow_type: custom` and a FlowExtension envelope; it MUST NOT retain a standard FlowType identifier.
+
 ### 9.6 Approval Strategy with Auto-Issue
 
 For `application_approval_issuance` flows, setting `approval_strategy: AUTO` with `auto_issue: true` on the Application Template causes the `approval_decision` and `issue_credential` steps to execute atomically without manual intervention. This is not a separate endpoint — it is a configuration of the `application_approval_issuance` flow type.
@@ -870,7 +883,10 @@ For `application_approval_issuance` flows, setting `approval_strategy: AUTO` wit
 - Verification `flow_type` values (`oid4vp_presentation`, `mdl_presentation`, `siopv2`) MUST have `presentation_policy_id`.
 - `siopv2` flows MUST have `presentation_policy_id`. The presentation policy governs the ID token claims requested from the Self-Issued OP.
 - `combined` flows MUST have both `credential_template_id` and `presentation_policy_id`.
-- `credential_template_id` and `application_template_id` are mutually exclusive.
+- `physical_document_issuance` flows MUST have `credential_template_id`, `application_template_id`, and a physical-production `delivery_destination_profile_id`.
+- `credential_template_id` and `application_template_id` are mutually exclusive except for `physical_document_issuance` and explicit custom extensions.
+- Standard FlowTypes MUST NOT contain `extension`; `custom` MUST contain a valid extension envelope.
+- Flow creation MUST produce `DRAFT`; activation is an explicit validation-gated action.
 - Active flows MUST NOT reference `DRAFT` or `DEPRECATED` Credential Templates or Application Templates.
 - `deployment_profile_ids` MUST each reference an existing Deployment Profile.
 
@@ -885,6 +901,8 @@ GET    /v1/flows/definitions/{id}
 PATCH  /v1/flows/definitions/{id}
 DELETE /v1/flows/definitions/{id}
 POST   /v1/flows/definitions/{id}/activate
+POST   /v1/flows/definitions/{id}/validate
+GET    /v1/flows/capabilities
 ```
 
 #### Flow Instances (Runtime)
@@ -1203,7 +1221,6 @@ Application Templates are **purely user-facing**. They have no cryptographic con
 | `evidence_requirements` | EvidenceRequirement[] | No | Documents or biometrics required |
 | `claim_collection_rules` | ClaimCollectionRule[] | No | How claims are gathered |
 | `approval_strategy` | ApprovalStrategy | Yes | `AUTO`, `MANUAL`, `RULES_BASED`, `EXTERNAL` |
-| `approval_rules` | object | No | **Deprecated** — use `approval_policy_set_id`. Legacy rules engine config |
 | `approval_policy_set_id` | UUID | No | Reference to a Cedar PolicySet (§16) for `RULES_BASED` approval |
 | `notification_config` | NotificationConfig | No | Email/SMS templates for status updates |
 | `ui_config` | UIConfig | No | Theme, wizard vs. single-page, welcome text |
@@ -1267,7 +1284,7 @@ adapter-generated facts.
 
 ### 11.5 Validation Rules
 
-- `approval_strategy: RULES_BASED` MUST have a non-null `approval_policy_set_id` or non-empty `approval_rules` (legacy). Cedar PolicySets take precedence when both are present.
+- `approval_strategy: RULES_BASED` MUST have a non-null `approval_policy_set_id` referencing an ACTIVE `APPROVAL_RULES` PolicySet.
 - All `claim_mapping` values MUST reference claims in the associated Credential Template.
 - A `DEPRECATED` Application Template MUST NOT be the target of a new credential application.
 
@@ -1751,7 +1768,7 @@ GET    /v1/notifications/{id}/delivery-results
 
 ### 16.1 Purpose
 
-A Policy Set stores [Cedar](https://www.cedarpolicy.com/) authorization policies that govern access control, credential verification trust, and approval decisions. Cedar is a deny-by-default policy language that is statically analyzable, formally verifiable, and auditable. Policy Sets replace opaque JSON rule objects (`approval_rules`, `default_verification_rules`) with structured, machine-verifiable policies.
+A Policy Set stores [Cedar](https://www.cedarpolicy.com/) authorization policies that govern access control, credential verification trust, and approval decisions. Cedar is a deny-by-default policy language that is statically analyzable, formally verifiable, and auditable. MIP 0.3 uses Policy Sets instead of opaque JSON rule objects.
 
 MIP defines three policy domains:
 
@@ -1814,7 +1831,7 @@ Cedar PolicySets augment — rather than replace — existing enum-based fields:
 
 - **Trust Profile**: `allowed_algorithms`, `supported_formats`, and `trust_sources` remain the primary trust configuration. A `verification_policy_set_id` provides additional conditional trust rules (e.g., deny weak algorithms, require holder binding for specific compliance codes).
 - **Compliance Profile**: `verification_policy_set_id` replaces the deprecated `default_verification_rules` opaque object.
-- **Application Template**: `approval_policy_set_id` replaces the deprecated `approval_rules` opaque object. The `approval_strategy` MUST be `RULES_BASED` or `EXTERNAL` to use Cedar approval policies.
+- **Application Template**: `approval_policy_set_id` is required for Cedar approval policies. The `approval_strategy` MUST be `RULES_BASED` or `EXTERNAL`.
 - **SCIM Role**: `policy_set_id` provides ABAC rules beyond the static `permissions[]` array. When present, Cedar policies are evaluated in addition to permission checks.
 
 When both legacy fields and Cedar PolicySet references are present, the Cedar PolicySet takes precedence.
@@ -2424,7 +2441,7 @@ A conformant PEX implementation MUST:
 
 See [VERSIONING.md](VERSIONING.md) for the full versioning policy.
 
-This specification is at version **0.1.0 (Draft)**. Breaking changes may occur before 1.0.0.
+This specification is at version **0.3.0 (Draft)**. Breaking changes may occur before 1.0.0.
 
 ### 23.1 Version Negotiation
 
@@ -2529,8 +2546,8 @@ Organizations MAY define compliance profiles with `compliance_code: CUSTOM` and 
 **Custom Trust Sources**
 Organizations MAY define Trust Profile entries with `source_type: CUSTOM` to integrate identifier or key-management infrastructure not covered by the `ROOT_CA`, `TRUST_LIST`, or `PINNED_ISSUER` source types. The custom resolver is responsible for returning a verified public key (or set of keys) that the standard §5.7.3 signature-validation step can consume. As a concrete illustration, an event-sourced identifier system such as [KERI](https://keri.one/) would expose a key-state resolver that a `CUSTOM` trust source entry could reference; the remainder of the §5.7.3 algorithm is unchanged.
 
-**Custom Flow Types**
-Implementations MAY define additional flow types by prefixing with a reverse-domain namespace (e.g., `com.example.custom_enrollment`). Custom flow type identifiers MUST NOT conflict with normative values defined in §9.2.1. Custom flow types SHOULD follow the same step-sequence and state machine rules (§9.5, §9.9) as normative types.
+**Custom Flow Orchestration**
+Implementations MAY define non-standard orchestration with `flow_type: custom` and a versioned FlowExtension envelope. Extension identifiers MUST be absolute URIs controlled by the extension owner. A custom flow declares the standard operation it extends through `extension.extends_flow_type`, but MUST NOT claim conformance to that standard step sequence.
 
 **Claim Namespace Extensions**
 Credential Templates MAY define claims in custom namespaces. The namespaces `org.iso.18013.5.1`, `org.aamva.16`, `urn:mip:`, and `eu.europa.ec.eudi.*` are reserved. Organizations SHOULD use their reverse-domain namespace for custom claims (e.g., `com.example.employee.*`).

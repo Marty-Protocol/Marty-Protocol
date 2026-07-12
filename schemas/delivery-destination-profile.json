@@ -47,12 +47,13 @@
         "canvas_credentials",
         "canvas_credentials_backpack",
         "open_badges_backpack",
+        "physical_personalization_bureau",
         "custom"
       ]
     },
     "mode": {
       "type": "string",
-      "enum": ["holder_wallet", "learner_backpack", "organization_mirror", "direct_delivery"]
+      "enum": ["holder_wallet", "learner_backpack", "organization_mirror", "direct_delivery", "physical_production"]
     },
     "setup_actor": {
       "type": "string",
@@ -60,7 +61,7 @@
     },
     "delivery_target": {
       "type": "string",
-      "enum": ["wallet", "didcomm_v2", "canvas_credentials", "external_api", "webhook"]
+      "enum": ["wallet", "didcomm_v2", "canvas_credentials", "external_api", "webhook", "physical_document"]
     },
     "wallet_profile_id": {
       "type": ["string", "null"],
@@ -68,11 +69,11 @@
     },
     "credential_format": {
       "type": ["string", "null"],
-      "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD", null]
+      "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD", "ICAO_EMRTD", null]
     },
     "issuance_protocol": {
       "type": ["string", "null"],
-      "enum": ["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT", null]
+      "enum": ["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT", "PHYSICAL_DOCUMENT", null]
     },
     "compliance_profile_code": {
       "type": ["string", "null"]
@@ -158,6 +159,23 @@
           "setup_actor": {"const": "org_admin"},
           "requires_consent": {"type": "boolean"}
         }
+      }
+    },
+    {
+      "if": {
+        "properties": {"mode": {"const": "physical_production"}},
+        "required": ["mode"]
+      },
+      "then": {
+        "properties": {
+          "provider": {"const": "physical_personalization_bureau"},
+          "setup_actor": {"const": "org_admin"},
+          "delivery_target": {"const": "physical_document"},
+          "credential_format": {"const": "ICAO_EMRTD"},
+          "issuance_protocol": {"const": "PHYSICAL_DOCUMENT"},
+          "connector_type": {"const": "personalization_bureau"}
+        },
+        "required": ["organization_id", "connector_id", "connector_type", "credential_format", "issuance_protocol"]
       }
     }
   ]

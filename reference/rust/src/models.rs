@@ -1,6 +1,6 @@
-//! MIP Protocol Models � generated from marty-protocol/schemas/*.json
-//! Generated: 2026-05-14
-//! DO NOT EDIT � regenerate with: python scripts/codegen.py rust
+//! MIP Protocol Models — generated from marty-protocol/schemas/*.json
+//! Protocol version: 0.3.0
+//! DO NOT EDIT — regenerate with: python scripts/codegen.py rust
 
 use serde::{Deserialize, Serialize};
 
@@ -32,60 +32,45 @@ pub struct ApiKey {
     pub updated_at: Option<String>,
 }
 
-/// A person or entity that has applied for a credential through an application-approval
-/// flow. Applicants are a first-class entity with a lifecycle that terminates in credential
-/// issuance, rejection, or withdrawal.
+/// A holder-owned credential application created from an active ApplicationTemplate.
+/// Identity, credential policy, checks, and issuer data are server-derived.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Applicant {
+pub struct ApplicantApplication {
     pub id: String,
+    pub applicant_id: String,
     pub organization_id: String,
-    pub flow_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub credential_template_id: Option<String>,
+    pub reference_number: Option<String>,
+    pub application_template_id: String,
+    pub credential_template_id: String,
+    pub form_data: serde_json::Value,
+    pub integration_context: serde_json::Value,
+    pub status: String,
+    pub claim_state: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub user_id: Option<String>,
+    pub claim_blocker: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub external_id: Option<String>,
+    pub credential_display_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub given_name: Option<String>,
+    pub credential_offer_uri: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub family_name: Option<String>,
+    pub credential_offer_uris: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub email: Option<String>,
+    pub credential_offer_labels: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub phone: Option<String>,
-    pub status: ApplicantStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub reviewer_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub reviewer_lock_expires_at: Option<String>,
+    pub offer_expires_at: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub submitted_at: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reviewed_at: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub approved_at: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub credentialed_at: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub rejection_reason: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub rejection_code: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub application_data: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub vetting_checks: Option<Vec<serde_json::Value>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub issued_credential_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub metadata: Option<serde_json::Value>,
+    pub issued_at: Option<String>,
     pub created_at: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub updated_at: Option<String>,
+    pub updated_at: String,
 }
 
-/// User-facing credential application workflow with form fields, evidence, and approval
-/// config
+/// MIP 0.3 user-facing credential application workflow with canonical form fields,
+/// evidence, checks, approval policy, and lifecycle state
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ApplicationTemplate {
     pub id: String,
@@ -94,16 +79,20 @@ pub struct ApplicationTemplate {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_template_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub form_fields: Option<Vec<serde_json::Value>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub evidence_requirements: Option<Vec<serde_json::Value>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub claim_collection_rules: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub required_checks: Option<Vec<serde_json::Value>>,
     pub approval_strategy: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub approval_rules: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub approval_policy_set_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub application_validity_days: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub notification_config: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -198,9 +187,9 @@ pub struct ComplianceProfile {
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    pub credential_format: String,
+    pub credential_format: CredentialFormat,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub issuance_protocol: Option<String>,
+    pub issuance_protocol: Option<IssuanceProtocol>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub issuer_artifact_requirements: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -231,7 +220,7 @@ pub struct CredentialTemplate {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub vct: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub credential_payload_format: Option<String>,
+    pub credential_payload_format: Option<CredentialFormat>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub application_template_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -259,6 +248,53 @@ pub struct CredentialTemplate {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub privacy_posture: Option<serde_json::Value>,
     pub status: String,
+    pub created_at: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
+}
+
+/// A delivery destination describes where an issued credential can be delivered, opened,
+/// imported, or mirrored. Unlike WalletProfile, it can represent holder wallets, learner-
+/// owned backpacks, organization-managed mirrors such as Canvas Credentials, or custom
+/// delivery channels.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeliveryDestinationProfile {
+    pub id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_system: Option<bool>,
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub provider: String,
+    pub mode: String,
+    pub setup_actor: String,
+    pub delivery_target: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub wallet_profile_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_format: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub issuance_protocol: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub compliance_profile_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub connector_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub connector_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub requires_consent: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub claim_projection_policy: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub setup_requirements: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub capabilities: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub docs_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_enabled: Option<bool>,
     pub created_at: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<String>,
@@ -398,9 +434,22 @@ pub struct FlowExecution {
     pub updated_at: Option<String>,
 }
 
-/// End-to-end identity lifecycle orchestration. Each flow_type maps to a fixed protocol
-/// step sequence defined by OID4VCI, OID4VP, mDL ISO 18013-5, or application-approval
-/// workflows.
+/// Versioned non-standard orchestration envelope. A custom Flow uses this object so it
+/// cannot claim the conformance semantics of a standard FlowType.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FlowExtension {
+    pub extension_uri: String,
+    pub extension_version: String,
+    pub extends_flow_type: FlowType,
+    pub entry_step_id: String,
+    pub steps: Vec<serde_json::Value>,
+    pub transitions: Vec<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub config: Option<serde_json::Value>,
+}
+
+/// End-to-end identity lifecycle orchestration. Standard FlowTypes have fixed protocol
+/// sequences; non-standard graphs use flow_type custom with a versioned extension envelope.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Flow {
     pub id: String,
@@ -408,7 +457,7 @@ pub struct Flow {
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    pub flow_type: String,
+    pub flow_type: FlowType,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub flow_category: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -420,17 +469,30 @@ pub struct Flow {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub presentation_policy_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub delivery_destination_profile_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub deployment_profile_ids: Option<Vec<String>>,
     pub approval_strategy: ApprovalStrategy,
-    pub enabled: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub hooks: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trigger: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub extension: Option<FlowExtension>,
     pub status: String,
     pub created_at: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<String>,
+}
+
+/// Privacy-filtered response from GET /v1/issued-credentials/mine. Credential material,
+/// claims, hashes, signing references, and opaque subject identifiers are prohibited.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HolderCredentialInventory {
+    pub items: Vec<serde_json::Value>,
+    pub total: i64,
+    pub limit: i64,
+    pub offset: i64,
 }
 
 /// Record of a credential issuance event
@@ -699,12 +761,46 @@ pub struct Organization {
     pub updated_at: Option<String>,
 }
 
+/// Auditable production state for one physical ICAO eMRTD document. Sensitive data groups,
+/// biometrics, signing keys, and connector secrets are referenced but never embedded.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PhysicalDocumentJob {
+    pub id: String,
+    pub organization_id: String,
+    pub flow_execution_id: String,
+    pub application_id: String,
+    pub credential_template_id: String,
+    pub delivery_destination_profile_id: String,
+    pub document_type: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub country_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub secure_artifact_reference: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bureau_job_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tracking_number: Option<String>,
+    pub status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quality_result: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error_message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub submitted_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub completed_at: Option<String>,
+    pub created_at: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
+}
+
 /// A named collection of Cedar policies that governs authorization decisions within the MIP
-/// platform. PolicySets are referenced by ApplicationTemplate (approval_rules),
-/// TrustProfile (issuer trust), ComplianceProfile (verification rules), and the API gateway
-/// (access control). Each PolicySet contains one or more Cedar policy statements evaluated
-/// using deny-by-default semantics: at least one permit must match and zero forbid policies
-/// may match for the request to be authorized.
+/// platform. PolicySets are referenced by ApplicationTemplate (approval_policy_set_id),
+/// TrustProfile, ComplianceProfile, and the API gateway. Each PolicySet is evaluated using
+/// deny-by-default semantics: at least one permit must match and zero forbid policies may
+/// match.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PolicySet {
     pub id: String,
@@ -901,7 +997,7 @@ pub struct TrustFramework {
 }
 
 /// Join entity between TrustProfile and IssuerEntity with trust scoring and cascade
-/// revocation policy. trust_level is a 0–100 score; future versions will auto-adjust
+/// revocation policy. trust_level is a 0â€“100 score; future versions will auto-adjust
 /// based on issuer history (failed validations, revocation events, compliance lapses).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TrustProfileIssuer {
@@ -1037,7 +1133,7 @@ pub struct VettingCheck {
     pub updated_at: Option<String>,
 }
 
-/// Wallet compatibility record for a credential format × protocol × compliance
+/// Wallet compatibility record for a credential format Ã— protocol Ã— compliance
 /// combination. The canonical wallet profile set is auto-derived from CredentialTemplate
 /// configuration via the derivation key (credential_format, issuance_protocol,
 /// compliance_profile_code). Organizations MAY store override entries at /v1/wallet-
@@ -1071,6 +1167,10 @@ pub struct WalletProfile {
     pub supported_platforms: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub deep_link_pattern: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub format_variant: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deep_link_scheme: Option<String>,
     pub created_at: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<String>,

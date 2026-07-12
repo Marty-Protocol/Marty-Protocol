@@ -11,7 +11,7 @@
       "type": "string",
       "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
       "description": "The MIP protocol version supported by this implementation. MUST match the version in the served specification.",
-      "example": "0.1.0"
+      "example": "0.3.0"
     },
     "issuer": {
       "type": "string",
@@ -29,7 +29,7 @@
       "type": "array",
       "items": { "type": "string", "pattern": "^\\d+\\.\\d+(\\.\\d+)?$" },
       "description": "All MIP protocol versions supported by this implementation. Used for version negotiation (see §21). Includes the current version and any backward-compatible prior versions.",
-      "example": ["0.1.0"]
+      "example": ["0.3.0"]
     },
     "implementation_classes": {
       "type": "array",

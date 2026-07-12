@@ -1,7 +1,7 @@
 # Presentation Policy — Entity Specification
 
 **Entity:** Presentation Policy
-**Version:** 0.1.0
+**Version:** 0.3.0
 **Stability:** Dynamic
 **Section in root spec:** §7
 

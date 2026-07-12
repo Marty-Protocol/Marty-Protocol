@@ -1,7 +1,7 @@
 # Flow Execution — Entity Specification
 
 **Entity:** FlowExecution
-**Version:** 0.1.0
+**Version:** 0.3.0
 **Stability:** Stable
 **Section in root spec:** §9.2
 
@@ -108,6 +108,21 @@ Each `flow_type` has a fixed step sequence. Steps cannot be reordered. Steps mar
 3. `approval_decision` *(extensible)*
 4. `issue_credential`
 5. `deliver_credential` *(extensible)*
+
+### `physical_document_issuance`
+1. `accept_application`
+2. `validate_evidence`
+3. `approval_decision` *(extensible)*
+4. `generate_data_groups`
+5. `sign_sod`
+6. `submit_to_personalization` *(extensible)*
+7. `track_production`
+8. `quality_verify` *(extensible)*
+9. `activate_credential`
+
+### `custom`
+
+The execution sequence is read from the validated FlowExtension envelope. The execution retains the extension URI and version in its audit context and does not report conformance to the extended standard sequence.
 
 ## Hooks
 

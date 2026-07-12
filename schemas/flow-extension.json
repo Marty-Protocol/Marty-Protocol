@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/flow-extension.json",
+  "title": "FlowExtension",
+  "description": "Versioned non-standard orchestration envelope. A custom Flow uses this object so it cannot claim the conformance semantics of a standard FlowType.",
+  "type": "object",
+  "required": ["extension_uri", "extension_version", "extends_flow_type", "entry_step_id", "steps", "transitions"],
+  "additionalProperties": false,
+  "properties": {
+    "extension_uri": {"type": "string", "format": "uri"},
+    "extension_version": {"type": "string", "minLength": 1, "maxLength": 64},
+    "extends_flow_type": {"$ref": "../enums/flow-types.json#/$defs/standard_values"},
+    "entry_step_id": {"type": "string", "pattern": "^[a-z][a-z0-9_-]*$", "maxLength": 128},
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["step_id", "action"],
+        "additionalProperties": false,
+        "properties": {
+          "step_id": {"type": "string", "pattern": "^[a-z][a-z0-9_-]*$", "maxLength": 128},
+          "action": {"type": "string", "pattern": "^[a-z][a-z0-9_.:-]*$", "maxLength": 160},
+          "description": {"type": "string", "maxLength": 512},
+          "config": {"type": "object"},
+          "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 86400}
+        }
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from_step_id", "to_step_id", "outcome"],
+        "additionalProperties": false,
+        "properties": {
+          "from_step_id": {"type": "string", "pattern": "^[a-z][a-z0-9_-]*$", "maxLength": 128},
+          "to_step_id": {"type": "string", "pattern": "^[a-z][a-z0-9_-]*$", "maxLength": 128},
+          "outcome": {"type": "string", "enum": ["SUCCESS", "FAILURE", "APPROVED", "REJECTED", "TIMEOUT", "CUSTOM"]},
+          "condition": {"type": "object"}
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "description": "Extension-owned configuration. Its meaning is defined by extension_uri and extension_version."
+    }
+  }
+}

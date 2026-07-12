@@ -1,0 +1,18 @@
+{
+  "id": "passport-bureau-1",
+  "organization_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "is_system": false,
+  "name": "Primary Passport Personalization Bureau",
+  "provider": "physical_personalization_bureau",
+  "mode": "physical_production",
+  "setup_actor": "org_admin",
+  "delivery_target": "physical_document",
+  "credential_format": "ICAO_EMRTD",
+  "issuance_protocol": "PHYSICAL_DOCUMENT",
+  "compliance_profile_code": "ICAO_PASSPORT",
+  "connector_type": "personalization_bureau",
+  "connector_id": "connector-passport-1",
+  "requires_consent": false,
+  "is_enabled": true,
+  "created_at": "2026-07-11T00:00:00Z"
+}

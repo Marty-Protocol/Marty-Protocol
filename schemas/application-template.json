@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/application-template.json",
   "title": "ApplicationTemplate",
-  "description": "User-facing credential application workflow with form fields, evidence, and approval config",
+  "description": "MIP 0.3 user-facing credential application workflow with canonical form fields, evidence, checks, approval policy, and lifecycle state",
   "type": "object",
   "required": ["id", "organization_id", "name", "approval_strategy", "status", "created_at"],
   "additionalProperties": false,
@@ -11,6 +11,11 @@
     "organization_id": {"type": "string", "format": "uuid"},
     "name": {"type": "string", "minLength": 1, "maxLength": 128},
     "description": {"type": "string", "maxLength": 1024},
+    "credential_template_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Credential Template populated before activation. The referenced template must be ACTIVE and belong to the same organization."
+    },
     "form_fields": {
       "type": "array",
       "items": {
@@ -20,11 +25,13 @@
         "properties": {
           "field_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
           "label": {"type": "string", "minLength": 1, "maxLength": 256},
-          "field_type": {"type": "string", "enum": ["TEXT", "DATE", "SELECT", "FILE_UPLOAD", "BOOLEAN"]},
+          "field_type": {"type": "string", "enum": ["TEXT", "DATE", "DATETIME", "SELECT", "FILE_UPLOAD", "INTEGER", "NUMBER", "BOOLEAN", "EMAIL", "URL"]},
           "required": {"type": "boolean"},
           "claim_mapping": {"type": "string"},
           "validation_pattern": {"type": "string"},
           "options": {"type": "array", "items": {"type": "string"}},
+          "minimum": {"type": "number"},
+          "maximum": {"type": "number"},
           "placeholder": {"type": "string"},
           "hint": {"type": "string"}
         }
@@ -141,19 +148,31 @@
         }
       }
     },
+    "required_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["check_type", "is_required", "order"],
+        "additionalProperties": false,
+        "properties": {
+          "check_type": {"type": "string", "minLength": 1},
+          "is_required": {"type": "boolean"},
+          "order": {"type": "integer", "minimum": 1},
+          "config": {"type": "object"},
+          "external_provider": {"type": ["string", "null"]}
+        }
+      }
+    },
     "approval_strategy": {
       "type": "string",
       "enum": ["AUTO", "MANUAL", "RULES_BASED", "EXTERNAL"]
     },
-    "approval_rules": {
-      "type": "object",
-      "description": "DEPRECATED: Use approval_policy_set_id with Cedar policies instead. Legacy opaque rules object for RULES_BASED approval."
-    },
     "approval_policy_set_id": {
       "type": ["string", "null"],
       "format": "uuid",
-      "description": "Reference to a PolicySet (policy_type=APPROVAL_RULES) containing Cedar policies that govern auto-approval, manual review triggers, and denial rules. Required when approval_strategy = RULES_BASED. When set, takes precedence over legacy approval_rules."
+      "description": "Reference to an ACTIVE PolicySet with policy_type APPROVAL_RULES. Required when approval_strategy is RULES_BASED."
     },
+    "application_validity_days": {"type": "integer", "minimum": 1, "maximum": 3650},
     "notification_config": {"type": "object"},
     "ui_config": {"type": "object"},
     "status": {"type": "string", "enum": ["DRAFT", "ACTIVE", "DEPRECATED"]},

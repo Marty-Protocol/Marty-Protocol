@@ -1,7 +1,7 @@
 # Application Template — Entity Specification
 
 **Entity:** Application Template
-**Version:** 0.1.0
+**Version:** 0.3.0
 **Stability:** Dynamic
 **Section in root spec:** §11
 
@@ -32,11 +32,14 @@ An Application Template defines **how users apply for credentials**. It covers t
 | `organization_id` | UUID | Yes | Must reference existing organization |
 | `name` | string | Yes | 1–128 characters |
 | `description` | string | No | Max 1024 characters |
+| `credential_template_id` | UUID | Activation | Must reference an ACTIVE Credential Template in the same organization |
 | `form_fields` | FormField[] | No | User-facing input fields |
 | `evidence_requirements` | EvidenceRequirement[] | No | Required documents/biometrics |
+| `required_checks` | RequiredCheck[] | No | Server-derived checks created for applications |
 | `claim_collection_rules` | ClaimCollectionRule[] | No | Claim sourcing rules |
 | `approval_strategy` | ApprovalStrategy | Yes | `AUTO`, `MANUAL`, `RULES_BASED` |
-| `approval_rules` | object | Conditional | Required for `RULES_BASED` |
+| `approval_policy_set_id` | UUID | Conditional | Required for `RULES_BASED`; references an ACTIVE APPROVAL_RULES PolicySet |
+| `application_validity_days` | integer | Yes | 1-3650 days |
 | `notification_config` | NotificationConfig | No | Status update templates |
 | `ui_config` | UIConfig | No | Theme and layout configuration |
 | `status` | TemplateStatus | Yes | `DRAFT`, `ACTIVE`, `DEPRECATED` |
@@ -49,11 +52,13 @@ An Application Template defines **how users apply for credentials**. It covers t
 |----------|------|----------|------------|
 | `field_id` | string | Yes | Unique within template |
 | `label` | string | Yes | Display text |
-| `field_type` | FieldType | Yes | `TEXT`, `DATE`, `SELECT`, `FILE_UPLOAD`, `BOOLEAN` |
+| `field_type` | FieldType | Yes | `TEXT`, `DATE`, `DATETIME`, `SELECT`, `FILE_UPLOAD`, `INTEGER`, `NUMBER`, `BOOLEAN`, `EMAIL`, `URL` |
 | `required` | boolean | Yes | |
 | `claim_mapping` | string | No | Maps to claim `name` in Credential Template |
 | `validation_pattern` | string | No | Regex pattern for TEXT fields |
 | `options` | string[] | Conditional | Required for `SELECT` type |
+| `minimum` | number | No | Inclusive numeric lower bound |
+| `maximum` | number | No | Inclusive numeric upper bound |
 | `placeholder` | string | No | UI placeholder text |
 | `hint` | string | No | Helper text displayed to user |
 
@@ -147,13 +152,16 @@ adapter-generated facts.
 
 ## Constraints
 
-1. `approval_strategy: RULES_BASED` MUST have a non-null `approval_policy_set_id` or non-empty `approval_rules` (legacy). Cedar PolicySets take precedence when both are present.
+1. `approval_strategy: RULES_BASED` MUST have a non-null `approval_policy_set_id` referencing an ACTIVE `APPROVAL_RULES` PolicySet.
 2. All `form_field.claim_mapping` values MUST reference valid claim `name` values in the associated Credential Template.
 3. `SELECT` field_type MUST have non-empty `options`.
 4. `EXTERNAL_API` requirements MUST NOT store secret values directly. Store only deployment secret references in `api.secret_headers`.
 5. `EXTERNAL_API` implementations MUST persist only normalized `EvidenceFact` and audit metadata, not raw provider secrets.
 6. A `DEPRECATED` Application Template MUST NOT be the target of new applications.
-7. A `DRAFT` Application Template MUST NOT be referenced by an `ACTIVE` Credential Template.
+7. An `ACTIVE` Application Template MUST reference an `ACTIVE` Credential Template in the same organization.
+8. Creation MUST produce `DRAFT`. Status is server-derived and MUST NOT be accepted in create or patch payloads.
+9. Only `DRAFT` templates may be patched or deleted. Active templates transition to `DEPRECATED` and remain available for historical applications.
+10. Field validation MUST run on create, submit, and issuance. Date values use `YYYY-MM-DD`; datetime values use RFC 3339.
 
 ## Application Lifecycle
 
@@ -166,25 +174,22 @@ SUBMITTED → UNDER_REVIEW (manual) → APPROVED → (triggers issuance)
 SUBMITTED → APPROVED (auto/rules)  → (triggers issuance)
 ```
 
-## Approval Rules Schema (RULES_BASED)
+## HTTP API
 
-When `approval_strategy: RULES_BASED`, `approval_rules` contains a JSON-serialized rules engine configuration. The minimum schema:
-
-```json
-{
-  "rules": [
-    {
-      "condition": {"field": "age", "operator": "gte", "value": 18},
-      "action": "APPROVE"
-    },
-    {
-      "condition": {"field": "country_code", "operator": "in", "value": ["US", "CA"]},
-      "action": "APPROVE"
-    }
-  ],
-  "default_action": "MANUAL"
-}
+```text
+GET    /v1/application-templates?organization_id={organization_id}
+POST   /v1/application-templates
+GET    /v1/application-templates/{id}
+PATCH  /v1/application-templates/{id}
+DELETE /v1/application-templates/{id}
+POST   /v1/application-templates/{id}/validate
+POST   /v1/application-templates/{id}/activate
+POST   /v1/application-templates/{id}/deprecate
 ```
+
+List responses are direct JSON arrays. `DELETE` returns 204 for a draft and 409 for any other lifecycle state. Validation returns `{valid, errors}` where each error contains `section`, `field`, `code`, and a safe `message`.
+
+`RULES_BASED` approval is governed only by the referenced Cedar PolicySet. Opaque approval-rule objects are not part of MIP 0.3.
 
 ## Examples
 
