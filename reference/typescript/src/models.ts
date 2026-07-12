@@ -655,7 +655,7 @@ export interface TrustFramework {
   updated_at?: string;
 }
 
-/** Join entity between TrustProfile and IssuerEntity with trust scoring and cascade revocation policy. trust_level is a 0â€“100 score; future versions will auto-adjust based on issuer history (failed validations, revocation events, compliance lapses). */
+/** Join entity between TrustProfile and IssuerEntity with trust scoring and cascade revocation policy. trust_level is a 0–100 score; future versions will auto-adjust based on issuer history (failed validations, revocation events, compliance lapses). */
 export interface TrustProfileIssuer {
   id: string;
   trust_profile_id: string;
@@ -742,7 +742,7 @@ export interface VettingCheck {
   updated_at?: string;
 }
 
-/** Wallet compatibility record for a credential format Ã— protocol Ã— compliance combination. The canonical wallet profile set is auto-derived from CredentialTemplate configuration via the derivation key (credential_format, issuance_protocol, compliance_profile_code). Organizations MAY store override entries at /v1/wallet-registry to extend or customise the derived profile for their specific deployment. GET /v1/wallet-registry returns merged results: derived profiles supplemented (or overridden) by stored entries. */
+/** Wallet compatibility record for a credential format × protocol × compliance combination. The canonical wallet profile set is auto-derived from CredentialTemplate configuration via the derivation key (credential_format, issuance_protocol, compliance_profile_code). Organizations MAY store override entries at /v1/wallet-registry to extend or customise the derived profile for their specific deployment. GET /v1/wallet-registry returns merged results: derived profiles supplemented (or overridden) by stored entries. */
 export interface WalletProfile {
   id?: string;
   organization_id?: string | null;

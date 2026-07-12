@@ -33,6 +33,11 @@ ENUMS_DIR = REPO_ROOT / "enums"
 REF_MAP: dict[str, str] = {}
 
 
+def write_generated(path: Path, content: str) -> None:
+    """Write reproducible generated text on every host platform."""
+    path.write_text(content, encoding="utf-8", newline="\n")
+
+
 # ─── Helpers ───────────────────────────────────────────────────────────────────
 
 
@@ -61,7 +66,7 @@ def load_all_enums() -> list[dict]:
     """Load all enum JSON files, sorted by filename."""
     enums = []
     for f in sorted(ENUMS_DIR.glob("*.json")):
-        data = json.loads(f.read_text())
+        data = json.loads(f.read_text(encoding="utf-8"))
         data["_filename"] = f.stem  # e.g. "credential-formats"
         enums.append(data)
     return enums
@@ -71,7 +76,7 @@ def load_all_schemas() -> list[dict]:
     """Load all schema JSON files, sorted by filename."""
     schemas = []
     for f in sorted(SCHEMAS_DIR.glob("*.json")):
-        data = json.loads(f.read_text())
+        data = json.loads(f.read_text(encoding="utf-8"))
         data["_filename"] = f.stem  # e.g. "trust-profile"
         schemas.append(data)
     return schemas
@@ -309,7 +314,7 @@ def generate_python(enums: list[dict], schemas: list[dict]) -> None:
             lines.append(f'    {safe_name} = "{v}"')
         lines.append("")
 
-    (out_dir / "enums.py").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    write_generated(out_dir / "enums.py", "\n".join(lines) + "\n")
 
     # Generate models module
     lines = [
@@ -378,7 +383,7 @@ def generate_python(enums: list[dict], schemas: list[dict]) -> None:
         for name in model_names:
             lines.append(f"{name}.model_rebuild()")
 
-    (out_dir / "models.py").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    write_generated(out_dir / "models.py", "\n".join(lines) + "\n")
 
     # Generate __init__.py
     init_lines = [
@@ -387,10 +392,10 @@ def generate_python(enums: list[dict], schemas: list[dict]) -> None:
         "from .models import *  # noqa: F401,F403",
         "",
     ]
-    (out_dir / "__init__.py").write_text("\n".join(init_lines), encoding="utf-8")
+    write_generated(out_dir / "__init__.py", "\n".join(init_lines))
 
     # Generate py.typed marker
-    (out_dir / "py.typed").write_text("", encoding="utf-8")
+    write_generated(out_dir / "py.typed", "")
 
     print(f"  Python: {out_dir}")
 
@@ -435,7 +440,7 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
         lines.append("}")
         lines.append("")
 
-    (out_dir / "enums.rs").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    write_generated(out_dir / "enums.rs", "\n".join(lines) + "\n")
 
     # Generate models
     lines = [
@@ -485,7 +490,7 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
         lines.append("}")
         lines.append("")
 
-    (out_dir / "models.rs").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    write_generated(out_dir / "models.rs", "\n".join(lines) + "\n")
 
     # Generate lib.rs
     lib_lines = [
@@ -495,7 +500,7 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
         "pub mod models;",
         "",
     ]
-    (out_dir / "lib.rs").write_text("\n".join(lib_lines), encoding="utf-8")
+    write_generated(out_dir / "lib.rs", "\n".join(lib_lines))
 
     # Generate Cargo.toml
     cargo = textwrap.dedent("""\
@@ -510,7 +515,7 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
         serde = { version = "1", features = ["derive"] }
         serde_json = "1"
     """)
-    (out_dir.parent / "Cargo.toml").write_text(cargo, encoding="utf-8")
+    write_generated(out_dir.parent / "Cargo.toml", cargo)
 
     print(f"  Rust: {out_dir}")
 
@@ -548,7 +553,7 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
         lines.append("}")
         lines.append("")
 
-    (out_dir / "enums.ts").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    write_generated(out_dir / "enums.ts", "\n".join(lines) + "\n")
 
     # Generate models
     lines = [
@@ -591,7 +596,7 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
         lines.append("}")
         lines.append("")
 
-    (out_dir / "models.ts").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    write_generated(out_dir / "models.ts", "\n".join(lines) + "\n")
 
     # Generate index.ts
     index_lines = [
@@ -600,7 +605,7 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
         "export * from './models';",
         "",
     ]
-    (out_dir / "index.ts").write_text("\n".join(index_lines), encoding="utf-8")
+    write_generated(out_dir / "index.ts", "\n".join(index_lines))
 
     # Generate package.json
     pkg = {
@@ -618,7 +623,7 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
             "typescript": "^5.0.0"
         }
     }
-    (out_dir.parent / "package.json").write_text(json.dumps(pkg, indent=2) + "\n", encoding="utf-8")
+    write_generated(out_dir.parent / "package.json", json.dumps(pkg, indent=2) + "\n")
 
     # Generate tsconfig.json
     tsconfig = {
@@ -634,7 +639,7 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
         },
         "include": ["src/**/*"]
     }
-    (out_dir.parent / "tsconfig.json").write_text(json.dumps(tsconfig, indent=2) + "\n", encoding="utf-8")
+    write_generated(out_dir.parent / "tsconfig.json", json.dumps(tsconfig, indent=2) + "\n")
 
     print(f"  TypeScript: {out_dir}")
 
