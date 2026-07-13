@@ -1,10 +1,22 @@
 //! MIP Protocol Models — generated from marty-protocol/schemas/*.json
-//! Protocol version: 0.3.0
+//! Protocol version: 0.3.1
 //! DO NOT EDIT — regenerate with: python scripts/codegen.py rust
 
 use serde::{Deserialize, Serialize};
 
 use crate::enums::*;
+
+/// Deployment discovery projection of an active Compliance Profile and the discoverable API
+/// surface it requires.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ActiveComplianceProfile {
+    pub compliance_code: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_format: Option<CredentialFormat>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub issuance_protocol: Option<IssuanceProtocol>,
+    pub api_surface: Vec<serde_json::Value>,
+}
 
 /// API key for authenticating programmatic access to the Marty gateway. Keys are either
 /// ORGANIZATION-scoped (full org access within their scopes) or DEPLOYMENT-scoped
@@ -48,7 +60,7 @@ pub struct ApplicantApplication {
     pub status: String,
     pub claim_state: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub claim_blocker: Option<String>,
+    pub claim_blocker: Option<ClaimBlocker>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub credential_display_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -177,6 +189,15 @@ pub struct CascadeRevocationOperation {
     pub updated_at: Option<String>,
 }
 
+/// A privacy-safe, recoverable reason that an approved application cannot yet produce a
+/// credential offer.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClaimBlocker {
+    pub code: String,
+    pub owner: ClaimBlockerOwner,
+    pub message: String,
+}
+
 /// Abstraction of credential format complexity behind compliance-oriented identifiers
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ComplianceProfile {
@@ -193,8 +214,6 @@ pub struct ComplianceProfile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub issuer_artifact_requirements: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub default_verification_rules: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub verification_policy_set_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trust_profile_constraints: Option<serde_json::Value>,
@@ -202,8 +221,11 @@ pub struct ComplianceProfile {
     pub api_surface: Option<Vec<serde_json::Value>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub discoverable: Option<bool>,
+    pub status: String,
     pub is_system: bool,
     pub created_at: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
 }
 
 /// Master issuance configuration combining schema, compliance profile, and cryptographic
@@ -301,8 +323,8 @@ pub struct DeliveryDestinationProfile {
 }
 
 /// Runtime configuration for a physical or logical identity verification endpoint. Packages
-/// trust, policies, issuance capability, network mode, UX, and device grouping via Lanes.
-/// Compatibility extensions may additionally expose rollout and operational fields.
+/// trust, policies, issuance capability, network mode, user experience, and device grouping
+/// via Lanes.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DeploymentProfile {
     pub id: String,
@@ -320,15 +342,11 @@ pub struct DeploymentProfile {
     pub site_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled_flow_ids: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub default_presentation_policy_id: Option<String>,
     pub network_mode: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub key_access_mode: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub environment_config: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ux_config: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub update_channel: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -532,6 +550,7 @@ pub struct IssuanceRecord {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct IssuedCredential {
     pub id: String,
+    pub organization_id: String,
     pub credential_id: String,
     pub credential_type: String,
     pub credential_format: String,
@@ -541,6 +560,16 @@ pub struct IssuedCredential {
     pub application_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub revocation_profile_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub renewed_from_credential_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub renewed_to_credential_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub renewable: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub renewal_eligible_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub can_renew: Option<bool>,
     pub subject_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub subject_claims_hash: Option<String>,
@@ -625,10 +654,8 @@ pub struct MipConfigurationDiscoveryDocument {
     pub mip_version: String,
     pub issuer: String,
     pub mip_configuration_endpoint: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub supported_versions: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub implementation_classes: Option<Vec<String>>,
+    pub supported_versions: Vec<String>,
+    pub implementation_classes: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub issuance_endpoint: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -643,6 +670,7 @@ pub struct MipConfigurationDiscoveryDocument {
     pub supported_credential_formats: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub supported_compliance_profiles: Option<Vec<String>>,
+    pub active_compliance_profiles: Vec<ActiveComplianceProfile>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub supported_flow_types: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -908,6 +936,7 @@ pub struct RevocationProfile {
     pub id: String,
     pub organization_id: String,
     pub name: String,
+    pub status: String,
     pub revocation_mechanism: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mechanism_priority: Option<Vec<String>>,

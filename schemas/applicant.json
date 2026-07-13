@@ -54,16 +54,7 @@
     "claim_blocker": {
       "oneOf": [
         {"type": "null"},
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["code", "owner", "message"],
-          "properties": {
-            "code": {"type": "string", "maxLength": 128},
-            "owner": {"type": "string", "enum": ["APPLICANT", "ISSUER", "SYSTEM"]},
-            "message": {"type": "string", "maxLength": 512}
-          }
-        }
+        {"$ref": "claim-blocker.json"}
       ]
     },
     "credential_display_name": {"type": ["string", "null"], "maxLength": 256},

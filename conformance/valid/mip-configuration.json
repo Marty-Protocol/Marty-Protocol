@@ -1,5 +1,5 @@
 {
-  "mip_version": "1.0",
+  "mip_version": "0.3.1",
   "issuer": "https://issuer.example.com",
   "mip_configuration_endpoint": "https://issuer.example.com/.well-known/mip-configuration",
   "issuance_endpoint": "https://issuer.example.com/issuance",
@@ -12,9 +12,27 @@
   "service_documentation": "https://docs.example.com",
   "policy_uri": "https://issuer.example.com/policy",
   "implementation_classes": ["ISSUER", "VERIFIER"],
+  "supported_compliance_profiles": ["OID4VC"],
+  "active_compliance_profiles": [
+    {
+      "compliance_code": "OID4VC",
+      "credential_format": "SD_JWT_VC",
+      "issuance_protocol": "OID4VCI_PRE_AUTH",
+      "api_surface": [
+        {
+          "rel": "token",
+          "path_template": "/v1/issuance/token",
+          "method": "POST",
+          "auth_required": false,
+          "discoverable": true,
+          "standard_ref": "OID4VCI 1.0 Section 6"
+        }
+      ]
+    }
+  ],
   "supported_credential_formats": ["SD_JWT_VC", "MDOC"],
   "supported_flow_types": ["oid4vci_pre_authorized", "oid4vci_authorization_code"],
-  "supported_versions": ["1.0", "1.1"],
+  "supported_versions": ["0.3.1"],
   "proximity_supported": true,
   "proximity_engagement_methods": ["QR_CODE", "NFC"],
   "org_endpoints": [

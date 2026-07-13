@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/active-compliance-profile.json",
+  "title": "ActiveComplianceProfile",
+  "description": "Deployment discovery projection of an active Compliance Profile and the discoverable API surface it requires.",
+  "type": "object",
+  "required": ["compliance_code", "api_surface"],
+  "additionalProperties": false,
+  "properties": {
+    "compliance_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "credential_format": {
+      "$ref": "../enums/credential-formats.json"
+    },
+    "issuance_protocol": {
+      "$ref": "../enums/issuance-protocols.json"
+    },
+    "api_surface": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rel", "path_template", "method", "auth_required"],
+        "additionalProperties": false,
+        "properties": {
+          "rel": {"type": "string", "minLength": 1},
+          "path_template": {"type": "string", "minLength": 1},
+          "org_scoped_path": {"type": "string", "minLength": 1},
+          "method": {"type": "string", "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"]},
+          "auth_required": {"type": "boolean"},
+          "discoverable": {"type": "boolean", "default": true},
+          "response_schema_ref": {"type": "string"},
+          "standard_ref": {"type": "string"}
+        }
+      }
+    }
+  }
+}

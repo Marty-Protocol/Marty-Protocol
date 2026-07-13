@@ -1,7 +1,7 @@
 # Protocol Messages — Specification
 
 **Entity:** Protocol Messages
-**Version:** 0.3.0
+**Version:** 0.3.1
 **Stability:** Draft
 **Section in root spec:** §4 (Message Layer)
 
@@ -23,7 +23,7 @@ All MIP messages MUST be wrapped in the following envelope when transmitted betw
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `mip_version` | string | Yes | Protocol version. MUST be `"0.1"` for this spec revision. |
+| `mip_version` | string | Yes | Protocol version. MUST be `"0.3.1"` for this spec revision. |
 | `message_type` | MessageType | Yes | Identifies the message (see §2). |
 | `message_id` | UUID | Yes | Unique identifier for this message instance. |
 | `correlation_id` | UUID | No | Links messages belonging to the same flow instance. Set to `FlowInstance.id`. |
@@ -186,22 +186,26 @@ MIP-proprietary message (internal). Produced by the verification engine after ex
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `flow_id` | UUID | Yes | The `application_approval_issuance` Flow this submission targets |
-| `applicant_id` | UUID | No | Pre-existing applicant record ID (for resubmissions) |
-| `form_data` | object | Yes | Key-value pairs matching the ApplicationTemplate field names |
-| `evidence_references` | string[] | No | URIs to uploaded evidence documents |
+| `organization_id` | UUID | Yes | Target issuer organization; validated against the ApplicationTemplate owner |
+| `application_template_id` | UUID | Yes | Active ApplicationTemplate governing the submission |
+| `form_data` | object | Yes | Key-value pairs matching canonical ApplicationTemplate `field_id` values |
+| `integration_context` | object | No | Integration-specific context that is not applicant claim data |
 | `submitted_at` | datetime | Yes | ISO 8601 UTC |
+
+Applicant identity, CredentialTemplate, required checks, approval policy, and validity are server-derived. Clients MUST NOT include those values in this message.
 
 ### 3.10 ApplicantDecision
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `applicant_id` | UUID | Yes | Applicant record being decided |
-| `reviewer_id` | UUID | Yes | Reviewer user ID making the decision |
+| `application_id` | UUID | Yes | Application being decided |
+| `reviewer_id` | UUID | Yes | Server-derived authenticated reviewer recorded in the internal decision event |
 | `decision` | string | Yes | `APPROVED` or `REJECTED` |
 | `reason_code` | string | No | Rejection reason code (see Applicant schema) |
 | `reason_text` | string | No | Free-text explanation |
 | `decided_at` | datetime | Yes | ISO 8601 UTC |
+
+`reviewer_id` is internal event data. Decision request bodies and query parameters MUST NOT accept reviewer identity.
 
 ---
 

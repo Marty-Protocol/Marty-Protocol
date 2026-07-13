@@ -1,7 +1,7 @@
 # Trust Profile — Entity Specification
 
 **Entity:** Trust Profile
-**Version:** 0.3.0
+**Version:** 0.3.1
 **Stability:** Stable
 **Section in root spec:** §5
 

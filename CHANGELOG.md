@@ -9,6 +9,29 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 
 ## [Unreleased]
 
+### Changed
+- Removed `OB2_COMPATIBILITY`; Open Badges support is version 3 only.
+- Application Template evidence requirements now use only `auto_issue_on_permit`.
+- Application Template claim rules now use only `claim_name`, `source`, and `source_config`.
+- Removed Deployment Profile request/response aliases `default_presentation_policy_id` and `ux_config`.
+- Removed the opaque Compliance Profile `default_verification_rules` field.
+- Replaced compatibility/deprecation guidance with exact-version, atomic-release requirements.
+
+### Fixed
+- Generated Python, Rust, and TypeScript bindings now model `claim_blocker` as the typed nullable `ClaimBlocker` object instead of degrading it to `Any` or `string`.
+
+## [0.3.1] - 2026-07-12
+
+### Changed
+- Declared `0.3.1` as the only supported MIP message and discovery version.
+- Added the browser lifecycle gate as conformance evidence for canonical OID4VCI receipt and DCQL OID4VP presentation.
+- Removed Draft 13 singular credential proof compatibility from the reference wallet and issuance contract.
+
+### Fixed
+- Corrected stale normative message-version examples that still required `0.1`.
+- Corrected the MIP discovery conformance fixture to advertise the current supported version.
+- Corrected holder proof audience/nonce validation and DCQL response serialization in the reference wallet engine.
+
 ## [0.3.0] - 2026-07-11
 
 ### Changed

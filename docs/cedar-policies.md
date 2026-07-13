@@ -253,15 +253,18 @@ Cedar evaluation follows these rules:
 3. **All conditions must hold** — Every `when` clause must be true, every `unless` clause must be false
 4. **Disabled policies are skipped** — `enabled: false` policies do not participate in evaluation
 
-## Migration from Legacy Rules
+## Canonical Policy References
 
-| Legacy field | Replacement | Migration path |
-|---|---|---|
-| `ApiKey.scopes[]` | Cedar permit policies on `Role` | Kept for backward compatibility; Cedar policies evaluated in addition |
-| `ScimRole.permissions[]` | Cedar policies via `policy_set_id` | Kept for backward compatibility; Cedar forbid policies can restrict |
-| `ApplicationTemplate.approval_rules` | `approval_policy_set_id` → PolicySet | Deprecated; Cedar takes precedence when both are set |
-| `ComplianceProfile.default_verification_rules` | `verification_policy_set_id` → PolicySet | Deprecated; Cedar takes precedence when both are set |
-| `TrustProfile.allowed_issuers` / `denied_issuers` | `verification_policy_set_id` → PolicySet | Kept; Cedar policies evaluated as an additional layer |
+| Resource | Canonical policy reference |
+|---|---|
+| `Role` | Cedar permit/forbid policies through its active access-control PolicySet |
+| `ScimRole` | `policy_set_id` |
+| `ApplicationTemplate` | `approval_policy_set_id` |
+| `ComplianceProfile` | `verification_policy_set_id` |
+| `TrustProfile` | `verification_policy_set_id` |
+
+MIP 0.3.1 does not accept the removed opaque Application Template or Compliance
+Profile rule objects. Policy decisions are represented by active PolicySets.
 
 ## SDK Integration
 

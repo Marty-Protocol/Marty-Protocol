@@ -1,7 +1,7 @@
 # Applicant Application Specification
 
 **Entity:** ApplicantApplication
-**Version:** 0.3.0
+**Version:** 0.3.1
 **Stability:** Draft
 
 ## Purpose
@@ -51,7 +51,7 @@ Application lifecycle and claim readiness are separate state machines. An applic
 | `CLAIMED` | Wallet issuance completed. |
 | `EXPIRED` | The offer expired and must be regenerated. |
 
-`claim_blocker` contains a machine code, an owner (`APPLICANT`, `ISSUER`, or `SYSTEM`), and a privacy-safe message. Failure to locate an active issuance flow MUST persist `BLOCKED / NO_ACTIVE_ISSUANCE_FLOW / ISSUER` without changing application status from `APPROVED`.
+`claim_blocker` is a nullable [ClaimBlocker](../../schemas/claim-blocker.json) containing a non-empty machine code, a typed owner (`APPLICANT`, `ISSUER`, or `SYSTEM`), and a non-empty privacy-safe message. Failure to locate an active issuance flow MUST persist `BLOCKED / NO_ACTIVE_ISSUANCE_FLOW / ISSUER` without changing application status from `APPROVED`.
 
 ## Canonical API
 

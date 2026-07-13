@@ -1,5 +1,5 @@
 // MIP Protocol Enums — generated from marty-protocol/enums/*.json
-// Protocol version: 0.3.0
+// Protocol version: 0.3.1
 // DO NOT EDIT — regenerate with: python scripts/codegen.py typescript
 
 /** Formal permission scope strings for MIP API keys. Scopes follow the pattern '{resource}:{action}'. Organization-scoped keys may hold any of these scopes. Deployment-scoped keys are restricted to a subset appropriate for a single deployment profile. */
@@ -68,6 +68,13 @@ export enum ChannelType {
   SMS = 'SMS',
 }
 
+/** The party responsible for resolving an application claim blocker. */
+export enum ClaimBlockerOwner {
+  APPLICANT = 'APPLICANT',
+  ISSUER = 'ISSUER',
+  SYSTEM = 'SYSTEM',
+}
+
 /** Recognized compliance frameworks and identity standards for credential format abstraction */
 export enum ComplianceCode {
   ICAO_DTC = 'ICAO_DTC',
@@ -78,7 +85,6 @@ export enum ComplianceCode {
   EUDI_MDL = 'EUDI_MDL',
   OB3_JWT = 'OB3_JWT',
   OB3_JSONLD = 'OB3_JSONLD',
-  OB2_COMPATIBILITY = 'OB2_COMPATIBILITY',
   SD_JWT_VC = 'SD_JWT_VC',
   ENTERPRISE_VC = 'ENTERPRISE_VC',
   OID4VC = 'OID4VC',

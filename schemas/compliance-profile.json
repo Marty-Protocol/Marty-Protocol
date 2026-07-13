@@ -4,14 +4,14 @@
   "title": "ComplianceProfile",
   "description": "Abstraction of credential format complexity behind compliance-oriented identifiers",
   "type": "object",
-  "required": ["id", "compliance_code", "name", "credential_format", "is_system", "created_at"],
+  "required": ["id", "compliance_code", "name", "credential_format", "status", "is_system", "created_at"],
   "additionalProperties": false,
   "properties": {
     "id": {"type": "string", "format": "uuid"},
     "organization_id": {"type": ["string", "null"], "format": "uuid"},
     "compliance_code": {
       "type": "string",
-      "enum": ["ICAO_DTC", "ICAO_MRZ", "ICAO_PASSPORT", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "OB2_COMPATIBILITY", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
+      "enum": ["ICAO_DTC", "ICAO_MRZ", "ICAO_PASSPORT", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
     },
     "name": {"type": "string", "minLength": 1, "maxLength": 128},
     "description": {"type": "string", "maxLength": 1024},
@@ -39,10 +39,6 @@
           "items": {"type": "string"}
         }
       }
-    },
-    "default_verification_rules": {
-      "type": "object",
-      "description": "DEPRECATED: Use verification_policy_set_id with Cedar policies instead. Legacy opaque verification rules object."
     },
     "verification_policy_set_id": {
       "type": ["string", "null"],
@@ -103,6 +99,11 @@
             "type": "boolean",
             "description": "Whether this endpoint requires authentication. Wallet-facing endpoints are typically false."
           },
+          "discoverable": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether this endpoint is included in /.well-known/mip-configuration."
+          },
           "response_schema_ref": {
             "type": "string",
             "description": "JSON Schema $id of the expected response schema"
@@ -119,7 +120,12 @@
       "default": true,
       "description": "Whether this compliance profile appears in /.well-known/mip-configuration"
     },
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "ACTIVE", "SUSPENDED", "DEPRECATED"]
+    },
     "is_system": {"type": "boolean"},
-    "created_at": {"type": "string", "format": "date-time"}
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
   }
 }

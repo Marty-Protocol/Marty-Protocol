@@ -22,7 +22,7 @@
       },
       "verification_method": "SIGNED_WEBHOOK",
       "manual_fallback": false,
-      "auto_approve_on_evidence": true
+      "auto_issue_on_permit": true
     }
   ],
   "approval_strategy": "RULES_BASED",
@@ -30,4 +30,3 @@
   "status": "ACTIVE",
   "created_at": "2026-05-24T00:00:00Z"
 }
-

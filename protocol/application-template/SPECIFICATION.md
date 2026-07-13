@@ -1,7 +1,7 @@
 # Application Template — Entity Specification
 
 **Entity:** Application Template
-**Version:** 0.3.0
+**Version:** 0.3.1
 **Stability:** Dynamic
 **Section in root spec:** §11
 
@@ -80,6 +80,22 @@ An Application Template defines **how users apply for credentials**. It covers t
 | `expected_response` | object | No | HTTP status and JSON/path conditions expected from the provider response |
 | `response_mapping` | object | No | Mapping from provider response fields into a MIP `EvidenceFact` |
 | `auto_issue_on_permit` | boolean | No | Allows automatic approval/issuance after Cedar permits |
+
+### ClaimCollectionRule Fields
+
+| Property | Type | Required | Constraint |
+|----------|------|----------|------------|
+| `claim_name` | string | Yes | Credential Template claim populated by this rule |
+| `source` | string | Yes | `FORM_FIELD`, `EVIDENCE_EXTRACTION`, `EXTERNAL_API`, or `SYSTEM` |
+| `source_config` | object | No | Source-specific configuration |
+
+`FORM_FIELD` uses `source_config.field_id`. `SYSTEM` uses one of the canonical
+`source_config.system_field` values: `applicant.user_id`, `applicant.email`,
+`applicant.given_name`, `applicant.family_name`, `application.id`,
+`application.reference_number`, `application.organization_id`, `current.date`,
+`current.datetime`, `validity.expiry_date`, `template.name`,
+`template.description`, or `constant`. A constant also requires
+`source_config.value`. Clients cannot submit values for `SYSTEM` claims.
 
 `provider` and `fact_type` are required when `evidence_type` is
 `EXTERNAL_FACT` or `EXTERNAL_API`. `api`, `expected_response`, and

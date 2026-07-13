@@ -1,7 +1,7 @@
 # Compliance Profile — Entity Specification
 
 **Entity:** Compliance Profile
-**Version:** 0.3.0
+**Version:** 0.3.1
 **Stability:** Stable (system profiles), Moderate (custom)
 **Section in root spec:** §10
 
@@ -19,7 +19,7 @@ A Compliance Profile abstracts **credential format complexity** behind complianc
 | Credential Format | Technical encoding (mdoc, sd_jwt_vc, vc_jwt, json_ld) |
 | Issuance Protocol | How credentials are delivered |
 | Artifact Requirements | What keys, certs, or DIDs are needed |
-| Verification Defaults | Format-specific verification rules |
+| Verification Policy | Cedar PolicySet reference for verification rules |
 
 ## Properties
 
@@ -35,7 +35,7 @@ A Compliance Profile abstracts **credential format complexity** behind complianc
 | `credential_format` | CredentialFormat | Yes | From `credential-formats` enum |
 | `issuance_protocol` | IssuanceProtocol | No | From `issuance-protocols` enum |
 | `issuer_artifact_requirements` | ArtifactRequirements | No | See below |
-| `default_verification_rules` | object | No | Format-specific overrides |
+| `verification_policy_set_id` | UUID | No | Active Cedar PolicySet for credential-verification rules |
 | `trust_profile_constraints` | object | No | Trust requirements for this format |
 | `is_system` | boolean | Yes | System vs. organization-custom |
 | `created_at` | datetime | Yes | ISO 8601 |
@@ -120,15 +120,25 @@ The `api_surface` property declares the HTTP endpoints that a MIP implementation
 
 ### Well-Known Discovery: `/.well-known/mip-configuration`
 
-A MIP-compliant deployment MUST expose a `GET /.well-known/mip-configuration` endpoint. The response is a JSON object whose keys are endpoint `rel` values and whose values are the resolved URLs for that endpoint:
+A MIP-compliant deployment MUST expose a `GET /.well-known/mip-configuration` endpoint conforming to `schemas/mip-configuration.json`. Its `active_compliance_profiles` array contains each active profile and only its discoverable `api_surface` declarations. Canonical deployment endpoints remain top-level discovery properties:
 
 ```json
 {
-  "openid-credential-issuer-metadata": "https://issuer.example.com/.well-known/openid-credential-issuer",
-  "token": "https://issuer.example.com/v1/issuance/token",
-  "credential": "https://issuer.example.com/v1/issuance/credential",
-  "nonce": "https://issuer.example.com/v1/issuance/nonce",
-  "deferred-credential": "https://issuer.example.com/v1/issuance/deferred-credential"
+  "mip_version": "0.3.1",
+  "issuer": "https://issuer.example.com",
+  "mip_configuration_endpoint": "https://issuer.example.com/.well-known/mip-configuration",
+  "active_compliance_profiles": [{
+    "compliance_code": "OID4VC",
+    "credential_format": "SD_JWT_VC",
+    "issuance_protocol": "OID4VCI_PRE_AUTH",
+    "api_surface": [{
+      "rel": "token",
+      "path_template": "/v1/issuance/token",
+      "method": "POST",
+      "auth_required": false,
+      "discoverable": true
+    }]
+  }]
 }
 ```
 

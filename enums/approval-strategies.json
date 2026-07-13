@@ -17,7 +17,7 @@
       },
       "RULES_BASED": {
         "description": "Automated rules engine evaluates the application; routes to MANUAL on rule mismatch",
-        "requires": "approval_rules must be non-empty",
+        "requires": "approval_policy_set_id must reference an ACTIVE APPROVAL_RULES PolicySet",
         "use_case": "Age verification, professional credentials, jurisdiction-based eligibility"
       },
       "EXTERNAL": {

@@ -1,5 +1,5 @@
 """MIP Protocol Enums — generated from marty-protocol/enums/*.json
-Protocol version: 0.3.0
+Protocol version: 0.3.1
 DO NOT EDIT — regenerate with: python scripts/codegen.py python
 """
 from enum import Enum
@@ -75,6 +75,14 @@ class ChannelType(str, Enum):
     SMS = "SMS"
 
 
+class ClaimBlockerOwner(str, Enum):
+    """The party responsible for resolving an application claim blocker."""
+
+    APPLICANT = "APPLICANT"
+    ISSUER = "ISSUER"
+    SYSTEM = "SYSTEM"
+
+
 class ComplianceCode(str, Enum):
     """Recognized compliance frameworks and identity standards for credential format abstraction"""
 
@@ -86,7 +94,6 @@ class ComplianceCode(str, Enum):
     EUDI_MDL = "EUDI_MDL"
     OB3_JWT = "OB3_JWT"
     OB3_JSONLD = "OB3_JSONLD"
-    OB2_COMPATIBILITY = "OB2_COMPATIBILITY"
     SD_JWT_VC = "SD_JWT_VC"
     ENTERPRISE_VC = "ENTERPRISE_VC"
     OID4VC = "OID4VC"

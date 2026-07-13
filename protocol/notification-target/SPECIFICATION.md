@@ -1,7 +1,7 @@
 # Notification Target — Entity Specification
 
 **Entity:** Notification Target
-**Version:** 0.3.0
+**Version:** 0.3.1
 **Stability:** Operational
 **Section in root spec:** §15
 

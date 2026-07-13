@@ -1,6 +1,6 @@
 # Marty Identity Protocol — Normative Specification
 
-**Version:** 0.3.0
+**Version:** 0.3.1
 **Status:** Draft
 **Date:** 2026-07-11
 **Organization:** The MIP Authors
@@ -1110,7 +1110,6 @@ A Compliance Profile abstracts credential format complexity behind compliance-fo
 | `credential_format` | CredentialFormat | Yes | `MDOC`, `SD_JWT_VC`, `VC_JWT`, `JSON_LD` |
 | `issuance_protocol` | IssuanceProtocol | No | `OID4VCI_PRE_AUTH`, `OID4VCI_AUTH_CODE`, `DIRECT` |
 | `issuer_artifact_requirements` | ArtifactRequirements | No | Required keys, certs, DIDs |
-| `default_verification_rules` | object | No | **Deprecated** — use `verification_policy_set_id`. Format-specific verification defaults |
 | `verification_policy_set_id` | UUID | No | Reference to a Cedar PolicySet (§16) for credential verification rules |
 | `trust_profile_constraints` | TrustProfileConstraints | No | Trust profile compatibility requirements |
 | `is_system` | boolean | Yes | System-provided vs. organization-custom |
@@ -1183,7 +1182,7 @@ Each entry in `api_surface` has the following fields:
 
 Implementations MUST expose all endpoints declared in `api_surface` for every active Compliance Profile.
 
-**MIP Configuration Discovery**: Every MIP implementation MUST expose `GET /.well-known/mip-configuration` returning the active compliance profiles and their `api_surface` declarations. This is MIP's deployment-level metadata document.
+**MIP Configuration Discovery**: Every MIP implementation MUST expose `GET /.well-known/mip-configuration` conforming to `schemas/mip-configuration.json`. `active_compliance_profiles` contains each active profile's code, format/protocol when present, and only endpoint declarations whose `discoverable` value is not `false`. This is MIP's deployment-level metadata document.
 
 ### 10.7 API
 
@@ -1282,13 +1281,24 @@ or raw provider responses. Running a configured check MUST create a normalized
 `EvidenceFact` and evaluate the same approval policy path used by
 adapter-generated facts.
 
-### 11.5 Validation Rules
+### 11.5 ClaimCollectionRule
+
+Claim collection rules contain `claim_name`, `source`, and `source_config`.
+`source` is one of `FORM_FIELD`, `EVIDENCE_EXTRACTION`, `EXTERNAL_API`, or
+`SYSTEM`. Server-owned identity and lifecycle values MUST use `SYSTEM`, not an
+applicant form field. Canonical system fields are `applicant.user_id`,
+`applicant.email`, `applicant.given_name`, `applicant.family_name`,
+`application.id`, `application.reference_number`, `application.organization_id`,
+`current.date`, `current.datetime`, `validity.expiry_date`, `template.name`,
+`template.description`, and `constant`. Constants require `source_config.value`.
+
+### 11.6 Validation Rules
 
 - `approval_strategy: RULES_BASED` MUST have a non-null `approval_policy_set_id` referencing an ACTIVE `APPROVAL_RULES` PolicySet.
 - All `claim_mapping` values MUST reference claims in the associated Credential Template.
 - A `DEPRECATED` Application Template MUST NOT be the target of a new credential application.
 
-### 11.6 API
+### 11.7 API
 
 ```
 GET    /v1/application-templates
@@ -1296,11 +1306,26 @@ POST   /v1/application-templates
 GET    /v1/application-templates/{id}
 PATCH  /v1/application-templates/{id}
 DELETE /v1/application-templates/{id}
-POST   /v1/applications
-GET    /v1/applications/{id}
-PATCH  /v1/applications/{id}/approve
-PATCH  /v1/applications/{id}/reject
+POST   /v1/application-templates/{id}/validate
+POST   /v1/application-templates/{id}/activate
+POST   /v1/application-templates/{id}/deprecate
+
+GET    /v1/me/applicant-profile
+PATCH  /v1/me/applicant-profile
+GET    /v1/me/applications
+POST   /v1/me/applications
+GET    /v1/me/applications/{id}
+POST   /v1/me/applications/{id}/submit
+POST   /v1/me/applications/{id}/withdraw
+POST   /v1/me/applications/{id}/claim
+
+GET    /v1/organizations/{org_id}/applicants
+GET    /v1/organizations/{org_id}/applicants/{id}
+POST   /v1/organizations/{org_id}/applicants/{id}/approve
+POST   /v1/organizations/{org_id}/applicants/{id}/reject
 ```
+
+The complete reviewer lock, check, information-request, withdrawal, and issuance action surface is normative in the [Applicant Application Specification](protocol/applicant/SPECIFICATION.md). `/v1/applications` is not a public MIP resource.
 
 ---
 
@@ -1830,11 +1855,11 @@ This means `forbid` policies act as hard security constraints that cannot be ove
 Cedar PolicySets augment — rather than replace — existing enum-based fields:
 
 - **Trust Profile**: `allowed_algorithms`, `supported_formats`, and `trust_sources` remain the primary trust configuration. A `verification_policy_set_id` provides additional conditional trust rules (e.g., deny weak algorithms, require holder binding for specific compliance codes).
-- **Compliance Profile**: `verification_policy_set_id` replaces the deprecated `default_verification_rules` opaque object.
+- **Compliance Profile**: `verification_policy_set_id` supplies conditional credential-verification rules.
 - **Application Template**: `approval_policy_set_id` is required for Cedar approval policies. The `approval_strategy` MUST be `RULES_BASED` or `EXTERNAL`.
 - **SCIM Role**: `policy_set_id` provides ABAC rules beyond the static `permissions[]` array. When present, Cedar policies are evaluated in addition to permission checks.
 
-When both legacy fields and Cedar PolicySet references are present, the Cedar PolicySet takes precedence.
+Opaque approval and verification rule objects are not valid MIP 0.3.1 fields.
 
 ### 16.7 Validation Rules
 
@@ -1927,8 +1952,9 @@ See §18 (Organization & Identity Governance) for full SCIM alignment specificat
 | Flow Definitions | `/v1/flows/definitions` | Required |
 | Flow Instances | `/v1/flows/instances` | Required |
 | Issuance (admin) | `/v1/issuance` | Required |
-| Applications | `/v1/applications` | Required |
-| Applicants | `/v1/organizations/{id}/applicants` | Required |
+| Holder Applications | `/v1/me/applications` | Required |
+| Applicant Review | `/v1/organizations/{id}/applicants` | Required |
+| Holder Credential Inventory | `/v1/issued-credentials/mine` | Required |
 | API Keys | `/v1/api-keys` | Required |
 | Webhooks | `/v1/organizations/{id}/webhooks` | Required |
 | Alert Rules | `/v1/organizations/{id}/alert-rules` | Required |
@@ -1988,7 +2014,7 @@ Discovery endpoints for OID4VCI and OID4VP are **declared by the active Complian
 - All IDs are UUIDs (v4)
 - All timestamps are ISO 8601 with timezone (UTC preferred)
 - Pagination: `limit` + `offset` query parameters
-- Organization scoping: `organization_id` query parameter or JWT claim
+- Organization scoping: organization path parameters and persisted resource ownership are authoritative; a selected UI organization or an unverified query parameter never grants access
 - Error responses: `{ "error": string, "code": string, "field": string? }`
 - Versioning: URL path prefix `/v1/`
 - SCIM responses: RFC 7644 `ListResponse` with `totalResults`, `startIndex`, `itemsPerPage`, `Resources`
@@ -2441,15 +2467,15 @@ A conformant PEX implementation MUST:
 
 See [VERSIONING.md](VERSIONING.md) for the full versioning policy.
 
-This specification is at version **0.3.0 (Draft)**. Breaking changes may occur before 1.0.0.
+This specification is at version **0.3.1 (Draft)**. Breaking changes may occur before 1.0.0.
 
-### 23.1 Version Negotiation
+### 23.1 Strict Version Support
 
 All MIP messages MUST carry a `mip_version` field in the message envelope (see §26). Implementations that receive a message with an unsupported version MUST respond with `error_code: UNSUPPORTED_VERSION` and SHOULD include a `supported_versions` array in the error body.
 
-The `/.well-known/mip-configuration` document MUST include a `supported_versions` array listing all versions the deployment can serve. Clients SHOULD inspect the discovery document before initiating a flow to confirm version compatibility.
+The `/.well-known/mip-configuration` document MUST include `supported_versions: ["0.3.1"]`. Clients SHOULD inspect the discovery document before initiating a flow.
 
-Version negotiation uses a **highest-common-version** strategy: if both parties support overlapping versions, the higher common version MUST be used. If no overlap exists, the request MUST fail with `UNSUPPORTED_VERSION`.
+MIP 0.3.1 has no compatibility negotiation or fallback. A message declaring any other version MUST fail with `UNSUPPORTED_VERSION`; implementations MUST NOT reinterpret it as 0.3.1.
 
 ---
 
@@ -2589,7 +2615,7 @@ All MIP cross-party messages MUST conform to the message envelope defined in `pr
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `mip_version` | Yes | Protocol version string (e.g., `"0.1"`) |
+| `mip_version` | Yes | Protocol version string (e.g., `"0.3.1"`) |
 | `message_type` | Yes | One of the message type identifiers in §26.2 |
 | `message_id` | Yes | UUID unique within the deployment |
 | `correlation_id` | No | `FlowInstance.id` linking messages in one flow |

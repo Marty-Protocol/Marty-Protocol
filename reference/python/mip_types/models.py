@@ -1,5 +1,5 @@
 """MIP Protocol Models — generated from marty-protocol/schemas/*.json
-Protocol version: 0.3.0
+Protocol version: 0.3.1
 DO NOT EDIT — regenerate with: python scripts/codegen.py python
 """
 from __future__ import annotations
@@ -14,6 +14,7 @@ from .enums import (
     ApplicantStatus,
     ApprovalStrategy,
     ChannelType,
+    ClaimBlockerOwner,
     ComplianceCode,
     CredentialFormat,
     CredentialRankingStrategy,
@@ -33,6 +34,16 @@ from .enums import (
     ValidationAlgorithm,
     ZkCircuitSystem,
 )
+
+
+class ActiveComplianceProfile(BaseModel):
+    """Deployment discovery projection of an active Compliance Profile and the discoverable API
+surface it requires."""
+
+    compliance_code: str
+    credential_format: CredentialFormat | None = None
+    issuance_protocol: IssuanceProtocol | None = None
+    api_surface: list[dict[str, Any]]
 
 
 class ApiKey(BaseModel):
@@ -70,7 +81,7 @@ Identity, credential policy, checks, and issuer data are server-derived."""
     integration_context: dict[str, Any]
     status: Literal["DRAFT", "SUBMITTED", "UNDER_REVIEW", "PENDING_INFORMATION", "APPROVED", "REJECTED", "WITHDRAWN", "OFFERED", "CREDENTIALED", "SUSPENDED"]
     claim_state: Literal["NOT_READY", "BLOCKED", "OFFER_READY", "CLAIMED", "EXPIRED"]
-    claim_blocker: Any | None = None
+    claim_blocker: ClaimBlocker | None = None
     credential_display_name: str | None = None
     credential_offer_uri: str | None = None
     credential_offer_uris: dict[str, Any] | None = None
@@ -158,24 +169,34 @@ operations."""
     updated_at: datetime | None = None
 
 
+class ClaimBlocker(BaseModel):
+    """A privacy-safe, recoverable reason that an approved application cannot yet produce a
+credential offer."""
+
+    code: str
+    owner: ClaimBlockerOwner
+    message: str
+
+
 class ComplianceProfile(BaseModel):
     """Abstraction of credential format complexity behind compliance-oriented identifiers"""
 
     id: str
     organization_id: str | None = None
-    compliance_code: Literal["ICAO_DTC", "ICAO_MRZ", "ICAO_PASSPORT", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "OB2_COMPATIBILITY", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
+    compliance_code: Literal["ICAO_DTC", "ICAO_MRZ", "ICAO_PASSPORT", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
     name: str
     description: str | None = None
     credential_format: CredentialFormat
     issuance_protocol: IssuanceProtocol | None = None
     issuer_artifact_requirements: dict[str, Any] | None = None
-    default_verification_rules: dict[str, Any] | None = None
     verification_policy_set_id: str | None = None
     trust_profile_constraints: dict[str, Any] | None = None
     api_surface: list[dict[str, Any]] | None = None
     discoverable: bool | None = None
+    status: Literal["DRAFT", "ACTIVE", "SUSPENDED", "DEPRECATED"]
     is_system: bool
     created_at: datetime
+    updated_at: datetime | None = None
 
 
 class CredentialTemplate(BaseModel):
@@ -242,8 +263,8 @@ delivery channels."""
 
 class DeploymentProfile(BaseModel):
     """Runtime configuration for a physical or logical identity verification endpoint. Packages
-trust, policies, issuance capability, network mode, UX, and device grouping via Lanes.
-Compatibility extensions may additionally expose rollout and operational fields."""
+trust, policies, issuance capability, network mode, user experience, and device grouping
+via Lanes."""
 
     id: str
     organization_id: str
@@ -255,11 +276,9 @@ Compatibility extensions may additionally expose rollout and operational fields.
     default_policy_id: str | None = None
     site_id: str | None = None
     enabled_flow_ids: list[str] | None = None
-    default_presentation_policy_id: str | None = None
     network_mode: Literal["ONLINE", "OFFLINE", "HYBRID"]
     key_access_mode: Literal["KEY_VAULT", "HSM", "DEVICE_KEYSTORE"] | None = None
     environment_config: dict[str, Any] | None = None
-    ux_config: dict[str, Any] | None = None
     update_channel: Literal["stable", "beta", "pinned"] | None = None
     update_policy: dict[str, Any] | None = None
     offline_cache_ttl_hours: int | None = None
@@ -410,6 +429,7 @@ class IssuedCredential(BaseModel):
 list entries, and revocation history."""
 
     id: str
+    organization_id: str
     credential_id: str
     credential_type: str
     credential_format: Literal["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]
@@ -417,6 +437,11 @@ list entries, and revocation history."""
     credential_template_id: str
     application_id: str | None = None
     revocation_profile_id: str | None = None
+    renewed_from_credential_id: str | None = None
+    renewed_to_credential_id: str | None = None
+    renewable: bool | None = None
+    renewal_eligible_at: datetime | None = None
+    can_renew: bool | None = None
     subject_id: str
     subject_claims_hash: str | None = None
     issued_at: datetime
@@ -477,8 +502,8 @@ to OpenID Connect Discovery (RFC 8414) but scoped to MIP-specific capabilities."
     mip_version: str
     issuer: str
     mip_configuration_endpoint: str
-    supported_versions: list[str] | None = None
-    implementation_classes: list[str] | None = None
+    supported_versions: list[str]
+    implementation_classes: list[str]
     issuance_endpoint: str | None = None
     openid_credential_issuer: str | None = None
     presentation_endpoint: str | None = None
@@ -486,6 +511,7 @@ to OpenID Connect Discovery (RFC 8414) but scoped to MIP-specific capabilities."
     authorization_endpoint: str | None = None
     supported_credential_formats: list[str] | None = None
     supported_compliance_profiles: list[str] | None = None
+    active_compliance_profiles: list[ActiveComplianceProfile]
     supported_flow_types: list[str] | None = None
     supported_signing_algorithms: list[str] | None = None
     proximity_supported: bool | None = None
@@ -679,6 +705,7 @@ class RevocationProfile(BaseModel):
     id: str
     organization_id: str
     name: str
+    status: Literal["DRAFT", "ACTIVE", "SUSPENDED"]
     revocation_mechanism: list[str]
     mechanism_priority: list[str] | None = None
     check_mode: RevocationTimingMode
@@ -900,11 +927,13 @@ operator-controlled endpoint when specified identity lifecycle events occur. Man
 
 
 # Rebuild models with forward references
+ActiveComplianceProfile.model_rebuild()
 ApiKey.model_rebuild()
 ApplicantApplication.model_rebuild()
 ApplicationTemplate.model_rebuild()
 BiometricEnrollment.model_rebuild()
 CascadeRevocationOperation.model_rebuild()
+ClaimBlocker.model_rebuild()
 ComplianceProfile.model_rebuild()
 CredentialTemplate.model_rebuild()
 DeliveryDestinationProfile.model_rebuild()

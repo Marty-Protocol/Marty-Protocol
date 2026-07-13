@@ -1,5 +1,5 @@
 //! MIP Protocol Enums — generated from marty-protocol/enums/*.json
-//! Protocol version: 0.3.0
+//! Protocol version: 0.3.1
 //! DO NOT EDIT — regenerate with: python scripts/codegen.py rust
 
 use serde::{Deserialize, Serialize};
@@ -124,6 +124,17 @@ pub enum ChannelType {
     Sms,
 }
 
+/// The party responsible for resolving an application claim blocker.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum ClaimBlockerOwner {
+    #[serde(rename = "APPLICANT")]
+    Applicant,
+    #[serde(rename = "ISSUER")]
+    Issuer,
+    #[serde(rename = "SYSTEM")]
+    System,
+}
+
 /// Recognized compliance frameworks and identity standards for credential format abstraction
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ComplianceCode {
@@ -143,8 +154,6 @@ pub enum ComplianceCode {
     Ob3Jwt,
     #[serde(rename = "OB3_JSONLD")]
     Ob3Jsonld,
-    #[serde(rename = "OB2_COMPATIBILITY")]
-    Ob2Compatibility,
     #[serde(rename = "SD_JWT_VC")]
     SdJwtVc,
     #[serde(rename = "ENTERPRISE_VC")]

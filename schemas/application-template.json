@@ -125,13 +125,9 @@
               "assertions": {"type": "object"}
             }
           },
-          "auto_approve_on_evidence": {
-            "type": "boolean",
-            "description": "Whether a permit decision may automatically approve and issue after this requirement is satisfied."
-          },
           "auto_issue_on_permit": {
             "type": "boolean",
-            "description": "Alias for auto_approve_on_evidence used by generic external API checks."
+            "description": "Whether a permit decision may automatically approve and issue after this requirement is satisfied."
           }
         }
       }
@@ -141,10 +137,29 @@
       "items": {
         "type": "object",
         "required": ["claim_name", "source"],
+        "additionalProperties": false,
         "properties": {
           "claim_name": {"type": "string"},
           "source": {"type": "string", "enum": ["FORM_FIELD", "EVIDENCE_EXTRACTION", "EXTERNAL_API", "SYSTEM"]},
-          "source_config": {"type": "object"}
+          "source_config": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "field_id": {"type": "string"},
+              "evidence_id": {"type": "string"},
+              "path": {"type": "string"},
+              "system_field": {
+                "type": "string",
+                "enum": [
+                  "applicant.user_id", "applicant.email", "applicant.given_name", "applicant.family_name",
+                  "application.id", "application.reference_number", "application.organization_id",
+                  "current.date", "current.datetime", "validity.expiry_date",
+                  "template.name", "template.description", "constant"
+                ]
+              },
+              "value": {}
+            }
+          }
         }
       }
     },

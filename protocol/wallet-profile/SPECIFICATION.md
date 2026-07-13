@@ -1,7 +1,7 @@
 # Wallet Profile — Entity Specification
 
 **Entity:** Wallet Profile
-**Version:** 0.3.0
+**Version:** 0.3.1
 **Stability:** Mixed (derived profiles: stable; override entries: mutable)
 **Section in root spec:** §13
 

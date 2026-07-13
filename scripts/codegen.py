@@ -24,7 +24,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_ROOT = REPO_ROOT
-PROTOCOL_VERSION = "0.3.0"
+PROTOCOL_VERSION = "0.3.1"
 SCHEMAS_DIR = REPO_ROOT / "schemas"
 ENUMS_DIR = REPO_ROOT / "enums"
 
@@ -122,8 +122,27 @@ def snake_to_pascal(name: str) -> str:
     return "".join(word.capitalize() for word in name.split("_"))
 
 
+def nullable_single_variant(prop: dict) -> tuple[dict, bool] | None:
+    """Return the sole non-null oneOf/anyOf branch and its nullability."""
+    variants = prop.get("oneOf") or prop.get("anyOf")
+    if not isinstance(variants, list):
+        return None
+
+    non_null = [variant for variant in variants if variant.get("type") != "null"]
+    nullable = any(variant.get("type") == "null" for variant in variants)
+    if len(non_null) != 1:
+        return None
+    return non_null[0], nullable
+
+
 def json_type_to_python(prop: dict, prop_name: str, required: bool) -> str:
     """Map a JSON Schema property to a Python type annotation."""
+    variant = nullable_single_variant(prop)
+    if variant:
+        branch, nullable = variant
+        base = json_type_to_python(branch, prop_name, True)
+        return f"{base} | None" if nullable and "| None" not in base else base
+
     ref = prop.get("$ref")
     if ref:
         return resolve_ref(ref)
@@ -176,6 +195,12 @@ def json_type_to_python(prop: dict, prop_name: str, required: bool) -> str:
 
 def json_type_to_rust(prop: dict, prop_name: str, required: bool) -> str:
     """Map a JSON Schema property to a Rust type."""
+    variant = nullable_single_variant(prop)
+    if variant:
+        branch, nullable = variant
+        base = json_type_to_rust(branch, prop_name, True)
+        return f"Option<{base}>" if nullable and not base.startswith("Option<") else base
+
     ref = prop.get("$ref")
     if ref:
         return resolve_ref(ref)
@@ -231,6 +256,12 @@ def json_type_to_rust(prop: dict, prop_name: str, required: bool) -> str:
 
 def json_type_to_ts(prop: dict, prop_name: str, required: bool) -> str:
     """Map a JSON Schema property to a TypeScript type."""
+    variant = nullable_single_variant(prop)
+    if variant:
+        branch, nullable = variant
+        base = json_type_to_ts(branch, prop_name, True)
+        return f"{base} | null" if nullable and "| null" not in base else base
+
     ref = prop.get("$ref")
     if ref:
         return resolve_ref(ref)
@@ -506,7 +537,7 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
     cargo = textwrap.dedent("""\
         [package]
         name = "mip-protocol-types"
-        version = "0.3.0"
+        version = "0.3.1"
         edition = "2021"
         description = "Generated Rust types for the Marty Identity Protocol"
         license = "Apache-2.0"

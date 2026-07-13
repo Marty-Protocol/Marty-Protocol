@@ -1,7 +1,7 @@
 # Flow - Entity Specification
 
 **Entity:** Flow
-**Version:** 0.3.0
+**Version:** 0.3.1
 **Stability:** Per use-case
 **Section in root spec:** Section 9
 

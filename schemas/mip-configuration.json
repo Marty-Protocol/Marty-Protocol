@@ -4,14 +4,21 @@
   "title": "MIP Configuration Discovery Document",
   "description": "Schema for the /.well-known/mip-configuration endpoint response. This document describes the capabilities, endpoints, and supported profiles of a MIP implementation. Analogous to OpenID Connect Discovery (RFC 8414) but scoped to MIP-specific capabilities.",
   "type": "object",
-  "required": ["mip_version", "issuer", "mip_configuration_endpoint"],
+  "required": [
+    "mip_version",
+    "issuer",
+    "mip_configuration_endpoint",
+    "supported_versions",
+    "implementation_classes",
+    "active_compliance_profiles"
+  ],
   "additionalProperties": false,
   "properties": {
     "mip_version": {
       "type": "string",
       "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
       "description": "The MIP protocol version supported by this implementation. MUST match the version in the served specification.",
-      "example": "0.3.0"
+      "example": "0.3.1"
     },
     "issuer": {
       "type": "string",
@@ -29,7 +36,7 @@
       "type": "array",
       "items": { "type": "string", "pattern": "^\\d+\\.\\d+(\\.\\d+)?$" },
       "description": "All MIP protocol versions supported by this implementation. Used for version negotiation (see §21). Includes the current version and any backward-compatible prior versions.",
-      "example": ["0.3.0"]
+      "example": ["0.3.1"]
     },
     "implementation_classes": {
       "type": "array",
@@ -84,6 +91,11 @@
       "items": { "type": "string" },
       "description": "Compliance profile IDs or compliance_codes supported by this implementation.",
       "example": ["AAMVA_MDL", "ICAO_DTC", "ENTERPRISE_VC"]
+    },
+    "active_compliance_profiles": {
+      "type": "array",
+      "items": {"$ref": "active-compliance-profile.json"},
+      "description": "Active Compliance Profiles and the discoverable API surface declarations the deployment MUST expose."
     },
     "supported_flow_types": {
       "type": "array",

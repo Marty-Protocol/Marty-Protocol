@@ -1,7 +1,7 @@
 # Deployment Profile — Entity Specification
 
 **Entity:** Deployment Profile
-**Version:** 0.3.0
+**Version:** 0.3.1
 **Stability:** Operational
 **Section in root spec:** §8
 

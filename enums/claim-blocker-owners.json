@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/claim-blocker-owners.json",
+  "title": "ClaimBlockerOwner",
+  "description": "The party responsible for resolving an application claim blocker.",
+  "type": "string",
+  "enum": ["APPLICANT", "ISSUER", "SYSTEM"]
+}

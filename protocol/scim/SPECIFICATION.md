@@ -1,7 +1,7 @@
 # SCIM — Identity Governance Specification
 
 **Entity:** SCIM User, Group, Role
-**Version:** 0.3.0
+**Version:** 0.3.1
 **Stability:** Moderate
 **Standards:** RFC 7643 (SCIM Core Schema), RFC 7644 (SCIM Protocol)
 **Section in root spec:** §17.5

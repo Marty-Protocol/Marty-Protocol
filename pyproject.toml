@@ -1,6 +1,6 @@
 [project]
 name = "marty-protocol-tests"
-version = "0.3.0"
+version = "0.3.1"
 description = "Local validation scripts for the Marty Identity Protocol schema suite"
 requires-python = ">=3.11"
 dependencies = [

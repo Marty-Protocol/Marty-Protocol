@@ -1,7 +1,7 @@
 # Issued Credential — Entity Specification
 
 **Entity:** IssuedCredential
-**Version:** 0.3.0
+**Version:** 0.3.1
 **Stability:** Stable
 **Section in root spec:** §10
 
@@ -61,6 +61,7 @@ IssuedCredential does **not** store the credential payload. It stores only metad
 | POST | `/v1/issued-credentials/{id}/revoke` | Revoke a credential |
 | POST | `/v1/issued-credentials/{id}/suspend` | Suspend a credential |
 | POST | `/v1/issued-credentials/{id}/reinstate` | Reinstate a suspended credential |
+| POST | `/v1/issued-credentials/{id}/renew` | Create a replacement offer for an eligible active credential |
 | GET | `/v1/issued-credentials/mine?status&limit&offset` | Authenticated holder inventory |
 
 IssuedCredentials are never created directly via API; they are created by the system when a FlowExecution completes.
@@ -113,6 +114,19 @@ Request body:
 
 `reason` must be one of the values in `enums/revocation-reasons.json`.
 
+## Renewal
+
+`POST /v1/issued-credentials/{id}/renew` is available only when the source credential is active, its Credential Template allows renewal, and the stored renewal window has opened. The response is a fresh holder offer; creating the offer does not change the source credential.
+
+After the replacement offer is redeemed successfully, the service MUST:
+
+- set the replacement `renewed_from_credential_id` to the source credential;
+- set the source `renewed_to_credential_id` to the replacement credential;
+- revoke the source with a supersession reason; and
+- reject any later renewal attempt for the same source.
+
+An abandoned or expired replacement offer leaves the source active and may be retried.
+
 ### Cascade revocation
 
 If the associated IssuerEntity is revoked, and the `TrustProfileIssuer.cascade_revocation_policy` is `AUTO_CASCADE`, a CascadeRevocationOperation is created covering all `active` IssuedCredentials for that issuer. See `protocol/issuer-registry/SPECIFICATION.md` for details.
@@ -139,6 +153,11 @@ Key fields:
 | `subject_claims_hash` | string | Yes | SHA-256 hex of canonical subject claims JSON |
 | `status` | string | Yes | `active`, `suspended`, `revoked`, `expired` |
 | `status_list_entries` | array | No | Zero or more status list slot references |
+| `renewed_from_credential_id` | string | No | Source credential replaced by this credential |
+| `renewed_to_credential_id` | string | No | Replacement credential that superseded this credential |
+| `renewable` | boolean | No | Whether the source issuance policy permits renewal |
+| `renewal_eligible_at` | datetime | No | Earliest time a renewal offer may be created |
+| `can_renew` | boolean | No | Derived action readiness for the current lifecycle state and time |
 | `issued_at` | datetime | Yes | |
 | `valid_until` | datetime | No | Null = no expiry |
 | `revoked_at` | datetime | No | Set on revocation |

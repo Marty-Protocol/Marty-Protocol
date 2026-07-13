@@ -3,6 +3,7 @@
   "compliance_code": "AAMVA_MDL",
   "name": "AAMVA Mobile Driver License",
   "credential_format": "MDOC",
+  "status": "ACTIVE",
   "is_system": true,
   "description": "ISO/IEC 18013-5 mDL with AAMVA trust framework",
   "issuance_protocol": "OID4VCI_PRE_AUTH",
@@ -13,7 +14,6 @@
     "cert_key_usage": ["digitalSignature"],
     "recommended_algorithms": ["ES256"]
   },
-  "default_verification_rules": {},
   "trust_profile_constraints": {},
   "organization_id": null,
   "discoverable": true,

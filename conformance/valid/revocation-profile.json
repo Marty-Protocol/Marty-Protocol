@@ -2,6 +2,7 @@
   "id": "a2b3c4d5-e6f7-4890-abcd-ef0123456789",
   "organization_id": "f1e2d3c4-b5a6-4978-9012-345678901234",
   "name": "Production Revocation Profile",
+  "status": "ACTIVE",
   "revocation_mechanism": ["STATUS_LIST_2021", "OCSP"],
   "mechanism_priority": ["STATUS_LIST_2021", "OCSP"],
   "check_mode": "CACHED",

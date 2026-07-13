@@ -1,5 +1,5 @@
 // MIP Protocol Models — generated from marty-protocol/schemas/*.json
-// Protocol version: 0.3.0
+// Protocol version: 0.3.1
 // DO NOT EDIT — regenerate with: python scripts/codegen.py typescript
 
 import {
@@ -7,6 +7,7 @@ import {
   ApplicantStatus,
   ApprovalStrategy,
   ChannelType,
+  ClaimBlockerOwner,
   ComplianceCode,
   CredentialFormat,
   CredentialRankingStrategy,
@@ -26,6 +27,14 @@ import {
   ValidationAlgorithm,
   ZkCircuitSystem,
 } from './enums';
+
+/** Deployment discovery projection of an active Compliance Profile and the discoverable API surface it requires. */
+export interface ActiveComplianceProfile {
+  compliance_code: string;
+  credential_format?: CredentialFormat;
+  issuance_protocol?: IssuanceProtocol;
+  api_surface: Record<string, unknown>[];
+}
 
 /** API key for authenticating programmatic access to the Marty gateway. Keys are either ORGANIZATION-scoped (full org access within their scopes) or DEPLOYMENT-scoped (restricted to a single deployment profile). The raw key value is only returned on creation; subsequent reads show a masked representation. Managed via /v1/api-keys. */
 export interface ApiKey {
@@ -56,7 +65,7 @@ export interface ApplicantApplication {
   integration_context: Record<string, unknown>;
   status: 'DRAFT' | 'SUBMITTED' | 'UNDER_REVIEW' | 'PENDING_INFORMATION' | 'APPROVED' | 'REJECTED' | 'WITHDRAWN' | 'OFFERED' | 'CREDENTIALED' | 'SUSPENDED';
   claim_state: 'NOT_READY' | 'BLOCKED' | 'OFFER_READY' | 'CLAIMED' | 'EXPIRED';
-  claim_blocker?: string;
+  claim_blocker?: ClaimBlocker | null;
   credential_display_name?: string | null;
   credential_offer_uri?: string | null;
   credential_offer_uris?: Record<string, unknown>;
@@ -135,23 +144,31 @@ export interface CascadeRevocationOperation {
   updated_at?: string;
 }
 
+/** A privacy-safe, recoverable reason that an approved application cannot yet produce a credential offer. */
+export interface ClaimBlocker {
+  code: string;
+  owner: ClaimBlockerOwner;
+  message: string;
+}
+
 /** Abstraction of credential format complexity behind compliance-oriented identifiers */
 export interface ComplianceProfile {
   id: string;
   organization_id?: string | null;
-  compliance_code: 'ICAO_DTC' | 'ICAO_MRZ' | 'ICAO_PASSPORT' | 'AAMVA_MDL' | 'EUDI_PID' | 'EUDI_MDL' | 'OB3_JWT' | 'OB3_JSONLD' | 'OB2_COMPATIBILITY' | 'SD_JWT_VC' | 'ENTERPRISE_VC' | 'OID4VC' | 'PEX' | 'CUSTOM';
+  compliance_code: 'ICAO_DTC' | 'ICAO_MRZ' | 'ICAO_PASSPORT' | 'AAMVA_MDL' | 'EUDI_PID' | 'EUDI_MDL' | 'OB3_JWT' | 'OB3_JSONLD' | 'SD_JWT_VC' | 'ENTERPRISE_VC' | 'OID4VC' | 'PEX' | 'CUSTOM';
   name: string;
   description?: string;
   credential_format: CredentialFormat;
   issuance_protocol?: IssuanceProtocol;
   issuer_artifact_requirements?: Record<string, unknown>;
-  default_verification_rules?: Record<string, unknown>;
   verification_policy_set_id?: string | null;
   trust_profile_constraints?: Record<string, unknown>;
   api_surface?: Record<string, unknown>[];
   discoverable?: boolean;
+  status: 'DRAFT' | 'ACTIVE' | 'SUSPENDED' | 'DEPRECATED';
   is_system: boolean;
   created_at: string;
+  updated_at?: string;
 }
 
 /** Master issuance configuration combining schema, compliance profile, and cryptographic materials */
@@ -210,7 +227,7 @@ export interface DeliveryDestinationProfile {
   updated_at?: string | null;
 }
 
-/** Runtime configuration for a physical or logical identity verification endpoint. Packages trust, policies, issuance capability, network mode, UX, and device grouping via Lanes. Compatibility extensions may additionally expose rollout and operational fields. */
+/** Runtime configuration for a physical or logical identity verification endpoint. Packages trust, policies, issuance capability, network mode, user experience, and device grouping via Lanes. */
 export interface DeploymentProfile {
   id: string;
   organization_id: string;
@@ -222,11 +239,9 @@ export interface DeploymentProfile {
   default_policy_id?: string | null;
   site_id?: string | null;
   enabled_flow_ids?: string[];
-  default_presentation_policy_id?: string | null;
   network_mode: 'ONLINE' | 'OFFLINE' | 'HYBRID';
   key_access_mode?: 'KEY_VAULT' | 'HSM' | 'DEVICE_KEYSTORE';
   environment_config?: Record<string, unknown>;
-  ux_config?: Record<string, unknown>;
   update_channel?: 'stable' | 'beta' | 'pinned';
   update_policy?: Record<string, unknown>;
   offline_cache_ttl_hours?: number;
@@ -360,6 +375,7 @@ export interface IssuanceRecord {
 /** Lifecycle record for an issued credential. Stores metadata without raw credential data (only a SHA-256 hash for integrity). Links FlowExecution to credential status, status list entries, and revocation history. */
 export interface IssuedCredential {
   id: string;
+  organization_id: string;
   credential_id: string;
   credential_type: string;
   credential_format: 'MDOC' | 'SD_JWT_VC' | 'VC_JWT' | 'JSON_LD';
@@ -367,6 +383,11 @@ export interface IssuedCredential {
   credential_template_id: string;
   application_id?: string | null;
   revocation_profile_id?: string | null;
+  renewed_from_credential_id?: string | null;
+  renewed_to_credential_id?: string | null;
+  renewable?: boolean;
+  renewal_eligible_at?: string | null;
+  can_renew?: boolean;
   subject_id: string;
   subject_claims_hash?: string | null;
   issued_at: string;
@@ -420,8 +441,8 @@ export interface MipConfigurationDiscoveryDocument {
   mip_version: string;
   issuer: string;
   mip_configuration_endpoint: string;
-  supported_versions?: string[];
-  implementation_classes?: string[];
+  supported_versions: string[];
+  implementation_classes: string[];
   issuance_endpoint?: string;
   openid_credential_issuer?: string;
   presentation_endpoint?: string;
@@ -429,6 +450,7 @@ export interface MipConfigurationDiscoveryDocument {
   authorization_endpoint?: string;
   supported_credential_formats?: string[];
   supported_compliance_profiles?: string[];
+  active_compliance_profiles: ActiveComplianceProfile[];
   supported_flow_types?: string[];
   supported_signing_algorithms?: string[];
   proximity_supported?: boolean;
@@ -598,6 +620,7 @@ export interface RevocationProfile {
   id: string;
   organization_id: string;
   name: string;
+  status: 'DRAFT' | 'ACTIVE' | 'SUSPENDED';
   revocation_mechanism: string[];
   mechanism_priority?: string[];
   check_mode: RevocationTimingMode;

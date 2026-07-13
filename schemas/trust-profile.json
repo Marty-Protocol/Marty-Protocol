@@ -186,7 +186,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "enum": ["ICAO_DTC", "ICAO_MRZ", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "OB2_COMPATIBILITY", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
+        "enum": ["ICAO_DTC", "ICAO_MRZ", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
       },
       "uniqueItems": true,
       "description": "Compliance codes whose trust requirements this profile satisfies. Enables multiple compliance profiles (e.g., EUDI_PID and EUDI_MDL) to share a single EUDI trust registry. When null or absent, compatibility is inferred from profile_type alone."
