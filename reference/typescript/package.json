@@ -1,10 +1,19 @@
 {
-  "name": "@mip-protocol/types",
+  "name": "@elevenid/marty-protocol-types",
   "version": "0.3.1",
   "description": "Generated TypeScript types for the Marty Identity Protocol",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Marty-Protocol/Marty-Protocol.git",
+    "directory": "reference/typescript"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build"
