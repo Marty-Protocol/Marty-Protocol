@@ -1,0 +1,23 @@
+﻿# Exact reviewed false positives from the pre-publication full-history audit.
+# Each entry binds one finding to its commit, path, rule, and line; new findings still fail.
+
+0aa1752c47944ecf41d753adb626a042d1fd7e5b:conformance/valid/applicant.json:generic-api-key:5
+0aa1752c47944ecf41d753adb626a042d1fd7e5b:conformance/valid/flow.json:generic-api-key:7
+0aa1752c47944ecf41d753adb626a042d1fd7e5b:conformance/valid/issuance.json:generic-api-key:6
+0aa1752c47944ecf41d753adb626a042d1fd7e5b:conformance/valid/issuance.json:generic-api-key:7
+0aa1752c47944ecf41d753adb626a042d1fd7e5b:conformance/valid/issued-credential.json:generic-api-key:20
+0aa1752c47944ecf41d753adb626a042d1fd7e5b:conformance/valid/issued-credential.json:generic-api-key:7
+0aa1752c47944ecf41d753adb626a042d1fd7e5b:conformance/valid/issued-credential.json:generic-api-key:8
+0aa1752c47944ecf41d753adb626a042d1fd7e5b:conformance/valid/subscription.json:generic-api-key:10
+0aa1752c47944ecf41d753adb626a042d1fd7e5b:SPECIFICATION.md:generic-api-key:2145
+0aa1752c47944ecf41d753adb626a042d1fd7e5b:SPECIFICATION.md:generic-api-key:2146
+1e9ab4a886f081408e77cdba8e3fa0a8dd8d9ff8:conformance/invalid/flow-physical-missing-destination.json:generic-api-key:6
+1e9ab4a886f081408e77cdba8e3fa0a8dd8d9ff8:conformance/valid/flow-custom.json:generic-api-key:7
+1e9ab4a886f081408e77cdba8e3fa0a8dd8d9ff8:conformance/valid/flow-physical-document.json:generic-api-key:7
+1e9ab4a886f081408e77cdba8e3fa0a8dd8d9ff8:conformance/valid/holder-credential-inventory.json:generic-api-key:7
+1e9ab4a886f081408e77cdba8e3fa0a8dd8d9ff8:conformance/valid/physical-document-job.json:generic-api-key:6
+28c5af1af0e1723f9a9f1acfd9b9468f879fdf7f:conformance/invalid/flow-physical-missing-destination.json:generic-api-key:6
+28c5af1af0e1723f9a9f1acfd9b9468f879fdf7f:conformance/valid/flow-custom.json:generic-api-key:7
+28c5af1af0e1723f9a9f1acfd9b9468f879fdf7f:conformance/valid/flow-physical-document.json:generic-api-key:7
+28c5af1af0e1723f9a9f1acfd9b9468f879fdf7f:conformance/valid/holder-credential-inventory.json:generic-api-key:7
+28c5af1af0e1723f9a9f1acfd9b9468f879fdf7f:conformance/valid/physical-document-job.json:generic-api-key:6

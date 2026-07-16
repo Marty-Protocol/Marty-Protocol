@@ -12,5 +12,10 @@ dependencies = [
     "pydantic>=2.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/Marty-Protocol/Marty-Protocol"
+Repository = "https://github.com/Marty-Protocol/Marty-Protocol.git"
+Issues = "https://github.com/Marty-Protocol/Marty-Protocol/issues"
+
 [project.optional-dependencies]
 dev = ["mypy>=1.0", "pytest>=7.0"]
