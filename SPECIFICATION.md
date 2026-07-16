@@ -128,7 +128,7 @@ A single execution of a Flow Definition. Each Flow Instance tracks state transit
 The set of policies, trust anchors, compliance profiles, and ecosystem rules that define what credentials are accepted within a jurisdiction or ecosystem (e.g., EUDI Trust Framework, AAMVA mDL Framework).
 
 **Nonce**
-A cryptographically random, single-use value used to prevent replay attacks in credential issuance (OID4VCI `c_nonce` for holder binding proofs) and presentation challenge-response. MUST be at minimum 128 bits of entropy, base64url-encoded.
+A cryptographically random challenge used to establish proof freshness. Presentation nonces MUST be unique to an authorization request and validated inside the authenticated presentation proof. An OID4VCI `c_nonce` is obtained from the issuer's Nonce Endpoint and remains valid according to issuer policy until rejected. MIP-generated nonce values MUST contain at least 128 bits of entropy and be base64url-encoded.
 
 **Proximity Protocol**
 A short-range transport for credential exchange. In MIP, this refers to ISO 18013-5 Part 8 BLE/NFC engagement between a reader device and a holder wallet.
@@ -262,9 +262,12 @@ Policy Set references (Cedar):
         |-- CredentialOffer ---->|  (QR / deep link / push notification)
         |                        |
         |<-- TokenRequest -------|  (pre-authorized_code grant)
-        |-- TokenResponse ------>|  (access_token + c_nonce)
+        |-- TokenResponse ------>|  (access_token)
         |                        |
-        |<-- CredentialRequest --|  (proof of holder binding using c_nonce)
+        |<-- NonceRequest -------|  (POST nonce_endpoint; no access token)
+        |-- NonceResponse ------>|  (c_nonce; Cache-Control: no-store)
+        |                        |
+        |<-- CredentialRequest --|  (proofs using c_nonce when required)
         |-- CredentialResponse ->|  (signed credential or transaction_id)
         |                        |
         |<-- Notification -------|  (wallet stores credential; optional)
@@ -654,8 +657,11 @@ The `longfellow-libzk-v1` system supports `EQUALITY` predicates on mDoc credenti
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `required` | boolean | Yes | Whether holder binding is required |
-| `binding_methods` | string[] | No | Accepted binding methods (`NONCE`, `DEVICE_KEY`, `SESSION_BINDING`) |
-| `nonce_required` | boolean | No | Whether verifier-provided nonce is required |
+| `binding_methods` | string[] | Conditional | Accepted control methods (`CREDENTIAL_KEY`, `DEVICE_KEY`, `SESSION_BINDING`) |
+| `proof_profiles` | string[] | Conditional | Accepted wire profiles (`OID4VP_VERIFIABLE_PRESENTATION`, `SD_JWT_KEY_BINDING`, `MDOC_DEVICE_AUTHENTICATION`, `CUSTOM`) |
+| `proof_freshness` | ProofFreshness | Conditional | Challenge, audience, replay, and proof-age requirements |
+
+When `required` is true, all three conditional fields are required. When false, they MUST be absent. A nonce or session challenge is freshness evidence only; it is not a holder-binding method without an authenticated proof.
 
 ### 7.6 FreshnessConfig
 
@@ -2211,13 +2217,13 @@ All UUID references MUST resolve to existing records within the same organizatio
 
 | Threat | Normative Requirement |
 |--------|----------------------|
-| Replay Attack | Implementations MUST reject any proof or VP token where the `nonce` has been previously seen. Nonces MUST be stored with sufficient retention to cover `offline_grace_seconds + clock_skew_seconds`. |
+| Replay Attack | Verifiers MUST reject a presentation proof or VP token replayed outside its original `nonce` and audience context. Issuers MUST reject duplicate key proofs while allowing an OID4VCI `c_nonce` to remain valid according to documented issuer policy. |
 | Credential Cloning | Issuance MUST require holder binding proof when `holder_binding_required: true` in the Compliance Profile (see §20.6). Wallet implementations SHOULD use hardware-backed key storage. |
 | Issuer Impersonation | Verifiers MUST validate the full issuer certificate chain or DID resolution per §5.7.3. |
 | Verifier Phishing | Wallets SHOULD validate `client_id` against registered verifier metadata. Verifiers SHOULD register their `client_id` in the organization's Deployment Profile. |
 | Revocation Bypass | Verifiers MUST NOT use `check_mode: SKIP` for credentials with legal or regulatory significance. Offline grace MUST NOT exceed 24 hours for credentials at assurance level IAL2 or higher. |
 | Wallet Compromise | Device Registrations SHOULD include device attestation proofs. Wallets SHOULD require biometric or PIN authentication before presenting. |
-| Nonce Reuse | Nonce endpoints MUST invalidate nonces immediately upon first use. Issued nonces MUST have an expiry (`c_nonce_expires_in` in OID4VCI token responses). |
+| Nonce Misuse | OID4VCI Nonce Endpoints MUST return a fresh unpredictable `c_nonce` with `Cache-Control: no-store`. Issuers MUST document nonce validity, reject invalid nonces, and prevent replay of an already accepted key proof. |
 | Man-in-the-Middle | All REST endpoints MUST use TLS 1.3+. Proximity sessions MUST use session encryption per ISO 18013-5:2021 §9. |
 | Metadata Injection | Issuer metadata endpoints MUST be served over HTTPS. Implementations SHOULD validate metadata document integrity via sub-resource integrity or signed metadata JWT. |
 | Offline Grace Abuse | `offline_grace_seconds` values MUST be logged in audit events when applied. A configurable alert threshold SHOULD be set for grace period usage frequency. |
@@ -2226,11 +2232,13 @@ All UUID references MUST resolve to existing records within the same organizatio
 
 When a Compliance Profile sets `holder_binding_required: true`:
 
-1. The issuer MUST include a `c_nonce` in the `TokenResponse` and require a `proof` object in the `CredentialRequest`.
-2. The wallet MUST respond with a `proof` containing a holder-bound JWT signed by the holder's private key, including the `c_nonce` as the `nonce` claim.
-3. The credential MUST be cryptographically bound to the holder's public key: `DeviceKey` for mDocs (ISO 18013-5 §7.2.2), `cnf.jwk` for SD-JWT-VC (IETF SD-JWT-VC §3.5).
-4. Verifiers MUST verify the holder binding proof during presentation validation before accepting any presented claims.
-5. A credential lacking holder binding MUST NOT be accepted by a verifier whose active Presentation Policy requires holder-bound presentations.
+1. Issuer metadata MUST advertise the supported proof types for each holder-bound credential configuration.
+2. When proof freshness uses `c_nonce`, the issuer MUST publish a Nonce Endpoint, return a fresh `c_nonce` with `Cache-Control: no-store`, and validate that nonce in each submitted key proof.
+3. The wallet MUST submit the OID4VCI 1.0 Final `proofs` parameter using a proof type advertised by the issuer. The proof MUST bind the issuer audience and, when the issuer has a Nonce Endpoint, its `c_nonce`.
+4. The credential MUST be bound using the format's defined mechanism, such as `DeviceKey` for mDocs or the holder public key referenced by an SD-JWT credential.
+5. A verifier whose Presentation Policy requires holder binding MUST validate one allowed `binding_method` using one allowed `proof_profile`, together with all configured `proof_freshness` checks.
+6. The verification result MUST record the required and validated method, proof profile, freshness checks, and a machine-readable failure reason when validation fails.
+7. A credential or presentation lacking the required binding evidence MUST be rejected before claims are accepted.
 
 ### 20.7 Normative Revocation Check Algorithm
 
@@ -2446,6 +2454,7 @@ A conformant OID4VC implementation MUST pass the OIDF conformance suite tests mi
 - **VCIIssuerHappyFlow (mso_mdoc)** — mDoc issuance with `mso_mdoc` format identifier.
 - **OID4VPVerifierHappyFlow** — VP token submission accepted and verification result returned.
 - **Nonce Endpoint** — `nonce_endpoint` returns unique `c_nonce` per request with `no-store` cache control.
+- **Token Response** — token responses do not carry draft-era `c_nonce` or `c_nonce_expires_in` fields.
 
 Implementations SHOULD target OIDF Certification Program level **Issuer** and **Verifier** classes.
 

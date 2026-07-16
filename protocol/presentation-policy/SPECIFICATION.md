@@ -19,7 +19,7 @@ Presentation Policies change when business rules change — they are the most fr
 |-----------|-------------|
 | Required Claims | Which claims must be present |
 | ZK Predicates | Boolean proofs over claims without revealing raw values |
-| Holder Binding | Whether device-bound or nonce proof-of-possession is required |
+| Holder Binding | Which credential, device, or session control proof is required |
 | Freshness | How recent the credential or its revocation check must be |
 | Issuer Constraints | Which issuers are accepted (via Trust Profile reference) |
 
@@ -94,8 +94,30 @@ Presentation Policies change when business rules change — they are the most fr
 | Property | Type | Required | Constraint |
 |----------|------|----------|------------|
 | `required` | boolean | Yes | |
-| `binding_methods` | string[] | No | `NONCE`, `DEVICE_KEY`, `SESSION_BINDING` |
-| `nonce_required` | boolean | No | Default false |
+| `binding_methods` | string[] | Conditional | `CREDENTIAL_KEY`, `DEVICE_KEY`, `SESSION_BINDING` |
+| `proof_profiles` | string[] | Conditional | `OID4VP_VERIFIABLE_PRESENTATION`, `SD_JWT_KEY_BINDING`, `MDOC_DEVICE_AUTHENTICATION`, `CUSTOM` |
+| `proof_freshness` | object | Conditional | Challenge, audience, replay, and proof-age checks |
+
+All conditional fields are required when `required` is true and prohibited when false.
+
+### ProofFreshness Fields
+
+| Property | Type | Required | Constraint |
+|----------|------|----------|------------|
+| `challenge_required` | boolean | No | Default true; validate nonce or format-equivalent challenge inside the authenticated proof |
+| `audience_binding_required` | boolean | No | Default true; bind proof to the verifier or transaction audience |
+| `replay_detection_required` | boolean | No | Default true; reject reuse outside the original transaction |
+| `max_proof_age_seconds` | integer | No | Positive maximum age when the proof profile carries time |
+
+`NONCE` is not a binding method. A nonce establishes freshness only when it is covered by a valid signature, MAC, device-authentication structure, or authenticated session proof.
+
+### Binding Method Semantics
+
+- `CREDENTIAL_KEY`: the verifier validates control of the private key associated with the credential at issuance. SD-JWT Key Binding is the standard example.
+- `DEVICE_KEY`: the verifier validates a format-defined device key proof, such as mdoc Device Authentication.
+- `SESSION_BINDING`: the verifier validates that the presentation is cryptographically bound to the current authenticated session or session transcript.
+
+The selected `proof_profiles` define the wire checks. Implementations MUST validate the profile's signature or MAC, credential-to-key association, challenge, audience, replay state, and permitted algorithms. `CUSTOM` requires a versioned custom Flow extension and MUST NOT be represented as standard MIP interoperability.
 
 ### FreshnessConfig Fields
 
@@ -112,6 +134,9 @@ Presentation Policies change when business rules change — they are the most fr
 3. `fallback_policy: REQUIRE_PREDICATE` MUST only be used when `supported_circuits` is non-empty.
 4. `trust_profile_id` MUST reference an existing Trust Profile if present.
 5. A `predicate_spec` with `fallback_policy: REQUIRE_PREDICATE` applied to a credential format that does not support ZK (e.g., `VC_JWT`) MUST be treated as an error at policy creation time.
+6. `holder_binding.required: true` requires non-empty, unique `binding_methods` and `proof_profiles`, plus `proof_freshness`.
+7. `holder_binding.required: false` prohibits binding methods, proof profiles, and proof-freshness settings.
+8. Policy activation MUST reject proof profiles incompatible with accepted credential formats or unavailable verifier capabilities.
 
 ## ZK Predicate Evaluation Order
 
@@ -153,7 +178,16 @@ When a claim has a `predicate_spec`:
     }
   ],
   "prefer_predicates": true,
-  "holder_binding": {"required": true, "binding_methods": ["NONCE"], "nonce_required": true},
+  "holder_binding": {
+    "required": true,
+    "binding_methods": ["DEVICE_KEY", "SESSION_BINDING"],
+    "proof_profiles": ["MDOC_DEVICE_AUTHENTICATION"],
+    "proof_freshness": {
+      "challenge_required": true,
+      "audience_binding_required": true,
+      "replay_detection_required": true
+    }
+  },
   "freshness": {"require_not_revoked": true},
   "created_at": "2026-03-11T00:00:00Z"
 }

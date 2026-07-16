@@ -41,6 +41,8 @@ A Deployment Profile packages trust configuration, verification policies, and ru
 | `environment_config` | EnvironmentConfig | No | See below |
 | `update_channel` | UpdateChannel | No | See below |
 | `lanes` | Lane[] | No | Logical device groupings |
+| `operator_biometric_authentication_required` | boolean | No | Require local operator biometric authentication before processing verifications |
+| `biometric_required` | boolean | Deprecated | Compatibility alias for operator authentication; never holder biometric matching |
 | `created_at` | datetime | Yes | ISO 8601 |
 | `updated_at` | datetime | No | ISO 8601 |
 
@@ -82,6 +84,8 @@ A Deployment Profile packages trust configuration, verification policies, and ru
 5. Device IDs MUST be unique across all lanes within the same Deployment Profile.
 6. A lane `default_policy_id` MUST be in the parent profile's `presentation_policy_ids`.
 7. `credential_template_ids`, if present, each MUST reference an `ACTIVE` Credential Template.
+8. The canonical operator-authentication field and deprecated alias MUST NOT appear together. Readers MUST normalize the alias to `operator_biometric_authentication_required`; writers MUST emit only the canonical field.
+9. Neither deployment field represents biometric holder binding. Presentation-time holder biometrics require a separate, explicitly versioned policy extension.
 
 ## Hierarchy
 

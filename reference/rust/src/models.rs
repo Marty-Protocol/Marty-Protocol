@@ -208,6 +208,10 @@ pub struct ComplianceProfile {
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub specification_reference: Option<String>,
     pub credential_format: CredentialFormat,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub issuance_protocol: Option<IssuanceProtocol>,
@@ -221,6 +225,50 @@ pub struct ComplianceProfile {
     pub api_surface: Option<Vec<serde_json::Value>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub discoverable: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub required_claims: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub optional_claims: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub required_namespaces: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub optional_namespaces: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub required_contexts: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub supported_proof_types: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub supported_algorithms: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub key_requirements: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub revocation_methods: Option<Vec<RevocationMechanism>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub revocation_required: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub allow_skip_revocation: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trust_source_types: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub holder_binding_required: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selective_disclosure_required: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub immutable: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub oid4vci_features: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub oid4vp_features: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pex_requirements: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub physical_production: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pki_hierarchy: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub vetting_requirements: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub conformance_tests: Option<Vec<serde_json::Value>>,
     pub status: String,
     pub is_system: bool,
     pub created_at: String,
@@ -353,6 +401,8 @@ pub struct DeploymentProfile {
     pub update_policy: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub offline_cache_ttl_hours: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub operator_biometric_authentication_required: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub biometric_required: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -727,6 +777,13 @@ pub struct NotificationTarget {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub email_addresses: Option<Vec<String>>,
     pub channels: Vec<String>,
+}
+
+/// Response from the OID4VCI 1.0 Final Nonce Endpoint. The HTTP response must also include
+/// Cache-Control: no-store.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OID4VCINonceResponse {
+    pub c_nonce: String,
 }
 
 /// Organisation-specific overlay of a TrustFramework. Separates shared framework

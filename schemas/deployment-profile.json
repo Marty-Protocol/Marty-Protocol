@@ -84,10 +84,15 @@
       "default": 24,
       "description": "Hours to cache trust anchors and status lists when network_mode is OFFLINE or HYBRID"
     },
-    "biometric_required": {
+    "operator_biometric_authentication_required": {
       "type": "boolean",
       "default": false,
       "description": "Require the operator to authenticate with biometric before processing verifications"
+    },
+    "biometric_required": {
+      "type": "boolean",
+      "deprecated": true,
+      "description": "Deprecated compatibility alias for operator_biometric_authentication_required. It never represents credential-holder biometric matching."
     },
     "audit_all_events": {
       "type": "boolean",
@@ -101,5 +106,12 @@
     },
     "created_at": {"type": "string", "format": "date-time"},
     "updated_at": {"type": "string", "format": "date-time"}
-  }
+  },
+  "allOf": [
+    {
+      "not": {
+        "required": ["operator_biometric_authentication_required", "biometric_required"]
+      }
+    }
+  ]
 }

@@ -7,7 +7,11 @@
   "required": ["id", "compliance_code", "name", "credential_format", "status", "is_system", "created_at"],
   "additionalProperties": false,
   "properties": {
-    "id": {"type": "string", "format": "uuid"},
+    "id": {
+      "type": "string",
+      "pattern": "^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|cpf?-[a-z0-9][a-z0-9-]{1,126})$",
+      "description": "UUID for organization profiles or stable cp-*/cpf-* identifier for system profiles."
+    },
     "organization_id": {"type": ["string", "null"], "format": "uuid"},
     "compliance_code": {
       "type": "string",
@@ -15,6 +19,8 @@
     },
     "name": {"type": "string", "minLength": 1, "maxLength": 128},
     "description": {"type": "string", "maxLength": 1024},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"},
+    "specification_reference": {"type": "string", "minLength": 1},
     "credential_format": {
       "type": "string",
       "$ref": "../enums/credential-formats.json"
@@ -119,6 +125,78 @@
       "type": "boolean",
       "default": true,
       "description": "Whether this compliance profile appears in /.well-known/mip-configuration"
+    },
+    "required_claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "namespace": {"type": "string", "minLength": 1},
+          "description": {"type": "string"},
+          "required": {"type": "boolean"}
+        }
+      }
+    },
+    "optional_claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "namespace": {"type": "string", "minLength": 1},
+          "description": {"type": "string"},
+          "required": {"type": "boolean"}
+        }
+      }
+    },
+    "required_namespaces": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "optional_namespaces": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "required_contexts": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "supported_proof_types": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "supported_algorithms": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "key_requirements": {"type": "object"},
+    "revocation_methods": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "../enums/revocation-methods.json"}
+    },
+    "revocation_required": {"type": "boolean"},
+    "allow_skip_revocation": {"type": "boolean"},
+    "trust_source_types": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "enum": ["TRUST_LIST", "PINNED_ISSUER", "ROOT_CA", "PKD_URL"]}
+    },
+    "holder_binding_required": {
+      "type": "boolean",
+      "description": "Whether credentials governed by this profile require issuance-time holder binding and holder-bound verification."
+    },
+    "selective_disclosure_required": {"type": "boolean"},
+    "immutable": {"type": "boolean"},
+    "oid4vci_features": {"type": "object"},
+    "oid4vp_features": {"type": "object"},
+    "pex_requirements": {"type": "object"},
+    "physical_production": {"type": "object"},
+    "pki_hierarchy": {"type": "object"},
+    "vetting_requirements": {"type": "object"},
+    "conformance_tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["suite", "module", "spec_ref", "test_file"],
+        "additionalProperties": false,
+        "properties": {
+          "suite": {"type": "string", "minLength": 1},
+          "module": {"type": "string", "minLength": 1},
+          "spec_ref": {"type": "string", "minLength": 1},
+          "test_file": {"type": "string", "minLength": 1}
+        }
+      }
     },
     "status": {
       "type": "string",

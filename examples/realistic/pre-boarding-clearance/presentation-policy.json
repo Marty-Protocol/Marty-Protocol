@@ -25,8 +25,13 @@
   "trust_profile_id": "tp-icao-dtc-example",
   "holder_binding": {
     "required": true,
-    "binding_methods": ["NONCE"],
-    "nonce_required": true
+    "binding_methods": ["CREDENTIAL_KEY"],
+    "proof_profiles": ["OID4VP_VERIFIABLE_PRESENTATION"],
+    "proof_freshness": {
+      "challenge_required": true,
+      "audience_binding_required": true,
+      "replay_detection_required": true
+    }
   },
   "freshness": {
     "max_age_seconds": 86400,

@@ -55,7 +55,9 @@ Signature is OPTIONAL for administrative messages (where TLS client auth is used
 |----------------|-----------|------|-------------|
 | `CredentialOffer` | Issuer → Holder | `create_offer` | OID4VCI credential offer (by reference or by value) |
 | `TokenRequest` | Holder → Issuer | `token_exchange` | OAuth2 token request (pre-authorized or auth code) |
-| `TokenResponse` | Issuer → Holder | `token_exchange` | Access token + optional `c_nonce` |
+| `TokenResponse` | Issuer → Holder | `token_exchange` | OAuth access token response; no credential nonce fields |
+| `NonceRequest` | Holder → Issuer | `credential_request` | Empty POST to the OID4VCI Nonce Endpoint |
+| `NonceResponse` | Issuer → Holder | `credential_request` | Fresh `c_nonce` with `Cache-Control: no-store` |
 | `CredentialRequest` | Holder → Issuer | `credential_request` | OID4VCI credential request with holder proof |
 | `CredentialResponse` | Issuer → Holder | `issue_credential` | Signed credential or deferred acceptance ID |
 | `DeferredCredentialRequest` | Holder → Issuer | `deferred_retrieve` | Poll for deferred credential |
@@ -120,26 +122,34 @@ Conforms to RFC 6749. For pre-authorized flows, the `pre-authorized_code` grant 
 
 ### 3.3 TokenResponse
 
-Conforms to RFC 6749. MUST include `c_nonce` and `c_nonce_expires_in` when the issuer requires a holder binding proof on the subsequent credential request.
+Conforms to RFC 6749. OID4VCI 1.0 Final token responses MUST NOT include the draft-era `c_nonce` or `c_nonce_expires_in` fields. A wallet obtains credential-proof freshness from the issuer's Nonce Endpoint.
 
-### 3.4 CredentialRequest
+### 3.4 NonceRequest and NonceResponse
 
-Conforms to OID4VCI §7.2. MUST include a `proof` object when `holder_binding_required: true` in the Compliance Profile. The proof MUST use the `c_nonce` received in the `TokenResponse`.
+When issuer metadata includes `nonce_endpoint`, the wallet sends an unauthenticated HTTP POST with an empty body. The issuer returns an `OID4VCINonceResponse` containing `c_nonce`; the HTTP response MUST include `Cache-Control: no-store`. Each successful request MUST return a fresh unpredictable value. The schemas are `schemas/oid4vci-nonce-request.json` and `schemas/oid4vci-nonce-response.json`.
 
-The `proof` object MUST contain:
+The issuer determines how long a `c_nonce` remains valid. It MUST reject invalid values and MUST reject replay of an already accepted key proof even when the associated nonce remains valid.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `proof_type` | string | `jwt` or `cwt` |
-| `jwt` | string | Signed JWT with `iss` (holder DID or key thumbprint), `aud` (issuer URL), `iat`, and `nonce` (`c_nonce` value) |
+### 3.5 CredentialRequest
 
-### 3.5 CredentialResponse
+Conforms to OID4VCI 1.0 Final Section 8.2. The `proofs` parameter MUST be present when the selected credential configuration advertises `proof_types_supported`. If the issuer publishes a Nonce Endpoint, every key proof MUST contain a valid `c_nonce` obtained from that endpoint.
+
+For the JWT proof type, the signed proof MUST use an advertised algorithm and bind:
+
+- the public key identified by `kid`, `jwk`, or `x5c` in the JOSE header;
+- the Credential Issuer Identifier in `aud`;
+- an acceptable creation time in `iat`; and
+- the issuer-provided `c_nonce` in `nonce` when a Nonce Endpoint is configured.
+
+Other proof types MUST follow their registered OID4VCI proof profile. Implementations MUST NOT silently reinterpret the legacy singular `proof` parameter as the Final `proofs` parameter.
+
+### 3.6 CredentialResponse
 
 Conforms to OID4VCI §7.3. Contains either:
 - `credential`: the signed credential (base64url mDoc CBOR or SD-JWT string)
 - `transaction_id`: deferred issuance identifier
 
-### 3.6 PresentationRequest
+### 3.7 PresentationRequest
 
 Conforms to OID4VP §5. MIP-specific extension fields:
 
@@ -152,11 +162,11 @@ Conforms to OID4VP §5. MIP-specific extension fields:
 | `mip_flow_instance_id` | UUID | No | MIP-extension: links request to FlowInstance |
 | `mip_policy_id` | UUID | No | MIP-extension: Presentation Policy ID that generated this request |
 
-### 3.7 PresentationResponse
+### 3.8 PresentationResponse
 
 Conforms to OID4VP §6. MUST be encrypted with the verifier's public key in cross-device flows when `jarm` response mode is used.
 
-### 3.8 VerificationResult
+### 3.9 VerificationResult
 
 MIP-proprietary message (internal). Produced by the verification engine after executing trust evaluation (§5.7.3).
 
@@ -182,7 +192,7 @@ MIP-proprietary message (internal). Produced by the verification engine after ex
 | `satisfies_predicate` | boolean | Whether any predicate on the claim was satisfied |
 | `result` | string | `PASS`, `FAIL`, `SKIPPED` |
 
-### 3.9 ApplicationSubmission
+### 3.10 ApplicationSubmission
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -194,7 +204,7 @@ MIP-proprietary message (internal). Produced by the verification engine after ex
 
 Applicant identity, CredentialTemplate, required checks, approval policy, and validity are server-derived. Clients MUST NOT include those values in this message.
 
-### 3.10 ApplicantDecision
+### 3.11 ApplicantDecision
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|

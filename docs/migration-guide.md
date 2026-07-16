@@ -1,8 +1,23 @@
 # MIP Migration Guide
 
 This guide documents coordinated, breaking upgrades between MIP releases. MIP
-0.3.1 does not provide a compatibility window: protocol, services, clients,
-generated bindings, fixtures, and stored data must move together.
+0.3.1 does not provide a mixed-version wire compatibility window: protocol,
+services, clients, generated bindings, and fixtures must move together. A
+bounded read-only compatibility path is permitted for persisted legacy values
+and explicitly documented inbound aliases; canonical writers never emit them.
+
+## Holder Binding and OID4VCI Final Nonce Migration
+
+This migration changes Presentation Policy holder binding and removes draft-era OID4VCI nonce handling.
+
+1. Replace `binding_methods: ["NONCE"]` with an actual control method: `CREDENTIAL_KEY`, `DEVICE_KEY`, or `SESSION_BINDING`.
+2. Remove `nonce_required`. Add `proof_profiles` and `proof_freshness`; configure challenge, audience, replay, and optional proof-age checks explicitly.
+3. Reject holder-binding configurations when `required` is true but methods, profiles, or freshness rules are missing. Remove all three fields when `required` is false.
+4. Stop reading `c_nonce` and `c_nonce_expires_in` from OAuth Token Responses. Discover `nonce_endpoint`, POST an empty body, and use the returned `c_nonce` in the OID4VCI Final `proofs` parameter.
+5. Normalize stored Deployment Profiles from `biometric_required` to `operator_biometric_authentication_required`. During the bounded storage migration, readers accept either field, writers emit only the canonical field, and payloads containing both are rejected.
+6. Store holder-binding evidence with verification results: required method, validated proof profile, challenge, audience, replay result, proof age when available, and failure reason.
+
+The deployment alias concerns operator authentication only. It MUST NOT be interpreted as credential-holder biometric comparison.
 
 ## 0.1.x to 0.3.1
 

@@ -30,7 +30,7 @@
     "key_modes": ["SOFTWARE", "HSM"],
     "key_algorithm_families": ["EC", "OKP"]
   },
-  "revocation_methods": ["StatusList2021", "BITSTRING_STATUS_LIST"],
+  "revocation_methods": ["STATUS_LIST_2021", "BITSTRING_STATUS_LIST"],
   "revocation_required": false,
   "allow_skip_revocation": true,
   "trust_source_types": ["PINNED_ISSUER"],

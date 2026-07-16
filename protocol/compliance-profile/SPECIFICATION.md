@@ -20,6 +20,9 @@ A Compliance Profile abstracts **credential format complexity** behind complianc
 | Issuance Protocol | How credentials are delivered |
 | Artifact Requirements | What keys, certs, or DIDs are needed |
 | Verification Policy | Cedar PolicySet reference for verification rules |
+| Credential Requirements | Claims, namespaces, proof types, algorithms, key rules, and revocation behavior |
+| Holder Binding | Whether issuance and later presentation require proof of control |
+| Conformance Evidence | Executable suites and fixtures that substantiate the profile |
 
 ## Properties
 
@@ -27,16 +30,26 @@ A Compliance Profile abstracts **credential format complexity** behind complianc
 
 | Property | Type | Required | Constraint |
 |----------|------|----------|------------|
-| `id` | UUID | Yes | Unique |
+| `id` | UUID or `cp-*`/`cpf-*` | Yes | Unique; stable identifiers are permitted for system profiles |
 | `organization_id` | UUID | No | Null for system profiles |
 | `compliance_code` | ComplianceCode | Yes | From `compliance-codes` enum |
 | `name` | string | Yes | 1–128 characters |
 | `description` | string | No | Max 1024 characters |
+| `version` | semver | No | Version of the profile definition |
+| `specification_reference` | string | No | Governing external specification or MIP reference |
 | `credential_format` | CredentialFormat | Yes | From `credential-formats` enum |
 | `issuance_protocol` | IssuanceProtocol | No | From `issuance-protocols` enum |
 | `issuer_artifact_requirements` | ArtifactRequirements | No | See below |
 | `verification_policy_set_id` | UUID | No | Active Cedar PolicySet for credential-verification rules |
 | `trust_profile_constraints` | object | No | Trust requirements for this format |
+| `required_claims` / `optional_claims` | ProfileClaim[] | No | Credential claim contract |
+| `required_namespaces` / `optional_namespaces` | string[] | No | Format namespace contract |
+| `supported_proof_types` | string[] | No | Issuance proof types accepted by the profile |
+| `supported_algorithms` | string[] | No | Algorithms accepted by the profile |
+| `key_requirements` | object | No | Format-specific key controls |
+| `revocation_methods` | RevocationMethod[] | No | Supported status mechanisms |
+| `holder_binding_required` | boolean | No | Requires issuance-time key binding and holder-bound presentation |
+| `conformance_tests` | ConformanceTest[] | No | Executable evidence for claimed conformance |
 | `is_system` | boolean | Yes | System vs. organization-custom |
 | `created_at` | datetime | Yes | ISO 8601 |
 
@@ -75,6 +88,9 @@ System profiles are read-only and pre-installed. They cannot be modified or dele
 3. Custom profiles with `compliance_code: CUSTOM` MUST have `organization_id` set.
 4. `credential_format` and `compliance_code` combinations MUST be internally consistent (e.g., `ICAO_DTC` requires `MDOC`).
 5. A Compliance Profile is immutable once referenced by an `ACTIVE` Credential Template.
+6. `holder_binding_required: true` requires an issuance proof that binds the credential to holder-controlled key material. A nonce alone never satisfies this requirement.
+7. Verifiers MUST combine the profile requirement with a Presentation Policy that selects an actual binding method, wire proof profile, and freshness checks.
+8. Every bundled system profile MUST validate against `schemas/compliance-profile.json`; undocumented extension fields are prohibited.
 
 ## Format–Code Compatibility Matrix
 
@@ -150,10 +166,10 @@ For per-organization endpoints, the `/.well-known/mip-configuration` response MA
 |-------|-------------------|---------|
 | `openid-credential-issuer-metadata` | OID4VCI §11.2.3 | OID4VCI issuer metadata document |
 | `token` | RFC 6749 §3.2 / OID4VCI §6 | OAuth2 token endpoint |
-| `credential` | OID4VCI §7 | Credential issuance endpoint |
-| `nonce` | OID4VCI §8 | Nonce endpoint |
-| `deferred-credential` | OID4VCI §9 | Deferred credential retrieval |
-| `notification` | OID4VCI §10 | Holder notification endpoint |
+| `credential` | OID4VCI 1.0 Final §8 | Credential issuance endpoint |
+| `nonce` | OID4VCI 1.0 Final §7 | Unauthenticated proof Nonce Endpoint; responses use `Cache-Control: no-store` |
+| `deferred-credential` | OID4VCI 1.0 Final §9 | Deferred credential retrieval |
+| `notification` | OID4VCI 1.0 Final §10 | Holder notification endpoint |
 | `status-list` | IETF Token Status List | Revocation status list endpoint |
 | `device-engagement` | ISO/IEC 18013-5:2021 §8.2.1 | mDoc device engagement (QR/NFC) |
 | `session-establishment` | ISO/IEC 18013-5:2021 §8.3 | mDoc proximity session establishment |

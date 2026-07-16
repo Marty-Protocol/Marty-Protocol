@@ -10,6 +10,9 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 ## [Unreleased]
 
 ### Changed
+- Replaced Presentation Policy `NONCE` binding with explicit credential, device, or session control methods plus proof-profile and proof-freshness requirements.
+- Aligned OID4VCI issuance with the 1.0 Final Nonce Endpoint and plural `proofs` parameter; Token Responses no longer carry draft-era credential nonce fields.
+- Renamed Deployment Profile `biometric_required` to `operator_biometric_authentication_required` with a bounded read-compatibility alias.
 - Removed `OB2_COMPATIBILITY`; Open Badges support is version 3 only.
 - Application Template evidence requirements now use only `auto_issue_on_permit`.
 - Application Template claim rules now use only `claim_name`, `source`, and `source_config`.
@@ -18,7 +21,10 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 - Replaced compatibility/deprecation guidance with exact-version, atomic-release requirements.
 
 ### Fixed
+- Brought bundled system Compliance Profiles under schema validation, including `holder_binding_required` and their ecosystem requirement fields.
+- Added structured holder-binding evidence to Verification Session results.
 - Generated Python, Rust, and TypeScript bindings now model `claim_blocker` as the typed nullable `ClaimBlocker` object instead of degrading it to `Any` or `string`.
+- Corrected the `TOKEN_STATUS_LIST` standard reference from unrelated RFC 9738 to the active `draft-ietf-oauth-status-list` specification.
 
 ## [0.3.1] - 2026-07-12
 

@@ -56,7 +56,7 @@ A Revocation Profile provides **format-agnostic revocation configuration** for b
 | `CRL` | RFC 5280 | Certificate Revocation List |
 | `STATUS_LIST_2021` | W3C Status List 2021 | Bitstring status list (W3C) |
 | `BITSTRING_STATUS_LIST` | IETF draft-ietf-oauth-status-list | IETF Bitstring Status List |
-| `TOKEN_STATUS_LIST` | IETF RFC 9738 | Token Status List (TS) |
+| `TOKEN_STATUS_LIST` | IETF draft-ietf-oauth-status-list | Token Status List (TSL) |
 
 ### IssuerRevocationConfig Fields
 

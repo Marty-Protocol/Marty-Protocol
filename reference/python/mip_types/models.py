@@ -186,6 +186,8 @@ class ComplianceProfile(BaseModel):
     compliance_code: Literal["ICAO_DTC", "ICAO_MRZ", "ICAO_PASSPORT", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
     name: str
     description: str | None = None
+    version: str | None = None
+    specification_reference: str | None = None
     credential_format: CredentialFormat
     issuance_protocol: IssuanceProtocol | None = None
     issuer_artifact_requirements: dict[str, Any] | None = None
@@ -193,6 +195,28 @@ class ComplianceProfile(BaseModel):
     trust_profile_constraints: dict[str, Any] | None = None
     api_surface: list[dict[str, Any]] | None = None
     discoverable: bool | None = None
+    required_claims: list[dict[str, Any]] | None = None
+    optional_claims: list[dict[str, Any]] | None = None
+    required_namespaces: list[str] | None = None
+    optional_namespaces: list[str] | None = None
+    required_contexts: list[str] | None = None
+    supported_proof_types: list[str] | None = None
+    supported_algorithms: list[str] | None = None
+    key_requirements: dict[str, Any] | None = None
+    revocation_methods: list[RevocationMechanism] | None = None
+    revocation_required: bool | None = None
+    allow_skip_revocation: bool | None = None
+    trust_source_types: list[str] | None = None
+    holder_binding_required: bool | None = None
+    selective_disclosure_required: bool | None = None
+    immutable: bool | None = None
+    oid4vci_features: dict[str, Any] | None = None
+    oid4vp_features: dict[str, Any] | None = None
+    pex_requirements: dict[str, Any] | None = None
+    physical_production: dict[str, Any] | None = None
+    pki_hierarchy: dict[str, Any] | None = None
+    vetting_requirements: dict[str, Any] | None = None
+    conformance_tests: list[dict[str, Any]] | None = None
     status: Literal["DRAFT", "ACTIVE", "SUSPENDED", "DEPRECATED"]
     is_system: bool
     created_at: datetime
@@ -282,6 +306,7 @@ via Lanes."""
     update_channel: Literal["stable", "beta", "pinned"] | None = None
     update_policy: dict[str, Any] | None = None
     offline_cache_ttl_hours: int | None = None
+    operator_biometric_authentication_required: bool | None = None
     biometric_required: bool | None = None
     audit_all_events: bool | None = None
     lanes: list[Lane] | None = None
@@ -549,6 +574,13 @@ class NotificationTarget(BaseModel):
     webhook_endpoints: list[str] | None = None
     email_addresses: list[str] | None = None
     channels: list[str]
+
+
+class OID4VCINonceResponse(BaseModel):
+    """Response from the OID4VCI 1.0 Final Nonce Endpoint. The HTTP response must also include
+Cache-Control: no-store."""
+
+    c_nonce: str
 
 
 class OrganizationTrustProfile(BaseModel):
@@ -951,6 +983,7 @@ Lane.model_rebuild()
 MipConfigurationDiscoveryDocument.model_rebuild()
 NotificationPayload.model_rebuild()
 NotificationTarget.model_rebuild()
+OID4VCINonceResponse.model_rebuild()
 OrganizationTrustProfile.model_rebuild()
 Organization.model_rebuild()
 PhysicalDocumentJob.model_rebuild()

@@ -158,6 +158,8 @@ export interface ComplianceProfile {
   compliance_code: 'ICAO_DTC' | 'ICAO_MRZ' | 'ICAO_PASSPORT' | 'AAMVA_MDL' | 'EUDI_PID' | 'EUDI_MDL' | 'OB3_JWT' | 'OB3_JSONLD' | 'SD_JWT_VC' | 'ENTERPRISE_VC' | 'OID4VC' | 'PEX' | 'CUSTOM';
   name: string;
   description?: string;
+  version?: string;
+  specification_reference?: string;
   credential_format: CredentialFormat;
   issuance_protocol?: IssuanceProtocol;
   issuer_artifact_requirements?: Record<string, unknown>;
@@ -165,6 +167,28 @@ export interface ComplianceProfile {
   trust_profile_constraints?: Record<string, unknown>;
   api_surface?: Record<string, unknown>[];
   discoverable?: boolean;
+  required_claims?: Record<string, unknown>[];
+  optional_claims?: Record<string, unknown>[];
+  required_namespaces?: string[];
+  optional_namespaces?: string[];
+  required_contexts?: string[];
+  supported_proof_types?: string[];
+  supported_algorithms?: string[];
+  key_requirements?: Record<string, unknown>;
+  revocation_methods?: RevocationMechanism[];
+  revocation_required?: boolean;
+  allow_skip_revocation?: boolean;
+  trust_source_types?: string[];
+  holder_binding_required?: boolean;
+  selective_disclosure_required?: boolean;
+  immutable?: boolean;
+  oid4vci_features?: Record<string, unknown>;
+  oid4vp_features?: Record<string, unknown>;
+  pex_requirements?: Record<string, unknown>;
+  physical_production?: Record<string, unknown>;
+  pki_hierarchy?: Record<string, unknown>;
+  vetting_requirements?: Record<string, unknown>;
+  conformance_tests?: Record<string, unknown>[];
   status: 'DRAFT' | 'ACTIVE' | 'SUSPENDED' | 'DEPRECATED';
   is_system: boolean;
   created_at: string;
@@ -245,6 +269,7 @@ export interface DeploymentProfile {
   update_channel?: 'stable' | 'beta' | 'pinned';
   update_policy?: Record<string, unknown>;
   offline_cache_ttl_hours?: number;
+  operator_biometric_authentication_required?: boolean;
   biometric_required?: boolean;
   audit_all_events?: boolean;
   lanes?: Lane[];
@@ -486,6 +511,11 @@ export interface NotificationTarget {
   webhook_endpoints?: string[];
   email_addresses?: string[];
   channels: string[];
+}
+
+/** Response from the OID4VCI 1.0 Final Nonce Endpoint. The HTTP response must also include Cache-Control: no-store. */
+export interface OID4VCINonceResponse {
+  c_nonce: string;
 }
 
 /** Organisation-specific overlay of a TrustFramework. Separates shared framework definitions from per-org policy overrides, issuer allow/deny lists, and jurisdiction filters. */

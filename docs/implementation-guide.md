@@ -126,10 +126,17 @@ For high-assurance contexts (physical access, travel), set:
 ```json
 "holder_binding": {
   "required": true,
-  "binding_methods": ["NONCE"],
-  "nonce_required": true
+  "binding_methods": ["DEVICE_KEY", "SESSION_BINDING"],
+  "proof_profiles": ["MDOC_DEVICE_AUTHENTICATION"],
+  "proof_freshness": {
+    "challenge_required": true,
+    "audience_binding_required": true,
+    "replay_detection_required": true
+  }
 }
 ```
+
+A nonce is proof-freshness input, not a binding method. The verifier validates it inside the authenticated proof defined by the selected proof profile.
 
 ---
 

@@ -24,9 +24,16 @@
   "holder_binding": {
     "required": true,
     "binding_methods": [
-      "DEVICE_KEY"
+      "CREDENTIAL_KEY"
     ],
-    "nonce_required": true
+    "proof_profiles": [
+      "OID4VP_VERIFIABLE_PRESENTATION"
+    ],
+    "proof_freshness": {
+      "challenge_required": true,
+      "audience_binding_required": true,
+      "replay_detection_required": true
+    }
   },
   "freshness": {
     "max_age_seconds": 31536000,
@@ -41,4 +48,3 @@
   },
   "created_at": "2026-05-24T00:00:00Z"
 }
-
