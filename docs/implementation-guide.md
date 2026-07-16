@@ -39,7 +39,7 @@ Device Registration and Notification Target are operational entities created per
 
 ```json
 {
-  "organization_id": "your-org-id",
+  "organization_id": "example-org-id",
   "name": "My Trust Profile",
   "trust_sources": [
     {
