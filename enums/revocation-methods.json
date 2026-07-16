@@ -33,7 +33,7 @@
       },
       "TOKEN_STATUS_LIST": {
         "description": "IETF Token Status List",
-        "standard": "IETF RFC 9738",
+        "standard": "IETF draft-ietf-oauth-status-list",
         "use_case": "JWT-based and SD-JWT-VC credentials",
         "online_only": false
       }

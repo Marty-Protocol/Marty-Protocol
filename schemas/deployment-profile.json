@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/deployment-profile.json",
   "title": "DeploymentProfile",
-  "description": "Runtime configuration for a physical or logical identity verification endpoint. Packages trust, policies, issuance capability, network mode, UX, and device grouping via Lanes. Compatibility extensions may additionally expose rollout and operational fields.",
+  "description": "Runtime configuration for a physical or logical identity verification endpoint. Packages trust, policies, issuance capability, network mode, user experience, and device grouping via Lanes.",
   "type": "object",
   "required": ["id", "organization_id", "name", "trust_profile_id", "presentation_policy_ids", "network_mode", "created_at"],
   "additionalProperties": false,
@@ -37,15 +37,9 @@
     },
     "enabled_flow_ids": {
       "type": "array",
-      "minItems": 1,
       "items": {"type": "string", "format": "uuid"},
       "uniqueItems": true,
       "description": "IDs of Flow entities that are active at this deployment. A Flow can reference multiple DeploymentProfiles via its deployment_profile_ids."
-    },
-    "default_presentation_policy_id": {
-      "type": ["string", "null"],
-      "format": "uuid",
-      "description": "Compatibility alias for default_policy_id."
     },
     "network_mode": {
       "type": "string",
@@ -68,18 +62,6 @@
         "theme": {"type": "string", "enum": ["light", "dark", "high_contrast"], "default": "light"}
       }
     },
-    "ux_config": {
-      "type": "object",
-      "description": "Compatibility alias for environment_config.",
-      "additionalProperties": false,
-      "properties": {
-        "language": {"type": "string", "default": "en-US"},
-        "signage_text": {"type": "object", "additionalProperties": {"type": "string"}},
-        "operator_mode": {"type": "boolean", "default": false},
-        "accessibility_mode": {"type": "boolean", "default": false},
-        "theme": {"type": "string", "enum": ["light", "dark", "high_contrast"], "default": "light"}
-      }
-    },
     "update_channel": {
       "type": "string",
       "enum": ["stable", "beta", "pinned"],
@@ -88,7 +70,7 @@
     },
     "update_policy": {
       "type": "object",
-      "description": "Compatibility extension for software update policy.",
+      "description": "Software update policy.",
       "additionalProperties": false,
       "properties": {
         "channel": {"type": "string", "enum": ["stable", "beta", "pinned"], "default": "stable"},
@@ -102,10 +84,15 @@
       "default": 24,
       "description": "Hours to cache trust anchors and status lists when network_mode is OFFLINE or HYBRID"
     },
-    "biometric_required": {
+    "operator_biometric_authentication_required": {
       "type": "boolean",
       "default": false,
       "description": "Require the operator to authenticate with biometric before processing verifications"
+    },
+    "biometric_required": {
+      "type": "boolean",
+      "deprecated": true,
+      "description": "Deprecated compatibility alias for operator_biometric_authentication_required. It never represents credential-holder biometric matching."
     },
     "audit_all_events": {
       "type": "boolean",
@@ -119,5 +106,12 @@
     },
     "created_at": {"type": "string", "format": "date-time"},
     "updated_at": {"type": "string", "format": "date-time"}
-  }
+  },
+  "allOf": [
+    {
+      "not": {
+        "required": ["operator_biometric_authentication_required", "biometric_required"]
+      }
+    }
+  ]
 }

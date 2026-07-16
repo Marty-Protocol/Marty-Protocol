@@ -3,7 +3,7 @@
   "name": "ICAO Physical ePassport",
   "compliance_code": "ICAO_PASSPORT",
   "version": "1.0.0",
-  "credential_format": "PHYSICAL",
+  "credential_format": "ICAO_EMRTD",
   "issuance_protocol": "PHYSICAL_DOCUMENT",
   "description": "Compliance profile for ICAO Doc 9303 physical ePassport booklet issuance. Governs the complete lifecycle from application through personalization bureau submission, chip encoding, and activation. Requires physical production by an authorized personalization bureau.",
   "specification_reference": "ICAO Doc 9303 Parts 1–12 — Machine Readable Travel Documents",
@@ -69,6 +69,7 @@
   "immutable": true,
   "status": "ACTIVE",
   "discoverable": true,
+  "created_at": "2026-07-15T00:00:00Z",
   "conformance_tests": [
     {
       "suite": "icao-passport",

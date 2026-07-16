@@ -1,4 +1,4 @@
-//! MIP Protocol Types — generated from marty-protocol JSON Schemas.
+//! MIP Protocol Types â€” generated from marty-protocol JSON Schemas.
 
 pub mod enums;
 pub mod models;

@@ -16,9 +16,7 @@
   "accepted_credential_types": ["LoyaltyProgramMembership"],
   "trust_profile_id": "tp-oid4vci-issuer-example",
   "holder_binding": {
-    "required": false,
-    "binding_methods": ["NONCE"],
-    "nonce_required": false
+    "required": false
   },
   "freshness": {
     "require_not_revoked": true,

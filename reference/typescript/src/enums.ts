@@ -1,6 +1,6 @@
-// MIP Protocol Enums — generated from marty-protocol/enums/*.json
-// Generated: 2026-05-14
-// DO NOT EDIT — regenerate with: python scripts/codegen.py typescript
+// MIP Protocol Enums â€” generated from marty-protocol/enums/*.json
+// Protocol version: 0.3.1
+// DO NOT EDIT â€” regenerate with: python scripts/codegen.py typescript
 
 /** Formal permission scope strings for MIP API keys. Scopes follow the pattern '{resource}:{action}'. Organization-scoped keys may hold any of these scopes. Deployment-scoped keys are restricted to a subset appropriate for a single deployment profile. */
 export enum ApiKeyScope {
@@ -68,6 +68,13 @@ export enum ChannelType {
   SMS = 'SMS',
 }
 
+/** The party responsible for resolving an application claim blocker. */
+export enum ClaimBlockerOwner {
+  APPLICANT = 'APPLICANT',
+  ISSUER = 'ISSUER',
+  SYSTEM = 'SYSTEM',
+}
+
 /** Recognized compliance frameworks and identity standards for credential format abstraction */
 export enum ComplianceCode {
   ICAO_DTC = 'ICAO_DTC',
@@ -78,7 +85,6 @@ export enum ComplianceCode {
   EUDI_MDL = 'EUDI_MDL',
   OB3_JWT = 'OB3_JWT',
   OB3_JSONLD = 'OB3_JSONLD',
-  OB2_COMPATIBILITY = 'OB2_COMPATIBILITY',
   SD_JWT_VC = 'SD_JWT_VC',
   ENTERPRISE_VC = 'ENTERPRISE_VC',
   OID4VC = 'OID4VC',
@@ -86,13 +92,14 @@ export enum ComplianceCode {
   CUSTOM = 'CUSTOM',
 }
 
-/** Technical encoding formats for verifiable credentials */
+/** Technical encoding formats for digital and physical credentials */
 export enum CredentialFormat {
   MDOC = 'MDOC',
   SD_JWT_VC = 'SD_JWT_VC',
   VC_JWT = 'VC_JWT',
   JSON_LD = 'JSON_LD',
   ZK_MDOC = 'ZK_MDOC',
+  ICAO_EMRTD = 'ICAO_EMRTD',
 }
 
 /** When a wallet holds multiple credentials that satisfy a PresentationPolicy, this strategy determines which is preferred. Used in PresentationPolicy.credential_ranking_strategy. */
@@ -116,7 +123,7 @@ export enum FallbackPolicy {
   DENY = 'DENY',
 }
 
-/** Lifecycle status of a FlowInstance. Aligned with §9.9.2 state machine. Terminal states: COMPLETED, FAILED, EXPIRED, CANCELLED. */
+/** Lifecycle status of a FlowInstance. Aligned with Â§9.9.2 state machine. Terminal states: COMPLETED, FAILED, EXPIRED, CANCELLED. */
 export enum FlowInstanceStatus {
   PENDING = 'PENDING',
   IN_PROGRESS = 'IN_PROGRESS',
@@ -129,7 +136,7 @@ export enum FlowInstanceStatus {
   CANCELLED = 'CANCELLED',
 }
 
-/** Protocol-aligned flow types. Each type maps to a fixed ordered step sequence. Issuance and verification flows are separate; application_approval_issuance is the multi-step application workflow. */
+/** Protocol-aligned flow types. Standard types map to fixed ordered step sequences. Non-standard orchestration uses the explicit custom extension envelope. */
 export enum FlowType {
   OID4VCI_PRE_AUTHORIZED = 'oid4vci_pre_authorized',
   OID4VCI_AUTHORIZATION_CODE = 'oid4vci_authorization_code',
@@ -142,6 +149,7 @@ export enum FlowType {
   PHYSICAL_DOCUMENT_ISSUANCE = 'physical_document_issuance',
   COMBINED = 'combined',
   SIOPV2 = 'siopv2',
+  CUSTOM = 'custom',
 }
 
 /** Protocols used to deliver credentials from issuer to holder */

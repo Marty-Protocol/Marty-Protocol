@@ -33,6 +33,7 @@ venv/
 dist/
 build/
 out/
+target/
 
 # Test output
 .conformance-results/

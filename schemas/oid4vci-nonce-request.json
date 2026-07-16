@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/oid4vci-nonce-request.json",
+  "title": "OID4VCINonceRequest",
+  "description": "Empty POST body for the OID4VCI 1.0 Final Nonce Endpoint.",
+  "type": "object",
+  "maxProperties": 0,
+  "additionalProperties": false
+}

@@ -9,6 +9,44 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 
 ## [Unreleased]
 
+### Changed
+- Replaced Presentation Policy `NONCE` binding with explicit credential, device, or session control methods plus proof-profile and proof-freshness requirements.
+- Aligned OID4VCI issuance with the 1.0 Final Nonce Endpoint and plural `proofs` parameter; Token Responses no longer carry draft-era credential nonce fields.
+- Renamed Deployment Profile `biometric_required` to `operator_biometric_authentication_required` with a bounded read-compatibility alias.
+- Removed `OB2_COMPATIBILITY`; Open Badges support is version 3 only.
+- Application Template evidence requirements now use only `auto_issue_on_permit`.
+- Application Template claim rules now use only `claim_name`, `source`, and `source_config`.
+- Removed Deployment Profile request/response aliases `default_presentation_policy_id` and `ux_config`.
+- Removed the opaque Compliance Profile `default_verification_rules` field.
+- Replaced compatibility/deprecation guidance with exact-version, atomic-release requirements.
+
+### Fixed
+- Brought bundled system Compliance Profiles under schema validation, including `holder_binding_required` and their ecosystem requirement fields.
+- Added structured holder-binding evidence to Verification Session results.
+- Generated Python, Rust, and TypeScript bindings now model `claim_blocker` as the typed nullable `ClaimBlocker` object instead of degrading it to `Any` or `string`.
+- Corrected the `TOKEN_STATUS_LIST` standard reference from unrelated RFC 9738 to the active `draft-ietf-oauth-status-list` specification.
+
+## [0.3.1] - 2026-07-12
+
+### Changed
+- Declared `0.3.1` as the only supported MIP message and discovery version.
+- Added the browser lifecycle gate as conformance evidence for canonical OID4VCI receipt and DCQL OID4VP presentation.
+- Removed Draft 13 singular credential proof compatibility from the reference wallet and issuance contract.
+
+### Fixed
+- Corrected stale normative message-version examples that still required `0.1`.
+- Corrected the MIP discovery conformance fixture to advertise the current supported version.
+- Corrected holder proof audience/nonce validation and DCQL response serialization in the reference wallet engine.
+
+## [0.3.0] - 2026-07-11
+
+### Changed
+- Replaced applicant-ID and legacy `/v1/applicants/*` APIs with canonical organization-scoped reviewer and `/v1/me/*` self-service contracts.
+- Application creation now accepts only `organization_id`, `application_template_id`, `form_data`, and `integration_context`; policy and identity fields are server-derived.
+- Added independent `claim_state` and privacy-safe `claim_blocker` semantics.
+- Added authenticated holder inventory at `/v1/issued-credentials/mine`.
+- Added `FIELD_VALIDATION_FAILED` and `NO_ACTIVE_ISSUANCE_FLOW` errors.
+
 ### Deprecated
 - `OB2_COMPATIBILITY` is now on a formal sunset path:
   - no new integrations should adopt it after `v0.2.0`

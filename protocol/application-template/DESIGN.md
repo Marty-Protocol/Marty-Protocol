@@ -1,6 +1,6 @@
 # Application Template — Design Notes
 
-**Version:** 0.1.0
+**Version:** 0.3.1
 
 ---
 
@@ -16,7 +16,7 @@ The application form and approval workflow are separated from cryptographic conf
 
 ### Rules-Based Approval
 
-`approval_rules` is deliberately schema-flexible. The intent is to support various rules engines (simple comparisons, expression trees, decision tables) without mandating a single format. Implementations MUST document their supported `approval_rules` schema.
+Approval logic is expressed through `approval_policy_set_id` and an ACTIVE Cedar PolicySet. Application Templates do not carry opaque rules-engine payloads.
 
 ### Evidence vs. Form Fields
 

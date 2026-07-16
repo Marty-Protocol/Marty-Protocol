@@ -4,7 +4,7 @@
   "title": "ComplianceCode",
   "description": "Recognized compliance frameworks and identity standards for credential format abstraction",
   "type": "string",
-  "enum": ["ICAO_DTC", "ICAO_MRZ", "ICAO_PASSPORT", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "OB2_COMPATIBILITY", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"],
+  "enum": ["ICAO_DTC", "ICAO_MRZ", "ICAO_PASSPORT", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"],
   "$defs": {
     "values": {
       "ICAO_DTC": {
@@ -47,14 +47,6 @@
         "standard": "1EdTech Open Badges 3.0, W3C VC Data Model, JSON-LD 1.1",
         "governed_by": "1EdTech"
       },
-      "OB2_COMPATIBILITY": {
-        "description": "1EdTech Open Badge v2.0 backward-compatibility mode",
-        "format": "JSON_LD",
-        "standard": "1EdTech Open Badges 2.0",
-        "governed_by": "1EdTech",
-        "deprecated": true,
-        "migration_target": "OB3_JWT or OB3_JSONLD"
-      },
       "SD_JWT_VC": {
         "description": "Generic Selective Disclosure JWT Verifiable Credential (no framework binding)",
         "format": "SD_JWT_VC",
@@ -75,7 +67,7 @@
       },
       "ICAO_PASSPORT": {
         "description": "ICAO Physical ePassport — ICAO 9303 Parts 1–12 booklet issuance with chip personalization",
-        "format": "PHYSICAL",
+        "format": "ICAO_EMRTD",
         "standard": "ICAO Doc 9303 Parts 1–12, ISO/IEC 14443",
         "governed_by": "ICAO",
         "compatible_profile_types": ["ICAO", "CUSTOM"],

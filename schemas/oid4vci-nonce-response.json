@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/oid4vci-nonce-response.json",
+  "title": "OID4VCINonceResponse",
+  "description": "Response from the OID4VCI 1.0 Final Nonce Endpoint. The HTTP response must also include Cache-Control: no-store.",
+  "type": "object",
+  "required": ["c_nonce"],
+  "additionalProperties": false,
+  "properties": {
+    "c_nonce": {"type": "string", "minLength": 16}
+  }
+}

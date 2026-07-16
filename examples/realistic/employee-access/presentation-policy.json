@@ -35,8 +35,14 @@
   "trust_profile_id": "tp-enterprise-sd-jwt-example",
   "holder_binding": {
     "required": true,
-    "binding_methods": ["NONCE"],
-    "nonce_required": true
+    "binding_methods": ["CREDENTIAL_KEY"],
+    "proof_profiles": ["SD_JWT_KEY_BINDING"],
+    "proof_freshness": {
+      "challenge_required": true,
+      "audience_binding_required": true,
+      "replay_detection_required": true,
+      "max_proof_age_seconds": 300
+    }
   },
   "freshness": {
     "max_age_seconds": 28800,

@@ -1,8 +1,8 @@
 # Marty Identity Protocol — Normative Specification
 
-**Version:** 0.1.0
+**Version:** 0.3.1
 **Status:** Draft
-**Date:** 2026-03-11
+**Date:** 2026-07-11
 **Organization:** The MIP Authors
 
 ---
@@ -58,7 +58,7 @@ MIP's trust model is intentionally infrastructure-neutral. The `TrustSource` abs
 
 MIP specifies:
 
-- The data model and constraints for 11 protocol entities
+- The data model and constraints for protocol entities defined in `/schemas/`
 - The relationships between those entities
 - API resource naming and endpoint conventions
 - Validation rules for each entity
@@ -128,7 +128,7 @@ A single execution of a Flow Definition. Each Flow Instance tracks state transit
 The set of policies, trust anchors, compliance profiles, and ecosystem rules that define what credentials are accepted within a jurisdiction or ecosystem (e.g., EUDI Trust Framework, AAMVA mDL Framework).
 
 **Nonce**
-A cryptographically random, single-use value used to prevent replay attacks in credential issuance (OID4VCI `c_nonce` for holder binding proofs) and presentation challenge-response. MUST be at minimum 128 bits of entropy, base64url-encoded.
+A cryptographically random challenge used to establish proof freshness. Presentation nonces MUST be unique to an authorization request and validated inside the authenticated presentation proof. An OID4VCI `c_nonce` is obtained from the issuer's Nonce Endpoint and remains valid according to issuer policy until rejected. MIP-generated nonce values MUST contain at least 128 bits of entropy and be base64url-encoded.
 
 **Proximity Protocol**
 A short-range transport for credential exchange. In MIP, this refers to ISO 18013-5 Part 8 BLE/NFC engagement between a reader device and a holder wallet.
@@ -262,9 +262,12 @@ Policy Set references (Cedar):
         |-- CredentialOffer ---->|  (QR / deep link / push notification)
         |                        |
         |<-- TokenRequest -------|  (pre-authorized_code grant)
-        |-- TokenResponse ------>|  (access_token + c_nonce)
+        |-- TokenResponse ------>|  (access_token)
         |                        |
-        |<-- CredentialRequest --|  (proof of holder binding using c_nonce)
+        |<-- NonceRequest -------|  (POST nonce_endpoint; no access token)
+        |-- NonceResponse ------>|  (c_nonce; Cache-Control: no-store)
+        |                        |
+        |<-- CredentialRequest --|  (proofs using c_nonce when required)
         |-- CredentialResponse ->|  (signed credential or transaction_id)
         |                        |
         |<-- Notification -------|  (wallet stores credential; optional)
@@ -654,8 +657,11 @@ The `longfellow-libzk-v1` system supports `EQUALITY` predicates on mDoc credenti
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `required` | boolean | Yes | Whether holder binding is required |
-| `binding_methods` | string[] | No | Accepted binding methods (`NONCE`, `DEVICE_KEY`, `SESSION_BINDING`) |
-| `nonce_required` | boolean | No | Whether verifier-provided nonce is required |
+| `binding_methods` | string[] | Conditional | Accepted control methods (`CREDENTIAL_KEY`, `DEVICE_KEY`, `SESSION_BINDING`) |
+| `proof_profiles` | string[] | Conditional | Accepted wire profiles (`OID4VP_VERIFIABLE_PRESENTATION`, `SD_JWT_KEY_BINDING`, `MDOC_DEVICE_AUTHENTICATION`, `CUSTOM`) |
+| `proof_freshness` | ProofFreshness | Conditional | Challenge, audience, replay, and proof-age requirements |
+
+When `required` is true, all three conditional fields are required. When false, they MUST be absent. A nonce or session challenge is freshness evidence only; it is not a holder-binding method without an authenticated proof.
 
 ### 7.6 FreshnessConfig
 
@@ -795,10 +801,12 @@ A Flow orchestrates the **end-to-end identity lifecycle**: application → appro
 | `credential_template_id` | UUID | No | Required for issuance flow types |
 | `presentation_policy_id` | UUID | No | Required for verification flow types |
 | `application_template_id` | UUID | No | Required for `application_approval_issuance` |
+| `delivery_destination_profile_id` | string | No | Required for `physical_document_issuance` |
 | `deployment_profile_ids` | UUID[] | No | Where this flow runs |
-| `approval_strategy` | ApprovalStrategy | Yes | `AUTO`, `MANUAL`, `RULES_BASED` |
+| `approval_strategy` | ApprovalStrategy | Yes | `AUTO`, `MANUAL`, `RULES_BASED`, `EXTERNAL` |
 | `trigger` | FlowTrigger | No | What initiates the flow |
 | `hooks` | object | No | Pre/post step hooks keyed by step name |
+| `extension` | FlowExtension | Conditional | Required only for `flow_type: custom` |
 | `status` | FlowStatus | Yes | `DRAFT`, `ACTIVE`, `PAUSED`, `ARCHIVED` |
 | `created_at` | datetime | Yes | ISO 8601 |
 | `updated_at` | datetime | No | ISO 8601 |
@@ -815,6 +823,10 @@ A Flow orchestrates the **end-to-end identity lifecycle**: application → appro
 | `credential_revocation` | REVOCATION | `credential_template_id` | MIP §12 |
 | `oid4vp_presentation` | VERIFICATION | `presentation_policy_id` | OID4VP |
 | `mdl_presentation` | VERIFICATION | `presentation_policy_id` | ISO 18013-5 |
+| `siopv2` | VERIFICATION | `presentation_policy_id` | SIOPv2 |
+| `combined` | COMBINED | `credential_template_id`, `presentation_policy_id` | MIP Section 9 |
+| `physical_document_issuance` | ISSUANCE | `credential_template_id`, `application_template_id`, `delivery_destination_profile_id` | ICAO 9303 |
+| `custom` | Derived | `extension` | MIP extension mechanism |
 
 #### 9.2.2 FlowCategory Values (Non-Normative)
 
@@ -822,10 +834,13 @@ A Flow orchestrates the **end-to-end identity lifecycle**: application → appro
 
 | `flow_category` | Included `flow_type` values |
 |-----------------|-----------------------------|
-| `ISSUANCE` | `oid4vci_pre_authorized`, `oid4vci_authorization_code`, `mdl_issuance`, `application_approval_issuance` |
-| `VERIFICATION` | `oid4vp_presentation`, `mdl_presentation` |
+| `ISSUANCE` | `oid4vci_pre_authorized`, `oid4vci_authorization_code`, `mdl_issuance`, `application_approval_issuance`, `physical_document_issuance` |
+| `VERIFICATION` | `oid4vp_presentation`, `mdl_presentation`, `siopv2` |
 | `RENEWAL` | `credential_renewal` |
 | `REVOCATION` | `credential_revocation` |
+| `COMBINED` | `combined` |
+
+For `custom`, the category is derived from `extension.extends_flow_type`.
 
 ### 9.3 FlowTrigger
 
@@ -859,6 +874,10 @@ Flows support pre/post hooks on named steps via the `hooks` object. Keys are `pr
 | `siopv2` | `create_request → authentication_submission → verify_id_token` |
 | `combined` | `accept_application → approval_decision → issue_credential → create_request → presentation_submission → verify_presentation` |
 
+| `physical_document_issuance` | `accept_application -> validate_evidence -> approval_decision -> generate_data_groups -> sign_sod -> submit_to_personalization -> track_production -> quality_verify -> activate_credential` |
+
+Standard sequences are immutable. A non-standard sequence MUST use `flow_type: custom` and a FlowExtension envelope; it MUST NOT retain a standard FlowType identifier.
+
 ### 9.6 Approval Strategy with Auto-Issue
 
 For `application_approval_issuance` flows, setting `approval_strategy: AUTO` with `auto_issue: true` on the Application Template causes the `approval_decision` and `issue_credential` steps to execute atomically without manual intervention. This is not a separate endpoint — it is a configuration of the `application_approval_issuance` flow type.
@@ -870,7 +889,10 @@ For `application_approval_issuance` flows, setting `approval_strategy: AUTO` wit
 - Verification `flow_type` values (`oid4vp_presentation`, `mdl_presentation`, `siopv2`) MUST have `presentation_policy_id`.
 - `siopv2` flows MUST have `presentation_policy_id`. The presentation policy governs the ID token claims requested from the Self-Issued OP.
 - `combined` flows MUST have both `credential_template_id` and `presentation_policy_id`.
-- `credential_template_id` and `application_template_id` are mutually exclusive.
+- `physical_document_issuance` flows MUST have `credential_template_id`, `application_template_id`, and a physical-production `delivery_destination_profile_id`.
+- `credential_template_id` and `application_template_id` are mutually exclusive except for `physical_document_issuance` and explicit custom extensions.
+- Standard FlowTypes MUST NOT contain `extension`; `custom` MUST contain a valid extension envelope.
+- Flow creation MUST produce `DRAFT`; activation is an explicit validation-gated action.
 - Active flows MUST NOT reference `DRAFT` or `DEPRECATED` Credential Templates or Application Templates.
 - `deployment_profile_ids` MUST each reference an existing Deployment Profile.
 
@@ -885,6 +907,8 @@ GET    /v1/flows/definitions/{id}
 PATCH  /v1/flows/definitions/{id}
 DELETE /v1/flows/definitions/{id}
 POST   /v1/flows/definitions/{id}/activate
+POST   /v1/flows/definitions/{id}/validate
+GET    /v1/flows/capabilities
 ```
 
 #### Flow Instances (Runtime)
@@ -1092,7 +1116,6 @@ A Compliance Profile abstracts credential format complexity behind compliance-fo
 | `credential_format` | CredentialFormat | Yes | `MDOC`, `SD_JWT_VC`, `VC_JWT`, `JSON_LD` |
 | `issuance_protocol` | IssuanceProtocol | No | `OID4VCI_PRE_AUTH`, `OID4VCI_AUTH_CODE`, `DIRECT` |
 | `issuer_artifact_requirements` | ArtifactRequirements | No | Required keys, certs, DIDs |
-| `default_verification_rules` | object | No | **Deprecated** — use `verification_policy_set_id`. Format-specific verification defaults |
 | `verification_policy_set_id` | UUID | No | Reference to a Cedar PolicySet (§16) for credential verification rules |
 | `trust_profile_constraints` | TrustProfileConstraints | No | Trust profile compatibility requirements |
 | `is_system` | boolean | Yes | System-provided vs. organization-custom |
@@ -1165,7 +1188,7 @@ Each entry in `api_surface` has the following fields:
 
 Implementations MUST expose all endpoints declared in `api_surface` for every active Compliance Profile.
 
-**MIP Configuration Discovery**: Every MIP implementation MUST expose `GET /.well-known/mip-configuration` returning the active compliance profiles and their `api_surface` declarations. This is MIP's deployment-level metadata document.
+**MIP Configuration Discovery**: Every MIP implementation MUST expose `GET /.well-known/mip-configuration` conforming to `schemas/mip-configuration.json`. `active_compliance_profiles` contains each active profile's code, format/protocol when present, and only endpoint declarations whose `discoverable` value is not `false`. This is MIP's deployment-level metadata document.
 
 ### 10.7 API
 
@@ -1203,7 +1226,6 @@ Application Templates are **purely user-facing**. They have no cryptographic con
 | `evidence_requirements` | EvidenceRequirement[] | No | Documents or biometrics required |
 | `claim_collection_rules` | ClaimCollectionRule[] | No | How claims are gathered |
 | `approval_strategy` | ApprovalStrategy | Yes | `AUTO`, `MANUAL`, `RULES_BASED`, `EXTERNAL` |
-| `approval_rules` | object | No | **Deprecated** — use `approval_policy_set_id`. Legacy rules engine config |
 | `approval_policy_set_id` | UUID | No | Reference to a Cedar PolicySet (§16) for `RULES_BASED` approval |
 | `notification_config` | NotificationConfig | No | Email/SMS templates for status updates |
 | `ui_config` | UIConfig | No | Theme, wizard vs. single-page, welcome text |
@@ -1265,13 +1287,24 @@ or raw provider responses. Running a configured check MUST create a normalized
 `EvidenceFact` and evaluate the same approval policy path used by
 adapter-generated facts.
 
-### 11.5 Validation Rules
+### 11.5 ClaimCollectionRule
 
-- `approval_strategy: RULES_BASED` MUST have a non-null `approval_policy_set_id` or non-empty `approval_rules` (legacy). Cedar PolicySets take precedence when both are present.
+Claim collection rules contain `claim_name`, `source`, and `source_config`.
+`source` is one of `FORM_FIELD`, `EVIDENCE_EXTRACTION`, `EXTERNAL_API`, or
+`SYSTEM`. Server-owned identity and lifecycle values MUST use `SYSTEM`, not an
+applicant form field. Canonical system fields are `applicant.user_id`,
+`applicant.email`, `applicant.given_name`, `applicant.family_name`,
+`application.id`, `application.reference_number`, `application.organization_id`,
+`current.date`, `current.datetime`, `validity.expiry_date`, `template.name`,
+`template.description`, and `constant`. Constants require `source_config.value`.
+
+### 11.6 Validation Rules
+
+- `approval_strategy: RULES_BASED` MUST have a non-null `approval_policy_set_id` referencing an ACTIVE `APPROVAL_RULES` PolicySet.
 - All `claim_mapping` values MUST reference claims in the associated Credential Template.
 - A `DEPRECATED` Application Template MUST NOT be the target of a new credential application.
 
-### 11.6 API
+### 11.7 API
 
 ```
 GET    /v1/application-templates
@@ -1279,11 +1312,26 @@ POST   /v1/application-templates
 GET    /v1/application-templates/{id}
 PATCH  /v1/application-templates/{id}
 DELETE /v1/application-templates/{id}
-POST   /v1/applications
-GET    /v1/applications/{id}
-PATCH  /v1/applications/{id}/approve
-PATCH  /v1/applications/{id}/reject
+POST   /v1/application-templates/{id}/validate
+POST   /v1/application-templates/{id}/activate
+POST   /v1/application-templates/{id}/deprecate
+
+GET    /v1/me/applicant-profile
+PATCH  /v1/me/applicant-profile
+GET    /v1/me/applications
+POST   /v1/me/applications
+GET    /v1/me/applications/{id}
+POST   /v1/me/applications/{id}/submit
+POST   /v1/me/applications/{id}/withdraw
+POST   /v1/me/applications/{id}/claim
+
+GET    /v1/organizations/{org_id}/applicants
+GET    /v1/organizations/{org_id}/applicants/{id}
+POST   /v1/organizations/{org_id}/applicants/{id}/approve
+POST   /v1/organizations/{org_id}/applicants/{id}/reject
 ```
+
+The complete reviewer lock, check, information-request, withdrawal, and issuance action surface is normative in the [Applicant Application Specification](protocol/applicant/SPECIFICATION.md). `/v1/applications` is not a public MIP resource.
 
 ---
 
@@ -1751,7 +1799,7 @@ GET    /v1/notifications/{id}/delivery-results
 
 ### 16.1 Purpose
 
-A Policy Set stores [Cedar](https://www.cedarpolicy.com/) authorization policies that govern access control, credential verification trust, and approval decisions. Cedar is a deny-by-default policy language that is statically analyzable, formally verifiable, and auditable. Policy Sets replace opaque JSON rule objects (`approval_rules`, `default_verification_rules`) with structured, machine-verifiable policies.
+A Policy Set stores [Cedar](https://www.cedarpolicy.com/) authorization policies that govern access control, credential verification trust, and approval decisions. Cedar is a deny-by-default policy language that is statically analyzable, formally verifiable, and auditable. MIP 0.3 uses Policy Sets instead of opaque JSON rule objects.
 
 MIP defines three policy domains:
 
@@ -1813,11 +1861,11 @@ This means `forbid` policies act as hard security constraints that cannot be ove
 Cedar PolicySets augment — rather than replace — existing enum-based fields:
 
 - **Trust Profile**: `allowed_algorithms`, `supported_formats`, and `trust_sources` remain the primary trust configuration. A `verification_policy_set_id` provides additional conditional trust rules (e.g., deny weak algorithms, require holder binding for specific compliance codes).
-- **Compliance Profile**: `verification_policy_set_id` replaces the deprecated `default_verification_rules` opaque object.
-- **Application Template**: `approval_policy_set_id` replaces the deprecated `approval_rules` opaque object. The `approval_strategy` MUST be `RULES_BASED` or `EXTERNAL` to use Cedar approval policies.
+- **Compliance Profile**: `verification_policy_set_id` supplies conditional credential-verification rules.
+- **Application Template**: `approval_policy_set_id` is required for Cedar approval policies. The `approval_strategy` MUST be `RULES_BASED` or `EXTERNAL`.
 - **SCIM Role**: `policy_set_id` provides ABAC rules beyond the static `permissions[]` array. When present, Cedar policies are evaluated in addition to permission checks.
 
-When both legacy fields and Cedar PolicySet references are present, the Cedar PolicySet takes precedence.
+Opaque approval and verification rule objects are not valid MIP 0.3.1 fields.
 
 ### 16.7 Validation Rules
 
@@ -1910,8 +1958,9 @@ See §18 (Organization & Identity Governance) for full SCIM alignment specificat
 | Flow Definitions | `/v1/flows/definitions` | Required |
 | Flow Instances | `/v1/flows/instances` | Required |
 | Issuance (admin) | `/v1/issuance` | Required |
-| Applications | `/v1/applications` | Required |
-| Applicants | `/v1/organizations/{id}/applicants` | Required |
+| Holder Applications | `/v1/me/applications` | Required |
+| Applicant Review | `/v1/organizations/{id}/applicants` | Required |
+| Holder Credential Inventory | `/v1/issued-credentials/mine` | Required |
 | API Keys | `/v1/api-keys` | Required |
 | Webhooks | `/v1/organizations/{id}/webhooks` | Required |
 | Alert Rules | `/v1/organizations/{id}/alert-rules` | Required |
@@ -1971,7 +2020,7 @@ Discovery endpoints for OID4VCI and OID4VP are **declared by the active Complian
 - All IDs are UUIDs (v4)
 - All timestamps are ISO 8601 with timezone (UTC preferred)
 - Pagination: `limit` + `offset` query parameters
-- Organization scoping: `organization_id` query parameter or JWT claim
+- Organization scoping: organization path parameters and persisted resource ownership are authoritative; a selected UI organization or an unverified query parameter never grants access
 - Error responses: `{ "error": string, "code": string, "field": string? }`
 - Versioning: URL path prefix `/v1/`
 - SCIM responses: RFC 7644 `ListResponse` with `totalResults`, `startIndex`, `itemsPerPage`, `Resources`
@@ -2168,13 +2217,13 @@ All UUID references MUST resolve to existing records within the same organizatio
 
 | Threat | Normative Requirement |
 |--------|----------------------|
-| Replay Attack | Implementations MUST reject any proof or VP token where the `nonce` has been previously seen. Nonces MUST be stored with sufficient retention to cover `offline_grace_seconds + clock_skew_seconds`. |
+| Replay Attack | Verifiers MUST reject a presentation proof or VP token replayed outside its original `nonce` and audience context. Issuers MUST reject duplicate key proofs while allowing an OID4VCI `c_nonce` to remain valid according to documented issuer policy. |
 | Credential Cloning | Issuance MUST require holder binding proof when `holder_binding_required: true` in the Compliance Profile (see §20.6). Wallet implementations SHOULD use hardware-backed key storage. |
 | Issuer Impersonation | Verifiers MUST validate the full issuer certificate chain or DID resolution per §5.7.3. |
 | Verifier Phishing | Wallets SHOULD validate `client_id` against registered verifier metadata. Verifiers SHOULD register their `client_id` in the organization's Deployment Profile. |
 | Revocation Bypass | Verifiers MUST NOT use `check_mode: SKIP` for credentials with legal or regulatory significance. Offline grace MUST NOT exceed 24 hours for credentials at assurance level IAL2 or higher. |
 | Wallet Compromise | Device Registrations SHOULD include device attestation proofs. Wallets SHOULD require biometric or PIN authentication before presenting. |
-| Nonce Reuse | Nonce endpoints MUST invalidate nonces immediately upon first use. Issued nonces MUST have an expiry (`c_nonce_expires_in` in OID4VCI token responses). |
+| Nonce Misuse | OID4VCI Nonce Endpoints MUST return a fresh unpredictable `c_nonce` with `Cache-Control: no-store`. Issuers MUST document nonce validity, reject invalid nonces, and prevent replay of an already accepted key proof. |
 | Man-in-the-Middle | All REST endpoints MUST use TLS 1.3+. Proximity sessions MUST use session encryption per ISO 18013-5:2021 §9. |
 | Metadata Injection | Issuer metadata endpoints MUST be served over HTTPS. Implementations SHOULD validate metadata document integrity via sub-resource integrity or signed metadata JWT. |
 | Offline Grace Abuse | `offline_grace_seconds` values MUST be logged in audit events when applied. A configurable alert threshold SHOULD be set for grace period usage frequency. |
@@ -2183,11 +2232,13 @@ All UUID references MUST resolve to existing records within the same organizatio
 
 When a Compliance Profile sets `holder_binding_required: true`:
 
-1. The issuer MUST include a `c_nonce` in the `TokenResponse` and require a `proof` object in the `CredentialRequest`.
-2. The wallet MUST respond with a `proof` containing a holder-bound JWT signed by the holder's private key, including the `c_nonce` as the `nonce` claim.
-3. The credential MUST be cryptographically bound to the holder's public key: `DeviceKey` for mDocs (ISO 18013-5 §7.2.2), `cnf.jwk` for SD-JWT-VC (IETF SD-JWT-VC §3.5).
-4. Verifiers MUST verify the holder binding proof during presentation validation before accepting any presented claims.
-5. A credential lacking holder binding MUST NOT be accepted by a verifier whose active Presentation Policy requires holder-bound presentations.
+1. Issuer metadata MUST advertise the supported proof types for each holder-bound credential configuration.
+2. When proof freshness uses `c_nonce`, the issuer MUST publish a Nonce Endpoint, return a fresh `c_nonce` with `Cache-Control: no-store`, and validate that nonce in each submitted key proof.
+3. The wallet MUST submit the OID4VCI 1.0 Final `proofs` parameter using a proof type advertised by the issuer. The proof MUST bind the issuer audience and, when the issuer has a Nonce Endpoint, its `c_nonce`.
+4. The credential MUST be bound using the format's defined mechanism, such as `DeviceKey` for mDocs or the holder public key referenced by an SD-JWT credential.
+5. A verifier whose Presentation Policy requires holder binding MUST validate one allowed `binding_method` using one allowed `proof_profile`, together with all configured `proof_freshness` checks.
+6. The verification result MUST record the required and validated method, proof profile, freshness checks, and a machine-readable failure reason when validation fails.
+7. A credential or presentation lacking the required binding evidence MUST be rejected before claims are accepted.
 
 ### 20.7 Normative Revocation Check Algorithm
 
@@ -2403,6 +2454,7 @@ A conformant OID4VC implementation MUST pass the OIDF conformance suite tests mi
 - **VCIIssuerHappyFlow (mso_mdoc)** — mDoc issuance with `mso_mdoc` format identifier.
 - **OID4VPVerifierHappyFlow** — VP token submission accepted and verification result returned.
 - **Nonce Endpoint** — `nonce_endpoint` returns unique `c_nonce` per request with `no-store` cache control.
+- **Token Response** — token responses do not carry draft-era `c_nonce` or `c_nonce_expires_in` fields.
 
 Implementations SHOULD target OIDF Certification Program level **Issuer** and **Verifier** classes.
 
@@ -2424,15 +2476,15 @@ A conformant PEX implementation MUST:
 
 See [VERSIONING.md](VERSIONING.md) for the full versioning policy.
 
-This specification is at version **0.1.0 (Draft)**. Breaking changes may occur before 1.0.0.
+This specification is at version **0.3.1 (Draft)**. Breaking changes may occur before 1.0.0.
 
-### 23.1 Version Negotiation
+### 23.1 Strict Version Support
 
 All MIP messages MUST carry a `mip_version` field in the message envelope (see §26). Implementations that receive a message with an unsupported version MUST respond with `error_code: UNSUPPORTED_VERSION` and SHOULD include a `supported_versions` array in the error body.
 
-The `/.well-known/mip-configuration` document MUST include a `supported_versions` array listing all versions the deployment can serve. Clients SHOULD inspect the discovery document before initiating a flow to confirm version compatibility.
+The `/.well-known/mip-configuration` document MUST include `supported_versions: ["0.3.1"]`. Clients SHOULD inspect the discovery document before initiating a flow.
 
-Version negotiation uses a **highest-common-version** strategy: if both parties support overlapping versions, the higher common version MUST be used. If no overlap exists, the request MUST fail with `UNSUPPORTED_VERSION`.
+MIP 0.3.1 has no compatibility negotiation or fallback. A message declaring any other version MUST fail with `UNSUPPORTED_VERSION`; implementations MUST NOT reinterpret it as 0.3.1.
 
 ---
 
@@ -2529,8 +2581,8 @@ Organizations MAY define compliance profiles with `compliance_code: CUSTOM` and 
 **Custom Trust Sources**
 Organizations MAY define Trust Profile entries with `source_type: CUSTOM` to integrate identifier or key-management infrastructure not covered by the `ROOT_CA`, `TRUST_LIST`, or `PINNED_ISSUER` source types. The custom resolver is responsible for returning a verified public key (or set of keys) that the standard §5.7.3 signature-validation step can consume. As a concrete illustration, an event-sourced identifier system such as [KERI](https://keri.one/) would expose a key-state resolver that a `CUSTOM` trust source entry could reference; the remainder of the §5.7.3 algorithm is unchanged.
 
-**Custom Flow Types**
-Implementations MAY define additional flow types by prefixing with a reverse-domain namespace (e.g., `com.example.custom_enrollment`). Custom flow type identifiers MUST NOT conflict with normative values defined in §9.2.1. Custom flow types SHOULD follow the same step-sequence and state machine rules (§9.5, §9.9) as normative types.
+**Custom Flow Orchestration**
+Implementations MAY define non-standard orchestration with `flow_type: custom` and a versioned FlowExtension envelope. Extension identifiers MUST be absolute URIs controlled by the extension owner. A custom flow declares the standard operation it extends through `extension.extends_flow_type`, but MUST NOT claim conformance to that standard step sequence.
 
 **Claim Namespace Extensions**
 Credential Templates MAY define claims in custom namespaces. The namespaces `org.iso.18013.5.1`, `org.aamva.16`, `urn:mip:`, and `eu.europa.ec.eudi.*` are reserved. Organizations SHOULD use their reverse-domain namespace for custom claims (e.g., `com.example.employee.*`).
@@ -2572,7 +2624,7 @@ All MIP cross-party messages MUST conform to the message envelope defined in `pr
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `mip_version` | Yes | Protocol version string (e.g., `"0.1"`) |
+| `mip_version` | Yes | Protocol version string (e.g., `"0.3.1"`) |
 | `message_type` | Yes | One of the message type identifiers in §26.2 |
 | `message_id` | Yes | UUID unique within the deployment |
 | `correlation_id` | No | `FlowInstance.id` linking messages in one flow |

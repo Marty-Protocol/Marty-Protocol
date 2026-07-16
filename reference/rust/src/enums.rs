@@ -1,6 +1,6 @@
-//! MIP Protocol Enums — generated from marty-protocol/enums/*.json
-//! Generated: 2026-05-14
-//! DO NOT EDIT — regenerate with: python scripts/codegen.py rust
+//! MIP Protocol Enums â€” generated from marty-protocol/enums/*.json
+//! Protocol version: 0.3.1
+//! DO NOT EDIT â€” regenerate with: python scripts/codegen.py rust
 
 use serde::{Deserialize, Serialize};
 
@@ -124,6 +124,17 @@ pub enum ChannelType {
     Sms,
 }
 
+/// The party responsible for resolving an application claim blocker.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum ClaimBlockerOwner {
+    #[serde(rename = "APPLICANT")]
+    Applicant,
+    #[serde(rename = "ISSUER")]
+    Issuer,
+    #[serde(rename = "SYSTEM")]
+    System,
+}
+
 /// Recognized compliance frameworks and identity standards for credential format abstraction
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ComplianceCode {
@@ -143,8 +154,6 @@ pub enum ComplianceCode {
     Ob3Jwt,
     #[serde(rename = "OB3_JSONLD")]
     Ob3Jsonld,
-    #[serde(rename = "OB2_COMPATIBILITY")]
-    Ob2Compatibility,
     #[serde(rename = "SD_JWT_VC")]
     SdJwtVc,
     #[serde(rename = "ENTERPRISE_VC")]
@@ -157,7 +166,7 @@ pub enum ComplianceCode {
     Custom,
 }
 
-/// Technical encoding formats for verifiable credentials
+/// Technical encoding formats for digital and physical credentials
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CredentialFormat {
     #[serde(rename = "MDOC")]
@@ -170,6 +179,8 @@ pub enum CredentialFormat {
     JsonLd,
     #[serde(rename = "ZK_MDOC")]
     ZkMdoc,
+    #[serde(rename = "ICAO_EMRTD")]
+    IcaoEmrtd,
 }
 
 /// When a wallet holds multiple credentials that satisfy a PresentationPolicy, this strategy determines which is preferred. Used in PresentationPolicy.credential_ranking_strategy.
@@ -205,7 +216,7 @@ pub enum FallbackPolicy {
     Deny,
 }
 
-/// Lifecycle status of a FlowInstance. Aligned with §9.9.2 state machine. Terminal states: COMPLETED, FAILED, EXPIRED, CANCELLED.
+/// Lifecycle status of a FlowInstance. Aligned with Â§9.9.2 state machine. Terminal states: COMPLETED, FAILED, EXPIRED, CANCELLED.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FlowInstanceStatus {
     #[serde(rename = "PENDING")]
@@ -228,7 +239,7 @@ pub enum FlowInstanceStatus {
     Cancelled,
 }
 
-/// Protocol-aligned flow types. Each type maps to a fixed ordered step sequence. Issuance and verification flows are separate; application_approval_issuance is the multi-step application workflow.
+/// Protocol-aligned flow types. Standard types map to fixed ordered step sequences. Non-standard orchestration uses the explicit custom extension envelope.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FlowType {
     #[serde(rename = "oid4vci_pre_authorized")]
@@ -253,6 +264,8 @@ pub enum FlowType {
     Combined,
     #[serde(rename = "siopv2")]
     Siopv2,
+    #[serde(rename = "custom")]
+    Custom,
 }
 
 /// Protocols used to deliver credentials from issuer to holder

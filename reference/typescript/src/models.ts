@@ -1,12 +1,13 @@
-// MIP Protocol Models — generated from marty-protocol/schemas/*.json
-// Generated: 2026-05-14
-// DO NOT EDIT — regenerate with: python scripts/codegen.py typescript
+// MIP Protocol Models â€” generated from marty-protocol/schemas/*.json
+// Protocol version: 0.3.1
+// DO NOT EDIT â€” regenerate with: python scripts/codegen.py typescript
 
 import {
   ApiKeyScope,
   ApplicantStatus,
   ApprovalStrategy,
   ChannelType,
+  ClaimBlockerOwner,
   ComplianceCode,
   CredentialFormat,
   CredentialRankingStrategy,
@@ -27,6 +28,14 @@ import {
   ZkCircuitSystem,
 } from './enums';
 
+/** Deployment discovery projection of an active Compliance Profile and the discoverable API surface it requires. */
+export interface ActiveComplianceProfile {
+  compliance_code: string;
+  credential_format?: CredentialFormat;
+  issuance_protocol?: IssuanceProtocol;
+  api_surface: Record<string, unknown>[];
+}
+
 /** API key for authenticating programmatic access to the Marty gateway. Keys are either ORGANIZATION-scoped (full org access within their scopes) or DEPLOYMENT-scoped (restricted to a single deployment profile). The raw key value is only returned on creation; subsequent reads show a masked representation. Managed via /v1/api-keys. */
 export interface ApiKey {
   id: string;
@@ -44,47 +53,45 @@ export interface ApiKey {
   updated_at?: string;
 }
 
-/** A person or entity that has applied for a credential through an application-approval flow. Applicants are a first-class entity with a lifecycle that terminates in credential issuance, rejection, or withdrawal. */
-export interface Applicant {
+/** A holder-owned credential application created from an active ApplicationTemplate. Identity, credential policy, checks, and issuer data are server-derived. */
+export interface ApplicantApplication {
   id: string;
+  applicant_id: string;
   organization_id: string;
-  flow_id: string;
-  credential_template_id?: string | null;
-  user_id?: string | null;
-  external_id?: string | null;
-  given_name?: string;
-  family_name?: string;
-  email?: string | null;
-  phone?: string | null;
-  status: ApplicantStatus;
-  reviewer_id?: string | null;
-  reviewer_lock_expires_at?: string | null;
+  reference_number?: string | null;
+  application_template_id: string;
+  credential_template_id: string;
+  form_data: Record<string, unknown>;
+  integration_context: Record<string, unknown>;
+  status: 'DRAFT' | 'SUBMITTED' | 'UNDER_REVIEW' | 'PENDING_INFORMATION' | 'APPROVED' | 'REJECTED' | 'WITHDRAWN' | 'OFFERED' | 'CREDENTIALED' | 'SUSPENDED';
+  claim_state: 'NOT_READY' | 'BLOCKED' | 'OFFER_READY' | 'CLAIMED' | 'EXPIRED';
+  claim_blocker?: ClaimBlocker | null;
+  credential_display_name?: string | null;
+  credential_offer_uri?: string | null;
+  credential_offer_uris?: Record<string, unknown>;
+  credential_offer_labels?: Record<string, unknown>;
+  offer_expires_at?: string | null;
   submitted_at?: string | null;
   reviewed_at?: string | null;
-  approved_at?: string | null;
-  credentialed_at?: string | null;
-  rejection_reason?: string | null;
-  rejection_code?: 'IDENTITY_UNVERIFIABLE' | 'DOCUMENT_INVALID' | 'DOCUMENT_EXPIRED' | 'BIOMETRIC_MISMATCH' | 'POLICY_VIOLATION' | 'INCOMPLETE_APPLICATION' | 'DUPLICATE_APPLICATION' | 'OTHER' | 'None';
-  application_data?: Record<string, unknown>;
-  vetting_checks?: Record<string, unknown>[];
-  issued_credential_id?: string | null;
-  metadata?: Record<string, unknown>;
+  issued_at?: string | null;
   created_at: string;
-  updated_at?: string;
+  updated_at: string;
 }
 
-/** User-facing credential application workflow with form fields, evidence, and approval config */
+/** MIP 0.3 user-facing credential application workflow with canonical form fields, evidence, checks, approval policy, and lifecycle state */
 export interface ApplicationTemplate {
   id: string;
   organization_id: string;
   name: string;
   description?: string;
+  credential_template_id?: string | null;
   form_fields?: Record<string, unknown>[];
   evidence_requirements?: Record<string, unknown>[];
   claim_collection_rules?: Record<string, unknown>[];
+  required_checks?: Record<string, unknown>[];
   approval_strategy: 'AUTO' | 'MANUAL' | 'RULES_BASED' | 'EXTERNAL';
-  approval_rules?: Record<string, unknown>;
   approval_policy_set_id?: string | null;
+  application_validity_days?: number;
   notification_config?: Record<string, unknown>;
   ui_config?: Record<string, unknown>;
   status: 'DRAFT' | 'ACTIVE' | 'DEPRECATED';
@@ -137,23 +144,55 @@ export interface CascadeRevocationOperation {
   updated_at?: string;
 }
 
+/** A privacy-safe, recoverable reason that an approved application cannot yet produce a credential offer. */
+export interface ClaimBlocker {
+  code: string;
+  owner: ClaimBlockerOwner;
+  message: string;
+}
+
 /** Abstraction of credential format complexity behind compliance-oriented identifiers */
 export interface ComplianceProfile {
   id: string;
   organization_id?: string | null;
-  compliance_code: 'ICAO_DTC' | 'ICAO_MRZ' | 'AAMVA_MDL' | 'EUDI_PID' | 'EUDI_MDL' | 'OB3_JWT' | 'OB3_JSONLD' | 'OB2_COMPATIBILITY' | 'SD_JWT_VC' | 'ENTERPRISE_VC' | 'OID4VC' | 'PEX' | 'CUSTOM';
+  compliance_code: 'ICAO_DTC' | 'ICAO_MRZ' | 'ICAO_PASSPORT' | 'AAMVA_MDL' | 'EUDI_PID' | 'EUDI_MDL' | 'OB3_JWT' | 'OB3_JSONLD' | 'SD_JWT_VC' | 'ENTERPRISE_VC' | 'OID4VC' | 'PEX' | 'CUSTOM';
   name: string;
   description?: string;
-  credential_format: 'MDOC' | 'SD_JWT_VC' | 'VC_JWT' | 'JSON_LD' | 'ZK_MDOC';
-  issuance_protocol?: 'OID4VCI_PRE_AUTH' | 'OID4VCI_AUTH_CODE' | 'DIRECT';
+  version?: string;
+  specification_reference?: string;
+  credential_format: CredentialFormat;
+  issuance_protocol?: IssuanceProtocol;
   issuer_artifact_requirements?: Record<string, unknown>;
-  default_verification_rules?: Record<string, unknown>;
   verification_policy_set_id?: string | null;
   trust_profile_constraints?: Record<string, unknown>;
   api_surface?: Record<string, unknown>[];
   discoverable?: boolean;
+  required_claims?: Record<string, unknown>[];
+  optional_claims?: Record<string, unknown>[];
+  required_namespaces?: string[];
+  optional_namespaces?: string[];
+  required_contexts?: string[];
+  supported_proof_types?: string[];
+  supported_algorithms?: string[];
+  key_requirements?: Record<string, unknown>;
+  revocation_methods?: RevocationMechanism[];
+  revocation_required?: boolean;
+  allow_skip_revocation?: boolean;
+  trust_source_types?: string[];
+  holder_binding_required?: boolean;
+  selective_disclosure_required?: boolean;
+  immutable?: boolean;
+  oid4vci_features?: Record<string, unknown>;
+  oid4vp_features?: Record<string, unknown>;
+  pex_requirements?: Record<string, unknown>;
+  physical_production?: Record<string, unknown>;
+  pki_hierarchy?: Record<string, unknown>;
+  vetting_requirements?: Record<string, unknown>;
+  conformance_tests?: Record<string, unknown>[];
+  status: 'DRAFT' | 'ACTIVE' | 'SUSPENDED' | 'DEPRECATED';
   is_system: boolean;
   created_at: string;
+  updated_at?: string;
 }
 
 /** Master issuance configuration combining schema, compliance profile, and cryptographic materials */
@@ -165,7 +204,7 @@ export interface CredentialTemplate {
   description?: string;
   compliance_profile_id: string;
   vct?: string | null;
-  credential_payload_format?: 'SD_JWT_VC' | 'MDOC' | 'VC_JWT' | 'JSON_LD';
+  credential_payload_format?: CredentialFormat;
   application_template_id?: string | null;
   trust_profile_id?: string | null;
   revocation_profile_id?: string | null;
@@ -185,7 +224,34 @@ export interface CredentialTemplate {
   updated_at?: string;
 }
 
-/** Runtime configuration for a physical or logical identity verification endpoint. Packages trust, policies, issuance capability, network mode, UX, and device grouping via Lanes. Compatibility extensions may additionally expose rollout and operational fields. */
+/** A delivery destination describes where an issued credential can be delivered, opened, imported, or mirrored. Unlike WalletProfile, it can represent holder wallets, learner-owned backpacks, organization-managed mirrors such as Canvas Credentials, or custom delivery channels. */
+export interface DeliveryDestinationProfile {
+  id: string;
+  organization_id?: string | null;
+  is_system?: boolean;
+  name: string;
+  description?: string | null;
+  provider: 'elevenid_wallet' | 'oid4vci_wallet' | 'didcomm_v2' | 'canvas_credentials' | 'canvas_credentials_backpack' | 'open_badges_backpack' | 'physical_personalization_bureau' | 'custom';
+  mode: 'holder_wallet' | 'learner_backpack' | 'organization_mirror' | 'direct_delivery' | 'physical_production';
+  setup_actor: 'learner' | 'org_admin' | 'system';
+  delivery_target: 'wallet' | 'didcomm_v2' | 'canvas_credentials' | 'external_api' | 'webhook' | 'physical_document';
+  wallet_profile_id?: string | null;
+  credential_format?: 'MDOC' | 'SD_JWT_VC' | 'VC_JWT' | 'JSON_LD' | 'ICAO_EMRTD' | 'None';
+  issuance_protocol?: 'OID4VCI_PRE_AUTH' | 'OID4VCI_AUTH_CODE' | 'DIRECT' | 'PHYSICAL_DOCUMENT' | 'None';
+  compliance_profile_code?: string | null;
+  connector_type?: string | null;
+  connector_id?: string | null;
+  requires_consent?: boolean;
+  claim_projection_policy?: Record<string, unknown>;
+  setup_requirements?: string[];
+  capabilities?: Record<string, unknown>;
+  docs_url?: string | null;
+  is_enabled?: boolean;
+  created_at: string;
+  updated_at?: string | null;
+}
+
+/** Runtime configuration for a physical or logical identity verification endpoint. Packages trust, policies, issuance capability, network mode, user experience, and device grouping via Lanes. */
 export interface DeploymentProfile {
   id: string;
   organization_id: string;
@@ -197,14 +263,13 @@ export interface DeploymentProfile {
   default_policy_id?: string | null;
   site_id?: string | null;
   enabled_flow_ids?: string[];
-  default_presentation_policy_id?: string | null;
   network_mode: 'ONLINE' | 'OFFLINE' | 'HYBRID';
   key_access_mode?: 'KEY_VAULT' | 'HSM' | 'DEVICE_KEYSTORE';
   environment_config?: Record<string, unknown>;
-  ux_config?: Record<string, unknown>;
   update_channel?: 'stable' | 'beta' | 'pinned';
   update_policy?: Record<string, unknown>;
   offline_cache_ttl_hours?: number;
+  operator_biometric_authentication_required?: boolean;
   biometric_required?: boolean;
   audit_all_events?: boolean;
   lanes?: Lane[];
@@ -270,26 +335,46 @@ export interface FlowExecution {
   updated_at?: string;
 }
 
-/** End-to-end identity lifecycle orchestration. Each flow_type maps to a fixed protocol step sequence defined by OID4VCI, OID4VP, mDL ISO 18013-5, or application-approval workflows. */
+/** Versioned non-standard orchestration envelope. A custom Flow uses this object so it cannot claim the conformance semantics of a standard FlowType. */
+export interface FlowExtension {
+  extension_uri: string;
+  extension_version: string;
+  extends_flow_type: FlowType;
+  entry_step_id: string;
+  steps: Record<string, unknown>[];
+  transitions: Record<string, unknown>[];
+  config?: Record<string, unknown>;
+}
+
+/** End-to-end identity lifecycle orchestration. Standard FlowTypes have fixed protocol sequences; non-standard graphs use flow_type custom with a versioned extension envelope. */
 export interface Flow {
   id: string;
   organization_id: string;
   name: string;
   description?: string;
-  flow_type: 'oid4vci_pre_authorized' | 'oid4vci_authorization_code' | 'mdl_issuance' | 'oid4vp_presentation' | 'mdl_presentation' | 'siopv2' | 'application_approval_issuance' | 'credential_renewal' | 'credential_revocation' | 'combined';
+  flow_type: FlowType;
   flow_category?: 'ISSUANCE' | 'VERIFICATION' | 'RENEWAL' | 'REVOCATION' | 'COMBINED';
   trust_profile_id?: string | null;
   credential_template_id?: string | null;
   application_template_id?: string | null;
   presentation_policy_id?: string | null;
+  delivery_destination_profile_id?: string | null;
   deployment_profile_ids?: string[];
   approval_strategy: ApprovalStrategy;
-  enabled: boolean;
   hooks?: Record<string, unknown>;
   trigger?: Record<string, unknown>;
+  extension?: FlowExtension;
   status: 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'ARCHIVED';
   created_at: string;
   updated_at?: string;
+}
+
+/** Privacy-filtered response from GET /v1/issued-credentials/mine. Credential material, claims, hashes, signing references, and opaque subject identifiers are prohibited. */
+export interface HolderCredentialInventory {
+  items: Record<string, unknown>[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 /** Record of a credential issuance event */
@@ -315,6 +400,7 @@ export interface IssuanceRecord {
 /** Lifecycle record for an issued credential. Stores metadata without raw credential data (only a SHA-256 hash for integrity). Links FlowExecution to credential status, status list entries, and revocation history. */
 export interface IssuedCredential {
   id: string;
+  organization_id: string;
   credential_id: string;
   credential_type: string;
   credential_format: 'MDOC' | 'SD_JWT_VC' | 'VC_JWT' | 'JSON_LD';
@@ -322,6 +408,11 @@ export interface IssuedCredential {
   credential_template_id: string;
   application_id?: string | null;
   revocation_profile_id?: string | null;
+  renewed_from_credential_id?: string | null;
+  renewed_to_credential_id?: string | null;
+  renewable?: boolean;
+  renewal_eligible_at?: string | null;
+  can_renew?: boolean;
   subject_id: string;
   subject_claims_hash?: string | null;
   issued_at: string;
@@ -375,8 +466,8 @@ export interface MipConfigurationDiscoveryDocument {
   mip_version: string;
   issuer: string;
   mip_configuration_endpoint: string;
-  supported_versions?: string[];
-  implementation_classes?: string[];
+  supported_versions: string[];
+  implementation_classes: string[];
   issuance_endpoint?: string;
   openid_credential_issuer?: string;
   presentation_endpoint?: string;
@@ -384,6 +475,7 @@ export interface MipConfigurationDiscoveryDocument {
   authorization_endpoint?: string;
   supported_credential_formats?: string[];
   supported_compliance_profiles?: string[];
+  active_compliance_profiles: ActiveComplianceProfile[];
   supported_flow_types?: string[];
   supported_signing_algorithms?: string[];
   proximity_supported?: boolean;
@@ -419,6 +511,11 @@ export interface NotificationTarget {
   webhook_endpoints?: string[];
   email_addresses?: string[];
   channels: string[];
+}
+
+/** Response from the OID4VCI 1.0 Final Nonce Endpoint. The HTTP response must also include Cache-Control: no-store. */
+export interface OID4VCINonceResponse {
+  c_nonce: string;
 }
 
 /** Organisation-specific overlay of a TrustFramework. Separates shared framework definitions from per-org policy overrides, issuer allow/deny lists, and jurisdiction filters. */
@@ -459,7 +556,30 @@ export interface Organization {
   updated_at?: string | null;
 }
 
-/** A named collection of Cedar policies that governs authorization decisions within the MIP platform. PolicySets are referenced by ApplicationTemplate (approval_rules), TrustProfile (issuer trust), ComplianceProfile (verification rules), and the API gateway (access control). Each PolicySet contains one or more Cedar policy statements evaluated using deny-by-default semantics: at least one permit must match and zero forbid policies may match for the request to be authorized. */
+/** Auditable production state for one physical ICAO eMRTD document. Sensitive data groups, biometrics, signing keys, and connector secrets are referenced but never embedded. */
+export interface PhysicalDocumentJob {
+  id: string;
+  organization_id: string;
+  flow_execution_id: string;
+  application_id: string;
+  credential_template_id: string;
+  delivery_destination_profile_id: string;
+  document_type: 'TD1' | 'TD2' | 'TD3';
+  country_code?: string;
+  secure_artifact_reference?: string | null;
+  bureau_job_id?: string | null;
+  tracking_number?: string | null;
+  status: 'DRAFT' | 'DATA_GENERATED' | 'SOD_SIGNED' | 'SUBMITTED' | 'IN_PRODUCTION' | 'QUALITY_CHECK' | 'READY_FOR_ACTIVATION' | 'ACTIVE' | 'FAILED' | 'CANCELLED';
+  quality_result?: Record<string, unknown> | null;
+  error_code?: string | null;
+  error_message?: string | null;
+  submitted_at?: string | null;
+  completed_at?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+}
+
+/** A named collection of Cedar policies that governs authorization decisions within the MIP platform. PolicySets are referenced by ApplicationTemplate (approval_policy_set_id), TrustProfile, ComplianceProfile, and the API gateway. Each PolicySet is evaluated using deny-by-default semantics: at least one permit must match and zero forbid policies may match. */
 export interface PolicySet {
   id: string;
   organization_id: string;
@@ -530,6 +650,7 @@ export interface RevocationProfile {
   id: string;
   organization_id: string;
   name: string;
+  status: 'DRAFT' | 'ACTIVE' | 'SUSPENDED';
   revocation_mechanism: string[];
   mechanism_priority?: string[];
   check_mode: RevocationTimingMode;
@@ -682,7 +803,7 @@ export interface WalletProfile {
   override_precedence?: number;
   name: string;
   description?: string;
-  credential_format: 'MDOC' | 'SD_JWT_VC' | 'VC_JWT' | 'JSON_LD';
+  credential_format: 'MDOC' | 'MSO_MDOC' | 'SD_JWT_VC' | 'VC_JWT' | 'JSON_LD';
   issuance_protocol: 'OID4VCI_PRE_AUTH' | 'OID4VCI_AUTH_CODE' | 'DIRECT';
   compliance_profile_code?: string | null;
   wallet_apps?: string[];
@@ -690,6 +811,8 @@ export interface WalletProfile {
   specifications?: string[];
   supported_platforms?: string[];
   deep_link_pattern?: string;
+  format_variant?: string;
+  deep_link_scheme?: string;
   created_at: string;
   updated_at?: string;
 }

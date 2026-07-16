@@ -27,6 +27,22 @@
         "claims_missing": {"type": "array", "items": {"type": "string"}},
         "trust_validated": {"type": "boolean"},
         "revocation_checked": {"type": "boolean"},
+        "holder_binding_evidence": {
+          "type": "object",
+          "required": ["required", "validated"],
+          "additionalProperties": false,
+          "properties": {
+            "required": {"type": "boolean"},
+            "validated": {"type": "boolean"},
+            "binding_method": {"type": "string", "enum": ["CREDENTIAL_KEY", "DEVICE_KEY", "SESSION_BINDING"]},
+            "proof_profile": {"type": "string", "enum": ["OID4VP_VERIFIABLE_PRESENTATION", "SD_JWT_KEY_BINDING", "MDOC_DEVICE_AUTHENTICATION", "CUSTOM"]},
+            "challenge_validated": {"type": "boolean"},
+            "audience_validated": {"type": "boolean"},
+            "replay_checked": {"type": "boolean"},
+            "proof_age_seconds": {"type": "integer", "minimum": 0},
+            "failure_reason": {"type": "string"}
+          }
+        },
         "failure_reason": {"type": "string"}
       }
     },

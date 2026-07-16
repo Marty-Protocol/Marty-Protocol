@@ -1,0 +1,15 @@
+{
+  "id": "3fa85f64-5717-4562-b3fc-2d7a2bcf9012",
+  "organization_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "flow_execution_id": "3fa85f64-5717-4562-b3fc-2d7a2bcf9013",
+  "application_id": "3fa85f64-5717-4562-b3fc-2d7a2bcf9014",
+  "credential_template_id": "4bd47e7a-3a4f-4e6b-b8e2-5d7a2bcf1234",
+  "delivery_destination_profile_id": "passport-bureau-1",
+  "document_type": "TD3",
+  "country_code": "USA",
+  "secure_artifact_reference": "vault://physical-documents/job-9012",
+  "bureau_job_id": "bureau-9012",
+  "status": "IN_PRODUCTION",
+  "submitted_at": "2026-07-11T00:05:00Z",
+  "created_at": "2026-07-11T00:00:00Z"
+}

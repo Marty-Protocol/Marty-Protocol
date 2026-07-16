@@ -1,144 +1,71 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/applicant.json",
-  "title": "Applicant",
-  "description": "A person or entity that has applied for a credential through an application-approval flow. Applicants are a first-class entity with a lifecycle that terminates in credential issuance, rejection, or withdrawal.",
+  "title": "ApplicantApplication",
+  "description": "A holder-owned credential application created from an active ApplicationTemplate. Identity, credential policy, checks, and issuer data are server-derived.",
   "type": "object",
-  "required": ["id", "organization_id", "flow_id", "status", "created_at"],
   "additionalProperties": false,
+  "required": [
+    "id",
+    "applicant_id",
+    "organization_id",
+    "application_template_id",
+    "credential_template_id",
+    "form_data",
+    "integration_context",
+    "status",
+    "claim_state",
+    "created_at",
+    "updated_at"
+  ],
   "properties": {
-    "id": {
+    "id": {"type": "string", "format": "uuid"},
+    "applicant_id": {
       "type": "string",
       "format": "uuid",
-      "description": "Unique applicant identifier"
+      "description": "Server-derived holder profile identifier. Clients MUST NOT supply this on creation."
     },
-    "organization_id": {
-      "type": "string",
-      "format": "uuid",
-      "description": "Organization that owns this applicant record"
-    },
-    "flow_id": {
-      "type": "string",
-      "format": "uuid",
-      "description": "The application_approval_issuance flow that governs this applicant"
-    },
+    "organization_id": {"type": "string", "format": "uuid"},
+    "reference_number": {"type": ["string", "null"], "maxLength": 128},
+    "application_template_id": {"type": "string", "format": "uuid"},
     "credential_template_id": {
-      "type": ["string", "null"],
-      "format": "uuid",
-      "description": "Credential template to be issued upon approval. Resolved from the flow unless overridden."
-    },
-    "user_id": {
-      "type": ["string", "null"],
-      "format": "uuid",
-      "description": "Platform user account associated with this applicant, if one exists. May be null for applicants who have not yet created an account."
-    },
-    "external_id": {
-      "type": ["string", "null"],
-      "maxLength": 256,
-      "description": "Caller-supplied external identifier (e.g., HR system ID, case number)"
-    },
-    "given_name": {
       "type": "string",
-      "maxLength": 128
+      "format": "uuid",
+      "description": "Resolved from application_template_id by the server."
     },
-    "family_name": {
-      "type": "string",
-      "maxLength": 128
+    "form_data": {
+      "type": "object",
+      "description": "Applicant-supplied values validated against the active ApplicationTemplate.",
+      "additionalProperties": true
     },
-    "email": {
-      "type": ["string", "null"],
-      "format": "email",
-      "description": "Contact email address for notifications"
-    },
-    "phone": {
-      "type": ["string", "null"],
-      "pattern": "^\\+[1-9]\\d{6,14}$",
-      "description": "E.164 phone number"
+    "integration_context": {
+      "type": "object",
+      "description": "Non-claim integration correlation data. It MUST NOT be copied into credential claims.",
+      "additionalProperties": true
     },
     "status": {
-      "$ref": "../enums/applicant-statuses.json",
-      "description": "Applicant lifecycle state. Transitions: DRAFT→SUBMITTED→UNDER_REVIEW→APPROVED→CREDENTIALED or REJECTED. See protocol/applicant/SPECIFICATION.md for full FSM."
+      "type": "string",
+      "enum": ["DRAFT", "SUBMITTED", "UNDER_REVIEW", "PENDING_INFORMATION", "APPROVED", "REJECTED", "WITHDRAWN", "OFFERED", "CREDENTIALED", "SUSPENDED"]
     },
-    "reviewer_id": {
-      "type": ["string", "null"],
-      "format": "uuid",
-      "description": "User ID of the currently assigned reviewer. Set when a ReviewerLock is acquired."
+    "claim_state": {
+      "type": "string",
+      "enum": ["NOT_READY", "BLOCKED", "OFFER_READY", "CLAIMED", "EXPIRED"]
     },
-    "reviewer_lock_expires_at": {
-      "type": ["string", "null"],
-      "format": "date-time",
-      "description": "Expiry time of the current reviewer lock. Null if no lock is held."
-    },
-    "submitted_at": {
-      "type": ["string", "null"],
-      "format": "date-time"
-    },
-    "reviewed_at": {
-      "type": ["string", "null"],
-      "format": "date-time"
-    },
-    "approved_at": {
-      "type": ["string", "null"],
-      "format": "date-time"
-    },
-    "credentialed_at": {
-      "type": ["string", "null"],
-      "format": "date-time"
-    },
-    "rejection_reason": {
-      "type": ["string", "null"],
-      "maxLength": 2048,
-      "description": "Human-readable rejection reason, set when status = REJECTED"
-    },
-    "rejection_code": {
-      "type": ["string", "null"],
-      "enum": [
-        "IDENTITY_UNVERIFIABLE",
-        "DOCUMENT_INVALID",
-        "DOCUMENT_EXPIRED",
-        "BIOMETRIC_MISMATCH",
-        "POLICY_VIOLATION",
-        "INCOMPLETE_APPLICATION",
-        "DUPLICATE_APPLICATION",
-        "OTHER",
-        null
+    "claim_blocker": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "claim-blocker.json"}
       ]
     },
-    "application_data": {
-      "type": "object",
-      "description": "Applicant-supplied form data corresponding to the application_template fields. Keys match field names from the ApplicationTemplate.",
-      "additionalProperties": true
-    },
-    "vetting_checks": {
-      "type": "array",
-      "description": "References to VettingCheck sub-resources. Read-only from the applicant schema perspective.",
-      "items": {
-        "type": "object",
-        "required": ["id", "check_type", "status"],
-        "properties": {
-          "id": {"type": "string", "format": "uuid"},
-          "check_type": {"type": "string"},
-          "status": {"type": "string"}
-        }
-      }
-    },
-    "issued_credential_id": {
-      "type": ["string", "null"],
-      "format": "uuid",
-      "description": "ID of the issued credential record when status = CREDENTIALED"
-    },
-    "metadata": {
-      "type": "object",
-      "description": "Reviewer-supplied freeform notes and tags",
-      "additionalProperties": true
-    },
-    "created_at": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "updated_at": {
-      "type": "string",
-      "format": "date-time"
-    }
+    "credential_display_name": {"type": ["string", "null"], "maxLength": 256},
+    "credential_offer_uri": {"type": ["string", "null"]},
+    "credential_offer_uris": {"type": "object", "additionalProperties": {"type": "string"}},
+    "credential_offer_labels": {"type": "object", "additionalProperties": {"type": "string"}},
+    "offer_expires_at": {"type": ["string", "null"], "format": "date-time"},
+    "submitted_at": {"type": ["string", "null"], "format": "date-time"},
+    "reviewed_at": {"type": ["string", "null"], "format": "date-time"},
+    "issued_at": {"type": ["string", "null"], "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
   }
 }

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/claim-blocker.json",
+  "title": "ClaimBlocker",
+  "description": "A privacy-safe, recoverable reason that an approved application cannot yet produce a credential offer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["code", "owner", "message"],
+  "properties": {
+    "code": {"type": "string", "minLength": 1, "maxLength": 128},
+    "owner": {"$ref": "../enums/claim-blocker-owners.json"},
+    "message": {"type": "string", "minLength": 1, "maxLength": 512}
+  }
+}

@@ -39,6 +39,7 @@
   "immutable": true,
   "status": "ACTIVE",
   "discoverable": true,
+  "created_at": "2026-07-15T00:00:00Z",
   "conformance_tests": [
     {
       "suite": "oid4vc",

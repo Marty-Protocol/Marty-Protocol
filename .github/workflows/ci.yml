@@ -28,6 +28,9 @@ jobs:
       - name: Run tests
         run: uv run pytest tests/ -v
 
+      - name: Verify generated bindings
+        run: uv run python scripts/codegen.py --check
+
   lint-json:
     name: JSON Schema Lint
     runs-on: ubuntu-latest
@@ -61,6 +64,18 @@ jobs:
           fetch-depth: 0
 
       - name: Check DCO sign-off
-        uses: dcoapp/dco@v3.0.2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          failed=0
+          while read -r commit; do
+            author_email="$(git show -s --format='%ae' "$commit")"
+            signoffs="$(git show -s --format='%(trailers:key=Signed-off-by,valueonly)' "$commit")"
+            if ! grep -Fqi "<$author_email>" <<<"$signoffs"; then
+              echo "::error::Commit $commit is missing a Signed-off-by trailer for $author_email"
+              failed=1
+            fi
+          done < <(git rev-list "$BASE_SHA..$HEAD_SHA")
+          exit "$failed"

@@ -1,6 +1,6 @@
-"""MIP Protocol Enums — generated from marty-protocol/enums/*.json
-Generated: 2026-05-14
-DO NOT EDIT — regenerate with: python scripts/codegen.py python
+"""MIP Protocol Enums â€” generated from marty-protocol/enums/*.json
+Protocol version: 0.3.1
+DO NOT EDIT â€” regenerate with: python scripts/codegen.py python
 """
 from enum import Enum
 
@@ -75,6 +75,14 @@ class ChannelType(str, Enum):
     SMS = "SMS"
 
 
+class ClaimBlockerOwner(str, Enum):
+    """The party responsible for resolving an application claim blocker."""
+
+    APPLICANT = "APPLICANT"
+    ISSUER = "ISSUER"
+    SYSTEM = "SYSTEM"
+
+
 class ComplianceCode(str, Enum):
     """Recognized compliance frameworks and identity standards for credential format abstraction"""
 
@@ -86,7 +94,6 @@ class ComplianceCode(str, Enum):
     EUDI_MDL = "EUDI_MDL"
     OB3_JWT = "OB3_JWT"
     OB3_JSONLD = "OB3_JSONLD"
-    OB2_COMPATIBILITY = "OB2_COMPATIBILITY"
     SD_JWT_VC = "SD_JWT_VC"
     ENTERPRISE_VC = "ENTERPRISE_VC"
     OID4VC = "OID4VC"
@@ -95,13 +102,14 @@ class ComplianceCode(str, Enum):
 
 
 class CredentialFormat(str, Enum):
-    """Technical encoding formats for verifiable credentials"""
+    """Technical encoding formats for digital and physical credentials"""
 
     MDOC = "MDOC"
     SD_JWT_VC = "SD_JWT_VC"
     VC_JWT = "VC_JWT"
     JSON_LD = "JSON_LD"
     ZK_MDOC = "ZK_MDOC"
+    ICAO_EMRTD = "ICAO_EMRTD"
 
 
 class CredentialRankingStrategy(str, Enum):
@@ -129,7 +137,7 @@ class FallbackPolicy(str, Enum):
 
 
 class FlowInstanceStatus(str, Enum):
-    """Lifecycle status of a FlowInstance. Aligned with §9.9.2 state machine. Terminal states: COMPLETED, FAILED, EXPIRED, CANCELLED."""
+    """Lifecycle status of a FlowInstance. Aligned with Â§9.9.2 state machine. Terminal states: COMPLETED, FAILED, EXPIRED, CANCELLED."""
 
     PENDING = "PENDING"
     IN_PROGRESS = "IN_PROGRESS"
@@ -143,7 +151,7 @@ class FlowInstanceStatus(str, Enum):
 
 
 class FlowType(str, Enum):
-    """Protocol-aligned flow types. Each type maps to a fixed ordered step sequence. Issuance and verification flows are separate; application_approval_issuance is the multi-step application workflow."""
+    """Protocol-aligned flow types. Standard types map to fixed ordered step sequences. Non-standard orchestration uses the explicit custom extension envelope."""
 
     OID4VCI_PRE_AUTHORIZED = "oid4vci_pre_authorized"
     OID4VCI_AUTHORIZATION_CODE = "oid4vci_authorization_code"
@@ -156,6 +164,7 @@ class FlowType(str, Enum):
     PHYSICAL_DOCUMENT_ISSUANCE = "physical_document_issuance"
     COMBINED = "combined"
     SIOPV2 = "siopv2"
+    CUSTOM = "custom"
 
 
 class IssuanceProtocol(str, Enum):

@@ -1,6 +1,6 @@
-"""MIP Protocol Models � generated from marty-protocol/schemas/*.json
-Generated: 2026-05-14
-DO NOT EDIT � regenerate with: python scripts/codegen.py python
+"""MIP Protocol Models — generated from marty-protocol/schemas/*.json
+Protocol version: 0.3.1
+DO NOT EDIT — regenerate with: python scripts/codegen.py python
 """
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ from .enums import (
     ApplicantStatus,
     ApprovalStrategy,
     ChannelType,
+    ClaimBlockerOwner,
     ComplianceCode,
     CredentialFormat,
     CredentialRankingStrategy,
@@ -33,6 +34,16 @@ from .enums import (
     ValidationAlgorithm,
     ZkCircuitSystem,
 )
+
+
+class ActiveComplianceProfile(BaseModel):
+    """Deployment discovery projection of an active Compliance Profile and the discoverable API
+surface it requires."""
+
+    compliance_code: str
+    credential_format: CredentialFormat | None = None
+    issuance_protocol: IssuanceProtocol | None = None
+    api_surface: list[dict[str, Any]]
 
 
 class ApiKey(BaseModel):
@@ -56,52 +67,49 @@ creation; subsequent reads show a masked representation. Managed via /v1/api-key
     updated_at: datetime | None = None
 
 
-class Applicant(BaseModel):
-    """A person or entity that has applied for a credential through an application-approval
-flow. Applicants are a first-class entity with a lifecycle that terminates in credential
-issuance, rejection, or withdrawal."""
+class ApplicantApplication(BaseModel):
+    """A holder-owned credential application created from an active ApplicationTemplate.
+Identity, credential policy, checks, and issuer data are server-derived."""
 
     id: str
+    applicant_id: str
     organization_id: str
-    flow_id: str
-    credential_template_id: str | None = None
-    user_id: str | None = None
-    external_id: str | None = None
-    given_name: str | None = None
-    family_name: str | None = None
-    email: str | None = None
-    phone: str | None = None
-    status: ApplicantStatus
-    reviewer_id: str | None = None
-    reviewer_lock_expires_at: datetime | None = None
+    reference_number: str | None = None
+    application_template_id: str
+    credential_template_id: str
+    form_data: dict[str, Any]
+    integration_context: dict[str, Any]
+    status: Literal["DRAFT", "SUBMITTED", "UNDER_REVIEW", "PENDING_INFORMATION", "APPROVED", "REJECTED", "WITHDRAWN", "OFFERED", "CREDENTIALED", "SUSPENDED"]
+    claim_state: Literal["NOT_READY", "BLOCKED", "OFFER_READY", "CLAIMED", "EXPIRED"]
+    claim_blocker: ClaimBlocker | None = None
+    credential_display_name: str | None = None
+    credential_offer_uri: str | None = None
+    credential_offer_uris: dict[str, Any] | None = None
+    credential_offer_labels: dict[str, Any] | None = None
+    offer_expires_at: datetime | None = None
     submitted_at: datetime | None = None
     reviewed_at: datetime | None = None
-    approved_at: datetime | None = None
-    credentialed_at: datetime | None = None
-    rejection_reason: str | None = None
-    rejection_code: Literal["IDENTITY_UNVERIFIABLE", "DOCUMENT_INVALID", "DOCUMENT_EXPIRED", "BIOMETRIC_MISMATCH", "POLICY_VIOLATION", "INCOMPLETE_APPLICATION", "DUPLICATE_APPLICATION", "OTHER", "None"] | None = None
-    application_data: dict[str, Any] | None = None
-    vetting_checks: list[dict[str, Any]] | None = None
-    issued_credential_id: str | None = None
-    metadata: dict[str, Any] | None = None
+    issued_at: datetime | None = None
     created_at: datetime
-    updated_at: datetime | None = None
+    updated_at: datetime
 
 
 class ApplicationTemplate(BaseModel):
-    """User-facing credential application workflow with form fields, evidence, and approval
-config"""
+    """MIP 0.3 user-facing credential application workflow with canonical form fields,
+evidence, checks, approval policy, and lifecycle state"""
 
     id: str
     organization_id: str
     name: str
     description: str | None = None
+    credential_template_id: str | None = None
     form_fields: list[dict[str, Any]] | None = None
     evidence_requirements: list[dict[str, Any]] | None = None
     claim_collection_rules: list[dict[str, Any]] | None = None
+    required_checks: list[dict[str, Any]] | None = None
     approval_strategy: Literal["AUTO", "MANUAL", "RULES_BASED", "EXTERNAL"]
-    approval_rules: dict[str, Any] | None = None
     approval_policy_set_id: str | None = None
+    application_validity_days: int | None = None
     notification_config: dict[str, Any] | None = None
     ui_config: dict[str, Any] | None = None
     status: Literal["DRAFT", "ACTIVE", "DEPRECATED"]
@@ -161,24 +169,58 @@ operations."""
     updated_at: datetime | None = None
 
 
+class ClaimBlocker(BaseModel):
+    """A privacy-safe, recoverable reason that an approved application cannot yet produce a
+credential offer."""
+
+    code: str
+    owner: ClaimBlockerOwner
+    message: str
+
+
 class ComplianceProfile(BaseModel):
     """Abstraction of credential format complexity behind compliance-oriented identifiers"""
 
     id: str
     organization_id: str | None = None
-    compliance_code: Literal["ICAO_DTC", "ICAO_MRZ", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "OB2_COMPATIBILITY", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
+    compliance_code: Literal["ICAO_DTC", "ICAO_MRZ", "ICAO_PASSPORT", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
     name: str
     description: str | None = None
-    credential_format: Literal["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD", "ZK_MDOC"]
-    issuance_protocol: Literal["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT"] | None = None
+    version: str | None = None
+    specification_reference: str | None = None
+    credential_format: CredentialFormat
+    issuance_protocol: IssuanceProtocol | None = None
     issuer_artifact_requirements: dict[str, Any] | None = None
-    default_verification_rules: dict[str, Any] | None = None
     verification_policy_set_id: str | None = None
     trust_profile_constraints: dict[str, Any] | None = None
     api_surface: list[dict[str, Any]] | None = None
     discoverable: bool | None = None
+    required_claims: list[dict[str, Any]] | None = None
+    optional_claims: list[dict[str, Any]] | None = None
+    required_namespaces: list[str] | None = None
+    optional_namespaces: list[str] | None = None
+    required_contexts: list[str] | None = None
+    supported_proof_types: list[str] | None = None
+    supported_algorithms: list[str] | None = None
+    key_requirements: dict[str, Any] | None = None
+    revocation_methods: list[RevocationMechanism] | None = None
+    revocation_required: bool | None = None
+    allow_skip_revocation: bool | None = None
+    trust_source_types: list[str] | None = None
+    holder_binding_required: bool | None = None
+    selective_disclosure_required: bool | None = None
+    immutable: bool | None = None
+    oid4vci_features: dict[str, Any] | None = None
+    oid4vp_features: dict[str, Any] | None = None
+    pex_requirements: dict[str, Any] | None = None
+    physical_production: dict[str, Any] | None = None
+    pki_hierarchy: dict[str, Any] | None = None
+    vetting_requirements: dict[str, Any] | None = None
+    conformance_tests: list[dict[str, Any]] | None = None
+    status: Literal["DRAFT", "ACTIVE", "SUSPENDED", "DEPRECATED"]
     is_system: bool
     created_at: datetime
+    updated_at: datetime | None = None
 
 
 class CredentialTemplate(BaseModel):
@@ -192,7 +234,7 @@ materials"""
     description: str | None = None
     compliance_profile_id: str
     vct: str | None = None
-    credential_payload_format: Literal["SD_JWT_VC", "MDOC", "VC_JWT", "JSON_LD"] | None = None
+    credential_payload_format: CredentialFormat | None = None
     application_template_id: str | None = None
     trust_profile_id: str | None = None
     revocation_profile_id: str | None = None
@@ -212,10 +254,41 @@ materials"""
     updated_at: datetime | None = None
 
 
+class DeliveryDestinationProfile(BaseModel):
+    """A delivery destination describes where an issued credential can be delivered, opened,
+imported, or mirrored. Unlike WalletProfile, it can represent holder wallets, learner-
+owned backpacks, organization-managed mirrors such as Canvas Credentials, or custom
+delivery channels."""
+
+    id: str
+    organization_id: str | None = None
+    is_system: bool | None = None
+    name: str
+    description: str | None = None
+    provider: Literal["elevenid_wallet", "oid4vci_wallet", "didcomm_v2", "canvas_credentials", "canvas_credentials_backpack", "open_badges_backpack", "physical_personalization_bureau", "custom"]
+    mode: Literal["holder_wallet", "learner_backpack", "organization_mirror", "direct_delivery", "physical_production"]
+    setup_actor: Literal["learner", "org_admin", "system"]
+    delivery_target: Literal["wallet", "didcomm_v2", "canvas_credentials", "external_api", "webhook", "physical_document"]
+    wallet_profile_id: str | None = None
+    credential_format: Literal["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD", "ICAO_EMRTD", "None"] | None = None
+    issuance_protocol: Literal["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT", "PHYSICAL_DOCUMENT", "None"] | None = None
+    compliance_profile_code: str | None = None
+    connector_type: str | None = None
+    connector_id: str | None = None
+    requires_consent: bool | None = None
+    claim_projection_policy: dict[str, Any] | None = None
+    setup_requirements: list[str] | None = None
+    capabilities: dict[str, Any] | None = None
+    docs_url: str | None = None
+    is_enabled: bool | None = None
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
 class DeploymentProfile(BaseModel):
     """Runtime configuration for a physical or logical identity verification endpoint. Packages
-trust, policies, issuance capability, network mode, UX, and device grouping via Lanes.
-Compatibility extensions may additionally expose rollout and operational fields."""
+trust, policies, issuance capability, network mode, user experience, and device grouping
+via Lanes."""
 
     id: str
     organization_id: str
@@ -227,14 +300,13 @@ Compatibility extensions may additionally expose rollout and operational fields.
     default_policy_id: str | None = None
     site_id: str | None = None
     enabled_flow_ids: list[str] | None = None
-    default_presentation_policy_id: str | None = None
     network_mode: Literal["ONLINE", "OFFLINE", "HYBRID"]
     key_access_mode: Literal["KEY_VAULT", "HSM", "DEVICE_KEYSTORE"] | None = None
     environment_config: dict[str, Any] | None = None
-    ux_config: dict[str, Any] | None = None
     update_channel: Literal["stable", "beta", "pinned"] | None = None
     update_policy: dict[str, Any] | None = None
     offline_cache_ttl_hours: int | None = None
+    operator_biometric_authentication_required: bool | None = None
     biometric_required: bool | None = None
     audit_all_events: bool | None = None
     lanes: list[Lane] | None = None
@@ -307,29 +379,52 @@ complete."""
     updated_at: datetime | None = None
 
 
+class FlowExtension(BaseModel):
+    """Versioned non-standard orchestration envelope. A custom Flow uses this object so it
+cannot claim the conformance semantics of a standard FlowType."""
+
+    extension_uri: str
+    extension_version: str
+    extends_flow_type: FlowType
+    entry_step_id: str
+    steps: list[dict[str, Any]]
+    transitions: list[dict[str, Any]]
+    config: dict[str, Any] | None = None
+
+
 class Flow(BaseModel):
-    """End-to-end identity lifecycle orchestration. Each flow_type maps to a fixed protocol
-step sequence defined by OID4VCI, OID4VP, mDL ISO 18013-5, or application-approval
-workflows."""
+    """End-to-end identity lifecycle orchestration. Standard FlowTypes have fixed protocol
+sequences; non-standard graphs use flow_type custom with a versioned extension envelope."""
 
     id: str
     organization_id: str
     name: str
     description: str | None = None
-    flow_type: Literal["oid4vci_pre_authorized", "oid4vci_authorization_code", "mdl_issuance", "oid4vp_presentation", "mdl_presentation", "siopv2", "application_approval_issuance", "credential_renewal", "credential_revocation", "combined"]
+    flow_type: FlowType
     flow_category: Literal["ISSUANCE", "VERIFICATION", "RENEWAL", "REVOCATION", "COMBINED"] | None = None
     trust_profile_id: str | None = None
     credential_template_id: str | None = None
     application_template_id: str | None = None
     presentation_policy_id: str | None = None
+    delivery_destination_profile_id: str | None = None
     deployment_profile_ids: list[str] | None = None
     approval_strategy: ApprovalStrategy
-    enabled: bool
     hooks: dict[str, Any] | None = None
     trigger: dict[str, Any] | None = None
+    extension: FlowExtension | None = None
     status: Literal["DRAFT", "ACTIVE", "PAUSED", "ARCHIVED"]
     created_at: datetime
     updated_at: datetime | None = None
+
+
+class HolderCredentialInventory(BaseModel):
+    """Privacy-filtered response from GET /v1/issued-credentials/mine. Credential material,
+claims, hashes, signing references, and opaque subject identifiers are prohibited."""
+
+    items: list[dict[str, Any]]
+    total: int
+    limit: int
+    offset: int
 
 
 class IssuanceRecord(BaseModel):
@@ -359,6 +454,7 @@ class IssuedCredential(BaseModel):
 list entries, and revocation history."""
 
     id: str
+    organization_id: str
     credential_id: str
     credential_type: str
     credential_format: Literal["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]
@@ -366,6 +462,11 @@ list entries, and revocation history."""
     credential_template_id: str
     application_id: str | None = None
     revocation_profile_id: str | None = None
+    renewed_from_credential_id: str | None = None
+    renewed_to_credential_id: str | None = None
+    renewable: bool | None = None
+    renewal_eligible_at: datetime | None = None
+    can_renew: bool | None = None
     subject_id: str
     subject_claims_hash: str | None = None
     issued_at: datetime
@@ -426,8 +527,8 @@ to OpenID Connect Discovery (RFC 8414) but scoped to MIP-specific capabilities."
     mip_version: str
     issuer: str
     mip_configuration_endpoint: str
-    supported_versions: list[str] | None = None
-    implementation_classes: list[str] | None = None
+    supported_versions: list[str]
+    implementation_classes: list[str]
     issuance_endpoint: str | None = None
     openid_credential_issuer: str | None = None
     presentation_endpoint: str | None = None
@@ -435,6 +536,7 @@ to OpenID Connect Discovery (RFC 8414) but scoped to MIP-specific capabilities."
     authorization_endpoint: str | None = None
     supported_credential_formats: list[str] | None = None
     supported_compliance_profiles: list[str] | None = None
+    active_compliance_profiles: list[ActiveComplianceProfile]
     supported_flow_types: list[str] | None = None
     supported_signing_algorithms: list[str] | None = None
     proximity_supported: bool | None = None
@@ -472,6 +574,13 @@ class NotificationTarget(BaseModel):
     webhook_endpoints: list[str] | None = None
     email_addresses: list[str] | None = None
     channels: list[str]
+
+
+class OID4VCINonceResponse(BaseModel):
+    """Response from the OID4VCI 1.0 Final Nonce Endpoint. The HTTP response must also include
+Cache-Control: no-store."""
+
+    c_nonce: str
 
 
 class OrganizationTrustProfile(BaseModel):
@@ -517,13 +626,37 @@ organization."""
     updated_at: datetime | None = None
 
 
+class PhysicalDocumentJob(BaseModel):
+    """Auditable production state for one physical ICAO eMRTD document. Sensitive data groups,
+biometrics, signing keys, and connector secrets are referenced but never embedded."""
+
+    id: str
+    organization_id: str
+    flow_execution_id: str
+    application_id: str
+    credential_template_id: str
+    delivery_destination_profile_id: str
+    document_type: Literal["TD1", "TD2", "TD3"]
+    country_code: str | None = None
+    secure_artifact_reference: str | None = None
+    bureau_job_id: str | None = None
+    tracking_number: str | None = None
+    status: Literal["DRAFT", "DATA_GENERATED", "SOD_SIGNED", "SUBMITTED", "IN_PRODUCTION", "QUALITY_CHECK", "READY_FOR_ACTIVATION", "ACTIVE", "FAILED", "CANCELLED"]
+    quality_result: dict[str, Any] | None = None
+    error_code: str | None = None
+    error_message: str | None = None
+    submitted_at: datetime | None = None
+    completed_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
 class PolicySet(BaseModel):
     """A named collection of Cedar policies that governs authorization decisions within the MIP
-platform. PolicySets are referenced by ApplicationTemplate (approval_rules),
-TrustProfile (issuer trust), ComplianceProfile (verification rules), and the API gateway
-(access control). Each PolicySet contains one or more Cedar policy statements evaluated
-using deny-by-default semantics: at least one permit must match and zero forbid policies
-may match for the request to be authorized."""
+platform. PolicySets are referenced by ApplicationTemplate (approval_policy_set_id),
+TrustProfile, ComplianceProfile, and the API gateway. Each PolicySet is evaluated using
+deny-by-default semantics: at least one permit must match and zero forbid policies may
+match."""
 
     id: str
     organization_id: str
@@ -604,6 +737,7 @@ class RevocationProfile(BaseModel):
     id: str
     organization_id: str
     name: str
+    status: Literal["DRAFT", "ACTIVE", "SUSPENDED"]
     revocation_mechanism: list[str]
     mechanism_priority: list[str] | None = None
     check_mode: RevocationTimingMode
@@ -672,8 +806,8 @@ OrganizationTrustProfile."""
 
 class TrustProfileIssuer(BaseModel):
     """Join entity between TrustProfile and IssuerEntity with trust scoring and cascade
-revocation policy. trust_level is a 0–100 score; future versions will auto-adjust
-based on issuer history (failed validations, revocation events, compliance lapses)."""
+revocation policy. trust_level is a 0–100 score; future versions will auto-adjust based
+on issuer history (failed validations, revocation events, compliance lapses)."""
 
     id: str
     trust_profile_id: str
@@ -772,13 +906,12 @@ step."""
 
 
 class WalletProfile(BaseModel):
-    """Wallet compatibility record for a credential format × protocol × compliance
-combination. The canonical wallet profile set is auto-derived from CredentialTemplate
-configuration via the derivation key (credential_format, issuance_protocol,
-compliance_profile_code). Organizations MAY store override entries at /v1/wallet-
-registry to extend or customise the derived profile for their specific deployment. GET
-/v1/wallet-registry returns merged results: derived profiles supplemented (or
-overridden) by stored entries."""
+    """Wallet compatibility record for a credential format × protocol × compliance combination.
+The canonical wallet profile set is auto-derived from CredentialTemplate configuration
+via the derivation key (credential_format, issuance_protocol, compliance_profile_code).
+Organizations MAY store override entries at /v1/wallet-registry to extend or customise
+the derived profile for their specific deployment. GET /v1/wallet-registry returns
+merged results: derived profiles supplemented (or overridden) by stored entries."""
 
     id: str | None = None
     organization_id: str | None = None
@@ -786,7 +919,7 @@ overridden) by stored entries."""
     override_precedence: int | None = None
     name: str
     description: str | None = None
-    credential_format: Literal["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]
+    credential_format: Literal["MDOC", "MSO_MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]
     issuance_protocol: Literal["OID4VCI_PRE_AUTH", "OID4VCI_AUTH_CODE", "DIRECT"]
     compliance_profile_code: str | None = None
     wallet_apps: list[str] | None = None
@@ -794,6 +927,8 @@ overridden) by stored entries."""
     specifications: list[str] | None = None
     supported_platforms: list[str] | None = None
     deep_link_pattern: str | None = None
+    format_variant: str | None = None
+    deep_link_scheme: str | None = None
     created_at: datetime
     updated_at: datetime | None = None
 
@@ -824,18 +959,23 @@ operator-controlled endpoint when specified identity lifecycle events occur. Man
 
 
 # Rebuild models with forward references
+ActiveComplianceProfile.model_rebuild()
 ApiKey.model_rebuild()
-Applicant.model_rebuild()
+ApplicantApplication.model_rebuild()
 ApplicationTemplate.model_rebuild()
 BiometricEnrollment.model_rebuild()
 CascadeRevocationOperation.model_rebuild()
+ClaimBlocker.model_rebuild()
 ComplianceProfile.model_rebuild()
 CredentialTemplate.model_rebuild()
+DeliveryDestinationProfile.model_rebuild()
 DeploymentProfile.model_rebuild()
 DeviceRegistration.model_rebuild()
 EvidenceFact.model_rebuild()
 FlowExecution.model_rebuild()
+FlowExtension.model_rebuild()
 Flow.model_rebuild()
+HolderCredentialInventory.model_rebuild()
 IssuanceRecord.model_rebuild()
 IssuedCredential.model_rebuild()
 IssuerEntity.model_rebuild()
@@ -843,8 +983,10 @@ Lane.model_rebuild()
 MipConfigurationDiscoveryDocument.model_rebuild()
 NotificationPayload.model_rebuild()
 NotificationTarget.model_rebuild()
+OID4VCINonceResponse.model_rebuild()
 OrganizationTrustProfile.model_rebuild()
 Organization.model_rebuild()
+PhysicalDocumentJob.model_rebuild()
 PolicySet.model_rebuild()
 PresentationPolicy.model_rebuild()
 ReviewerLock.model_rebuild()

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/physical-document-job.json",
+  "title": "PhysicalDocumentJob",
+  "description": "Auditable production state for one physical ICAO eMRTD document. Sensitive data groups, biometrics, signing keys, and connector secrets are referenced but never embedded.",
+  "type": "object",
+  "required": ["id", "organization_id", "flow_execution_id", "application_id", "credential_template_id", "delivery_destination_profile_id", "document_type", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "flow_execution_id": {"type": "string", "format": "uuid"},
+    "application_id": {"type": "string", "format": "uuid"},
+    "credential_template_id": {"type": "string", "format": "uuid"},
+    "delivery_destination_profile_id": {"type": "string", "maxLength": 128},
+    "document_type": {"type": "string", "enum": ["TD1", "TD2", "TD3"]},
+    "country_code": {"type": "string", "pattern": "^[A-Z]{3}$"},
+    "secure_artifact_reference": {"type": ["string", "null"], "maxLength": 512},
+    "bureau_job_id": {"type": ["string", "null"], "maxLength": 255},
+    "tracking_number": {"type": ["string", "null"], "maxLength": 255},
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "DATA_GENERATED", "SOD_SIGNED", "SUBMITTED", "IN_PRODUCTION", "QUALITY_CHECK", "READY_FOR_ACTIVATION", "ACTIVE", "FAILED", "CANCELLED"]
+    },
+    "quality_result": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "passed": {"type": "boolean"},
+        "checked_at": {"type": "string", "format": "date-time"},
+        "checked_by": {"type": ["string", "null"]},
+        "failure_codes": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "error_code": {"type": ["string", "null"], "maxLength": 128},
+    "error_message": {"type": ["string", "null"], "maxLength": 1024},
+    "submitted_at": {"type": ["string", "null"], "format": "date-time"},
+    "completed_at": {"type": ["string", "null"], "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

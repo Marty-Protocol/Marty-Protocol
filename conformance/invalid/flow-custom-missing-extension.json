@@ -1,0 +1,9 @@
+{
+  "id": "3fa85f64-5717-4562-b3fc-2d7a2bcf1234",
+  "organization_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "name": "Invalid Custom Flow",
+  "flow_type": "custom",
+  "approval_strategy": "AUTO",
+  "status": "DRAFT",
+  "created_at": "2026-07-11T00:00:00Z"
+}

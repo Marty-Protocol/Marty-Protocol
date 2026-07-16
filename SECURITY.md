@@ -4,9 +4,8 @@
 
 | Version | Status |
 |---------|--------|
-| 0.1.x (draft) | Active development; security issues addressed on best-effort basis |
-
-Once 0.1.0 stable is ratified, the maintainers will publish a formal supported-versions table.
+| 0.3.1 | Supported |
+| Earlier versions | Unsupported |
 
 ## Reporting a Vulnerability
 

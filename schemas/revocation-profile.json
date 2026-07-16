@@ -4,12 +4,17 @@
   "title": "RevocationProfile",
   "description": "Format-agnostic revocation configuration for issuers and verifiers",
   "type": "object",
-  "required": ["id", "organization_id", "name", "revocation_mechanism", "check_mode", "created_at"],
+  "required": ["id", "organization_id", "name", "status", "revocation_mechanism", "check_mode", "created_at"],
   "additionalProperties": false,
   "properties": {
     "id": {"type": "string", "format": "uuid"},
     "organization_id": {"type": "string", "format": "uuid"},
     "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "ACTIVE", "SUSPENDED"],
+      "description": "Lifecycle status. Only ACTIVE profiles may be bound to newly activated Credential Templates."
+    },
     "revocation_mechanism": {
       "type": "array",
       "minItems": 1,

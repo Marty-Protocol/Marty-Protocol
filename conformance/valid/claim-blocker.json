@@ -1,0 +1,5 @@
+{
+  "code": "NO_ACTIVE_ISSUANCE_FLOW",
+  "owner": "ISSUER",
+  "message": "The issuer is still preparing this credential."
+}

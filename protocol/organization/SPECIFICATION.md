@@ -1,7 +1,7 @@
 # Organization — Entity Specification
 
 **Entity:** Organization
-**Version:** 0.1.0
+**Version:** 0.3.1
 **Stability:** Moderate
 **Section in root spec:** §17
 

@@ -1,0 +1,5 @@
+{
+  "pointer": "/extension",
+  "error_code": "REQUIRED_REFERENCE",
+  "message": "A custom Flow must provide a versioned FlowExtension envelope."
+}

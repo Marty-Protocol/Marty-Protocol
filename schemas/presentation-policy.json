@@ -63,10 +63,51 @@
         "required": {"type": "boolean"},
         "binding_methods": {
           "type": "array",
-          "items": {"type": "string", "enum": ["NONCE", "DEVICE_KEY", "SESSION_BINDING"]}
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "enum": ["CREDENTIAL_KEY", "DEVICE_KEY", "SESSION_BINDING"]},
+          "description": "Control mechanism the verifier requires. Transaction freshness is configured separately in proof_freshness."
         },
-        "nonce_required": {"type": "boolean", "default": false}
-      }
+        "proof_profiles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["OID4VP_VERIFIABLE_PRESENTATION", "SD_JWT_KEY_BINDING", "MDOC_DEVICE_AUTHENTICATION", "CUSTOM"]
+          },
+          "description": "Wire-level proof profiles accepted for the selected binding methods."
+        },
+        "proof_freshness": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "challenge_required": {"type": "boolean", "default": true},
+            "audience_binding_required": {"type": "boolean", "default": true},
+            "replay_detection_required": {"type": "boolean", "default": true},
+            "max_proof_age_seconds": {"type": "integer", "minimum": 1}
+          },
+          "description": "Challenge, audience, replay, and age checks applied to the authenticated holder proof."
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"required": {"const": true}}, "required": ["required"]},
+          "then": {"required": ["binding_methods", "proof_profiles", "proof_freshness"]}
+        },
+        {
+          "if": {"properties": {"required": {"const": false}}, "required": ["required"]},
+          "then": {
+            "not": {
+              "anyOf": [
+                {"required": ["binding_methods"]},
+                {"required": ["proof_profiles"]},
+                {"required": ["proof_freshness"]}
+              ]
+            }
+          }
+        }
+      ]
     },
     "freshness": {
       "type": "object",

@@ -1,0 +1,4 @@
+reference/python/** text eol=lf
+reference/rust/src/** text eol=lf
+reference/rust/Cargo.toml text eol=lf
+reference/typescript/** text eol=lf
