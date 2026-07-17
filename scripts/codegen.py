@@ -541,6 +541,8 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
         edition = "2021"
         description = "Generated Rust types for the Marty Identity Protocol"
         license = "Apache-2.0"
+        repository = "https://github.com/Marty-Protocol/Marty-Protocol"
+        readme = "../../README.md"
 
         [dependencies]
         serde = { version = "1", features = ["derive"] }
@@ -640,12 +642,21 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
 
     # Generate package.json
     pkg = {
-        "name": "@mip-protocol/types",
+        "name": "@elevenid/marty-protocol-types",
         "version": PROTOCOL_VERSION,
         "description": "Generated TypeScript types for the Marty Identity Protocol",
         "main": "dist/index.js",
         "types": "dist/index.d.ts",
         "license": "Apache-2.0",
+        "repository": {
+            "type": "git",
+            "url": "https://github.com/Marty-Protocol/Marty-Protocol.git",
+            "directory": "reference/typescript"
+        },
+        "publishConfig": {
+            "access": "public",
+            "provenance": True
+        },
         "scripts": {
             "build": "tsc",
             "prepublishOnly": "npm run build"
