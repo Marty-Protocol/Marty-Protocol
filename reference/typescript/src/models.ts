@@ -204,6 +204,7 @@ export interface CredentialTemplate {
   description?: string;
   compliance_profile_id: string;
   vct?: string | null;
+  doctype?: string | null;
   credential_payload_format?: CredentialFormat;
   application_template_id?: string | null;
   trust_profile_id?: string | null;

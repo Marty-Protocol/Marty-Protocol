@@ -83,3 +83,31 @@ def test_active_template_without_issuer_did_fails_closed() -> None:
     document.pop("issuer_did")
     with pytest.raises(ValidationError, match="issuer_did"):
         validate_instance(SCHEMA, document)
+
+
+def test_mdoc_template_preserves_public_doctype_without_custody_selectors() -> None:
+    document = _active_template()
+    document.update(
+        {
+            "credential_type": "org.iso.18013.5.1.mDL",
+            "credential_payload_format": "MDOC",
+            "doctype": "org.iso.18013.5.1.mDL",
+        }
+    )
+    document.pop("vct")
+
+    validate_instance(SCHEMA, document)
+
+
+def test_mdoc_template_without_doctype_fails_closed() -> None:
+    document = _active_template()
+    document.update(
+        {
+            "credential_type": "org.iso.18013.5.1.mDL",
+            "credential_payload_format": "MDOC",
+        }
+    )
+    document.pop("vct")
+
+    with pytest.raises(ValidationError, match="doctype"):
+        validate_instance(SCHEMA, document)

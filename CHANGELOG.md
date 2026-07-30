@@ -27,6 +27,8 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 - Replaced compatibility/deprecation guidance with exact-version, atomic-release requirements.
 
 ### Fixed
+- Model ISO mdoc `doctype` explicitly in the public Credential Template
+  contract while keeping every signing-custody selector private.
 - Brought bundled system Compliance Profiles under schema validation, including `holder_binding_required` and their ecosystem requirement fields.
 - Added structured holder-binding evidence to Verification Session results.
 - Generated Python, Rust, and TypeScript bindings now model `claim_blocker` as the typed nullable `ClaimBlocker` object instead of degrading it to `Any` or `string`.
