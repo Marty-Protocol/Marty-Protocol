@@ -59,6 +59,12 @@ def resolve_ref(ref_path: str) -> str:
     return sanitize_class_name(kebab_to_pascal(filename))
 
 
+def is_schema_fragment_ref(ref_path: str) -> bool:
+    """Return whether a ref points inside a schema rather than to its root."""
+    _, separator, fragment = ref_path.partition("#")
+    return bool(separator and fragment)
+
+
 # ─── Helpers ───────────────────────────────────────────────────────────────────
 
 
@@ -145,6 +151,8 @@ def json_type_to_python(prop: dict, prop_name: str, required: bool) -> str:
 
     ref = prop.get("$ref")
     if ref:
+        if is_schema_fragment_ref(ref):
+            return "dict[str, Any]"
         return resolve_ref(ref)
 
     t = prop.get("type")
@@ -177,7 +185,11 @@ def json_type_to_python(prop: dict, prop_name: str, required: bool) -> str:
     if t == "array":
         items = prop.get("items", {})
         if "$ref" in items:
-            item_type = resolve_ref(items["$ref"])
+            item_type = (
+                "dict[str, Any]"
+                if is_schema_fragment_ref(items["$ref"])
+                else resolve_ref(items["$ref"])
+            )
         elif items.get("type") == "object":
             item_type = "dict[str, Any]"
         elif items.get("type") == "string":
@@ -203,6 +215,8 @@ def json_type_to_rust(prop: dict, prop_name: str, required: bool) -> str:
 
     ref = prop.get("$ref")
     if ref:
+        if is_schema_fragment_ref(ref):
+            return "serde_json::Value"
         return resolve_ref(ref)
 
     t = prop.get("type")
@@ -236,7 +250,11 @@ def json_type_to_rust(prop: dict, prop_name: str, required: bool) -> str:
     elif t == "array":
         items = prop.get("items", {})
         if "$ref" in items:
-            item_type = resolve_ref(items["$ref"])
+            item_type = (
+                "serde_json::Value"
+                if is_schema_fragment_ref(items["$ref"])
+                else resolve_ref(items["$ref"])
+            )
         elif items.get("type") == "object":
             item_type = "serde_json::Value"
         elif items.get("type") == "string":
@@ -264,6 +282,8 @@ def json_type_to_ts(prop: dict, prop_name: str, required: bool) -> str:
 
     ref = prop.get("$ref")
     if ref:
+        if is_schema_fragment_ref(ref):
+            return "Record<string, unknown>"
         return resolve_ref(ref)
 
     t = prop.get("type")
@@ -290,7 +310,11 @@ def json_type_to_ts(prop: dict, prop_name: str, required: bool) -> str:
     elif t == "array":
         items = prop.get("items", {})
         if "$ref" in items:
-            item_type = resolve_ref(items["$ref"])
+            item_type = (
+                "Record<string, unknown>"
+                if is_schema_fragment_ref(items["$ref"])
+                else resolve_ref(items["$ref"])
+            )
         elif items.get("type") == "object":
             item_type = "Record<string, unknown>"
         elif items.get("type") == "string":

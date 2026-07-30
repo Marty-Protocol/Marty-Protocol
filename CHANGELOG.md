@@ -15,7 +15,8 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
   requirements, and alternative requirements as public protocol semantics.
   A policy must contain at least one canonical claim, template-bound
   requirement, or alternative requirement; private custody routing remains
-  prohibited.
+  prohibited. Added separate tenant-scoped create and partial-update request
+  schemas so operation input cannot be confused with the persisted resource.
 - Defined canonical public issuance and verification-flow operation schemas.
   Public callers select signing identities only with `organization_id` and
   `issuer_did` (or a DID-bearing Credential Template); issuer-profile IDs,

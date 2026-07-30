@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/presentation-policy-update-request.json",
+  "title": "PresentationPolicyUpdateRequest",
+  "description": "Partially update a draft Presentation Policy through an explicit tenant scope",
+  "type": "object",
+  "required": ["organization_id"],
+  "additionalProperties": false,
+  "properties": {
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "name": {"type": ["string", "null"], "minLength": 1, "maxLength": 255},
+    "description": {"type": ["string", "null"], "maxLength": 2000},
+    "purpose": {"type": ["string", "null"], "maxLength": 2000},
+    "display_metadata": {
+      "oneOf": [
+        {
+          "$ref": "presentation-policy.json#/properties/display_metadata"
+        },
+        {"type": "null"}
+      ]
+    },
+    "required_claims": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "presentation-policy.json#/properties/required_claims/items"
+          }
+        },
+        {"type": "null"}
+      ]
+    },
+    "accepted_credential_types": {
+      "oneOf": [
+        {"type": "array", "items": {"type": "string"}},
+        {"type": "null"}
+      ]
+    },
+    "trust_profile_id": {"type": ["string", "null"], "maxLength": 255},
+    "credential_requirements": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "presentation-policy.json#/properties/credential_requirements/items"
+          }
+        },
+        {"type": "null"}
+      ]
+    },
+    "alternative_requirements": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "presentation-policy.json#/properties/alternative_requirements/items"
+          }
+        },
+        {"type": "null"}
+      ]
+    },
+    "compliance_profile_id": {"type": ["string", "null"], "maxLength": 255},
+    "prefer_predicates": {"type": ["boolean", "null"]},
+    "fallback_policy": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": ["REQUIRE_PREDICATE", "ACCEPT_RAW", "DENY"]
+        },
+        {"type": "null"}
+      ]
+    },
+    "supported_circuits": {
+      "oneOf": [
+        {"type": "array", "items": {"type": "string"}},
+        {"type": "null"}
+      ]
+    },
+    "credential_ranking_strategy": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": ["FRESHEST_FIRST", "HIGHEST_TRUST_FIRST", "CUSTOM"]
+        },
+        {"type": "null"}
+      ]
+    },
+    "credential_ranking_weights": {
+      "type": ["object", "null"],
+      "additionalProperties": {"type": "number"}
+    },
+    "holder_binding": {
+      "oneOf": [
+        {
+          "$ref": "presentation-policy.json#/properties/holder_binding"
+        },
+        {"type": "null"}
+      ]
+    },
+    "issuer_constraints": {
+      "oneOf": [
+        {
+          "$ref": "presentation-policy.json#/properties/issuer_constraints"
+        },
+        {"type": "null"}
+      ]
+    },
+    "freshness": {
+      "oneOf": [
+        {
+          "$ref": "presentation-policy.json#/properties/freshness"
+        },
+        {"type": "null"}
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "credential_ranking_strategy": {"const": "CUSTOM"}
+        },
+        "required": ["credential_ranking_strategy"]
+      },
+      "then": {
+        "required": ["credential_ranking_weights"],
+        "properties": {
+          "credential_ranking_weights": {"type": "object", "minProperties": 1}
+        }
+      }
+    }
+  ]
+}

@@ -170,6 +170,26 @@ When a claim has a `predicate_spec`:
 | Deployment Profile | `presentation_policy_ids` | Required — at least one policy |
 | Flow | `presentation_policy_id` | Required for verification flows |
 
+## Public API Operations
+
+The public create operation uses
+[`presentation-policy-create-request.json`](../../schemas/presentation-policy-create-request.json).
+It requires `organization_id`, `name`, and at least one canonical claim,
+template-bound requirement, or alternative requirement.
+
+The public partial-update operation uses
+[`presentation-policy-update-request.json`](../../schemas/presentation-policy-update-request.json).
+It always requires `organization_id` so the gateway can compare the caller's
+tenant context with the resource owner before forwarding the mutation. The
+tenant selector is a public authorization boundary and is not persisted as a
+mutable policy field.
+
+Both operation schemas reject unknown fields. Credential Template formats are
+authoritative: a caller may identify a template but MUST NOT override the
+template's configured credential format. Custody routing, issuer-profile IDs,
+service IDs, key references, and KMS/provider selectors are never valid
+Presentation Policy inputs.
+
 ## Examples
 
 ### Age Verification with ZK Predicate

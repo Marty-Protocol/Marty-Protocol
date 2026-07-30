@@ -333,7 +333,7 @@ export interface FlowExecution {
 export interface FlowExtension {
   extension_uri: string;
   extension_version: string;
-  extends_flow_type: FlowType;
+  extends_flow_type: Record<string, unknown>;
   entry_step_id: string;
   steps: Record<string, unknown>[];
   transitions: Record<string, unknown>[];
@@ -599,6 +599,52 @@ export interface PolicySet {
   status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
   created_at: string;
   updated_at?: string;
+}
+
+/** Create a tenant-scoped Presentation Policy through the public API */
+export interface PresentationPolicyCreateRequest {
+  organization_id: string;
+  name: string;
+  description?: string | null;
+  purpose?: string | null;
+  display_metadata?: Record<string, unknown>;
+  required_claims?: Record<string, unknown>[];
+  accepted_credential_types?: string[];
+  trust_profile_id?: string | null;
+  credential_requirements?: Record<string, unknown>[];
+  alternative_requirements?: Record<string, unknown>[];
+  compliance_profile_id?: string | null;
+  prefer_predicates?: boolean;
+  fallback_policy?: 'REQUIRE_PREDICATE' | 'ACCEPT_RAW' | 'DENY' | null;
+  supported_circuits?: string[];
+  credential_ranking_strategy?: 'FRESHEST_FIRST' | 'HIGHEST_TRUST_FIRST' | 'CUSTOM';
+  credential_ranking_weights?: Record<string, unknown> | null;
+  holder_binding?: Record<string, unknown>;
+  issuer_constraints?: Record<string, unknown>;
+  freshness?: Record<string, unknown>;
+}
+
+/** Partially update a draft Presentation Policy through an explicit tenant scope */
+export interface PresentationPolicyUpdateRequest {
+  organization_id: string;
+  name?: string | null;
+  description?: string | null;
+  purpose?: string | null;
+  display_metadata?: Record<string, unknown> | null;
+  required_claims?: Record<string, unknown>[] | null;
+  accepted_credential_types?: string[] | null;
+  trust_profile_id?: string | null;
+  credential_requirements?: Record<string, unknown>[] | null;
+  alternative_requirements?: Record<string, unknown>[] | null;
+  compliance_profile_id?: string | null;
+  prefer_predicates?: boolean | null;
+  fallback_policy?: 'REQUIRE_PREDICATE' | 'ACCEPT_RAW' | 'DENY' | null;
+  supported_circuits?: string[] | null;
+  credential_ranking_strategy?: 'FRESHEST_FIRST' | 'HIGHEST_TRUST_FIRST' | 'CUSTOM' | null;
+  credential_ranking_weights?: Record<string, unknown> | null;
+  holder_binding?: Record<string, unknown> | null;
+  issuer_constraints?: Record<string, unknown> | null;
+  freshness?: Record<string, unknown> | null;
 }
 
 /** Minimum disclosure requirements, predicates, and holder binding for credential verification */
