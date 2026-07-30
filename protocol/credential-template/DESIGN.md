@@ -10,9 +10,19 @@
 
 A Credential Template is a definition, not a credential. Many issued credentials (instances) reference one template. This separation allows batch issuance from a single config, analytics by template, and clean revocation at the template level.
 
-### auto_generate_artifacts
+### DID-only public issuer selection
 
-`auto_generate_artifacts: true` is a development-time convenience that allows the system to generate ephemeral keys and self-signed certificates. This flag MUST trigger a warning in any dashboard or audit log. It MUST NOT be available in production environments without explicit administrative override.
+An active template identifies its issuer only by `issuer_did`. The
+organization-scoped DID resolver selects exactly one active issuer profile for
+the requested operation, credential format, purpose, and algorithm. Issuer
+profile IDs, verification-method selection, certificate bindings, KMS
+providers, service IDs, and key references are private deployment state and
+MUST NOT appear in this public entity.
+
+Key creation and certificate provisioning are issuer-profile administration
+operations, not Credential Template fields. Implementations may automate that
+administration internally, but public template creation never requests local or
+ephemeral signing material.
 
 ### Why credential_type Is PascalCase
 

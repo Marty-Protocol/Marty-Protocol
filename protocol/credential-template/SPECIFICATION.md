@@ -9,12 +9,12 @@
 
 ## Purpose
 
-A Credential Template is the **master issuance configuration**. It combines:
-- **Schema** — the claims the credential contains
-- **Compliance Profile** — the encoding format and standards framework
-- **Cryptographic Materials** — keys, certificates, or DID references
-- **Validity Rules** — duration, renewability, reissuance
-- **Optional Workflow** — link to an Application Template for user-facing collection
+A Credential Template is the **master public issuance configuration**. It
+combines the claims, compliance profile, issuer DID, validity rules, and
+optional application workflow. Signing profiles, verification-method
+selection, certificates, and key custody are resolved internally from the
+owning organization and `issuer_did`; they are not fields in this public
+entity.
 
 Templates are reusable. Many credentials may be issued from a single template.
 
@@ -24,7 +24,7 @@ Templates are reusable. Many credentials may be issued from a single template.
 |-----------|-------------|
 | Claims | Claim definitions with type, namespace, disclosure config |
 | Compliance | Which compliance profile governs format and encoding |
-| Crypto | Signing key, algorithm, certificate chain or DID |
+| Issuer | Public DID only; signing profiles and custody remain private |
 | Validity | TTL, renewable, reissue window |
 | Workflow | Optional application form + approval process |
 
@@ -45,14 +45,7 @@ Templates are reusable. Many credentials may be issued from a single template.
 | `revocation_profile_id` | UUID | No | Revocation configuration |
 | `claims` | ClaimDefinition[] | Yes | At least one claim required |
 | `validity_rules` | ValidityRules | Yes | See below |
-| `issuer_key_id` | string | Conditional | Required unless `auto_generate_artifacts` |
-| `issuer_algorithm` | Algorithm | No | From `validation-algorithms` enum |
-| `key_access_mode` | KeyAccessMode | No | `KEY_VAULT`, `HSM`, `LOCAL`, `REMOTE_SIGNING` |
-| `issuer_certificate_chain_pem` | string | Conditional | For X.509-based credentials |
-| `issuer_did` | string | Conditional | For DID-based credentials |
-| `issuer_identity` | IssuerIdentity | No | DID-first binding for KMS/remote-backed issuance |
-| `remote_signing_config` | RemoteSigningConfig | No | Private deployment metadata for `REMOTE_SIGNING` |
-| `auto_generate_artifacts` | boolean | No | Dev only; default false |
+| `issuer_did` | string | Conditional | Required for every `ACTIVE` issuance template |
 | `privacy_posture` | PrivacyPosture | No | See below |
 | `status` | TemplateStatus | Yes | `DRAFT`, `ACTIVE`, `DEPRECATED` |
 | `created_at` | datetime | Yes | ISO 8601 |
@@ -88,27 +81,18 @@ Templates are reusable. Many credentials may be issued from a single template.
 | `prefer_predicates` | boolean | Prefer ZK predicates for boolean-derivable claims |
 | `sd_alg` | string | SD-JWT hash algorithm (default `sha-256`) |
 
-### IssuerIdentity Fields
-
-| Property | Type | Required | Constraint |
-|----------|------|----------|------------|
-| `issuer_did` | DID URI | Yes | Public issuer identity that appears in issued credentials |
-| `issuer_profile_id` | string | No | Organization issuer profile binding the DID to a signing service |
-| `verification_method_id` | DID URL | No | DID verification method used as the public `kid` |
-| `remote_key_binding` | object | No | Private resolver metadata such as KMS service/key references |
-
-`remote_key_binding` is not a public trust anchor. It may include private deployment fields such as `organization_id`, `signing_service_id`, `signing_key_reference`, and `kms_provider`. Verifiers MUST validate credentials through `issuer_identity.issuer_did` and the matching DID verification method, not through opaque KMS key IDs.
-
 ## Constraints
 
-1. For `ACTIVE` templates: exactly one of `issuer_key_id`, `issuer_certificate_chain_pem`, `issuer_did`, or `issuer_identity.issuer_did` MUST be present unless `auto_generate_artifacts` is `true`.
-2. DID-backed templates SHOULD use `issuer_identity` instead of raw `issuer_key_id`; when `issuer_identity` is present, signing MUST resolve through the organization issuer identity registry.
-3. `claims` MUST NOT be empty.
-4. Claim names MUST be unique within a template.
-5. `derived_from` MUST reference a valid `name` in the same template's `claims` array.
-6. A `DRAFT` template MUST NOT be used in an active Flow or issuance trigger.
-7. When `application_template_id` is set, the template MUST NOT be used for direct API issuance.
-8. `compliance_profile_id` MUST reference an existing Compliance Profile.
+1. Every `ACTIVE` issuance template MUST contain `issuer_did`.
+2. The public entity MUST reject issuer-profile IDs, verification-method selectors, algorithms, certificate bindings, KMS providers, signing-service IDs, key references, and artifact-generation controls.
+3. The implementation MUST resolve `organization_id` + `issuer_did` + operation/purpose + credential format + algorithm to exactly one authorized active internal issuer profile and fail closed for unknown, inactive, ambiguous, incompatible, mismatched, or cross-organization mappings.
+4. Signing MUST execute through the resolved issuer profile. The public caller never selects or invokes KMS custody directly.
+5. `claims` MUST NOT be empty.
+6. Claim names MUST be unique within a template.
+7. `derived_from` MUST reference a valid `name` in the same template's `claims` array.
+8. A `DRAFT` template MUST NOT be used in an active Flow or issuance trigger.
+9. When `application_template_id` is set, the template MUST NOT be used for direct API issuance.
+10. `compliance_profile_id` MUST reference an existing Compliance Profile.
 
 ## Derived Entities
 
@@ -131,7 +115,7 @@ The Credential Template is the **primary input** to wallet compatibility derivat
 ## Lifecycle
 
 ```
-DRAFT → (configure claims + crypto) → ACTIVE
+DRAFT → (configure claims + issuer DID) → ACTIVE
 ACTIVE → (superseded by new version) → DEPRECATED
 DRAFT  → (deleted before use)        → [removed]
 DEPRECATED → MUST NOT be used for new issuance
@@ -169,8 +153,7 @@ DEPRECATED → MUST NOT be used for new issuance
       "selectively_disclosable": true
     }
   ],
-  "issuer_certificate_chain_pem": "-----BEGIN CERTIFICATE-----\n...",
-  "issuer_algorithm": "ES256",
+  "issuer_did": "did:web:issuer.example.gov",
   "status": "ACTIVE",
   "created_at": "2026-03-11T00:00:00Z"
 }

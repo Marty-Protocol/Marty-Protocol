@@ -276,8 +276,9 @@ pub struct ComplianceProfile {
     pub updated_at: Option<String>,
 }
 
-/// Master issuance configuration combining schema, compliance profile, and cryptographic
-/// materials
+/// Public issuance configuration combining claims, compliance, issuer DID, and validity
+/// rules. Custody and signing-profile metadata are resolved internally from the
+/// organization and issuer DID.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CredentialTemplate {
     pub id: String,
@@ -300,21 +301,7 @@ pub struct CredentialTemplate {
     pub claims: Vec<serde_json::Value>,
     pub validity_rules: serde_json::Value,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub issuer_key_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub issuer_algorithm: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub key_access_mode: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub issuer_certificate_chain_pem: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub issuer_did: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub issuer_identity: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub remote_signing_config: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub auto_generate_artifacts: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub privacy_posture: Option<serde_json::Value>,
     pub status: String,
@@ -1296,4 +1283,3 @@ pub struct Webhook {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<String>,
 }
-

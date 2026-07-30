@@ -19,6 +19,7 @@ Thumbs.db
 # Node (for ajv-cli validator tooling)
 node_modules/
 package-lock.json
+!reference/typescript/package-lock.json
 yarn.lock
 
 # Python (for check-jsonschema validator tooling)

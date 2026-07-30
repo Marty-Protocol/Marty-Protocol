@@ -471,7 +471,9 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
         lines.append("}")
         lines.append("")
 
-    write_generated(out_dir / "enums.rs", "\n".join(lines) + "\n")
+    # `lines` deliberately ends with one empty entry, so joining already emits
+    # the single trailing newline required by rustfmt.
+    write_generated(out_dir / "enums.rs", "\n".join(lines))
 
     # Generate models
     lines = [
@@ -521,7 +523,7 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
         lines.append("}")
         lines.append("")
 
-    write_generated(out_dir / "models.rs", "\n".join(lines) + "\n")
+    write_generated(out_dir / "models.rs", "\n".join(lines))
 
     # Generate lib.rs
     lib_lines = [
@@ -647,6 +649,9 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
         "description": "Generated TypeScript types for the Marty Identity Protocol",
         "main": "dist/index.js",
         "types": "dist/index.d.ts",
+        "engines": {
+            "node": ">=24"
+        },
         "license": "Apache-2.0",
         "repository": {
             "type": "git",
@@ -662,7 +667,7 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
             "prepublishOnly": "npm run build"
         },
         "devDependencies": {
-            "typescript": "^5.0.0"
+            "typescript": "^7.0.2"
         }
     }
     write_generated(out_dir.parent / "package.json", json.dumps(pkg, indent=2) + "\n")
@@ -670,14 +675,14 @@ def generate_typescript(enums: list[dict], schemas: list[dict]) -> None:
     # Generate tsconfig.json
     tsconfig = {
         "compilerOptions": {
-            "target": "ES2020",
-            "module": "commonjs",
+            "target": "ES2022",
+            "module": "Node16",
             "declaration": True,
             "outDir": "./dist",
             "rootDir": "./src",
             "strict": True,
             "esModuleInterop": True,
-            "moduleResolution": "node"
+            "moduleResolution": "Node16"
         },
         "include": ["src/**/*"]
     }

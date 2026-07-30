@@ -6,6 +6,35 @@ services, clients, generated bindings, and fixtures must move together. A
 bounded read-only compatibility path is permitted for persisted legacy values
 and explicitly documented inbound aliases; canonical writers never emit them.
 
+## DID-only public issuer migration
+
+The next coordinated release removes signing custody and issuer-profile
+selection from public Credential Templates.
+
+1. Preserve existing profile, certificate, verification-method, algorithm, and
+   KMS bindings in the implementation's private issuer-profile store.
+2. Backfill every issuance template with the canonical public `issuer_did`
+   already bound to that profile. Abort on missing, inactive, ambiguous,
+   incompatible, or cross-organization mappings.
+3. Remove `issuer_profile_id`, `issuer_key_id`, `issuer_algorithm`,
+   `key_access_mode`, `issuer_certificate_chain_pem`, `issuer_identity`,
+   `remote_signing_config`, and `auto_generate_artifacts` from public request
+   and response shapes.
+4. Resolve `organization_id` + `issuer_did` + operation/purpose + credential
+   format + algorithm to exactly one internal issuer profile, and execute
+   signing through that profile. Do not invoke KMS directly from a public
+   request handler.
+5. Keep any bounded legacy profile-ID reader internal. It may only assert an
+   exact match with the DID-resolved profile; canonical writers and public APIs
+   never emit it.
+6. Run issuance and verification vectors for every supported credential
+   format, algorithm, certificate profile, and Python/browser client before
+   activating the release.
+
+This migration changes selection, not functionality: managed-key custody,
+X.509/mdoc certificate profiles, RSA compatibility, and all supported
+credential formats remain available behind issuer profiles.
+
 ## Holder Binding and OID4VCI Final Nonce Migration
 
 This migration changes Presentation Policy holder binding and removes draft-era OID4VCI nonce handling.
