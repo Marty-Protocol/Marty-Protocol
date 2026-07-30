@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/verification-flow-start-response.json",
+  "title": "VerificationFlowStartResponse",
+  "description": "Public response for a newly started verification flow. Internal flow-definition routing is intentionally absent.",
+  "type": "object",
+  "required": [
+    "instance_id",
+    "request_uri",
+    "qr_code_data",
+    "presentation_policy_id",
+    "nonce",
+    "expires_at",
+    "status"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "instance_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "request_uri": {"type": "string", "minLength": 1, "maxLength": 16384},
+    "qr_code_data": {"type": "string", "minLength": 1, "maxLength": 16384},
+    "presentation_policy_id": {"type": "string", "maxLength": 255},
+    "nonce": {"type": "string", "minLength": 22, "maxLength": 512},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "status": {"type": "string", "minLength": 1, "maxLength": 64}
+  }
+}

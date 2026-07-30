@@ -10,6 +10,11 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 ## [Unreleased]
 
 ### Changed
+- Defined canonical public issuance and verification-flow operation schemas.
+  Public callers select signing identities only with `organization_id` and
+  `issuer_did` (or a DID-bearing Credential Template); issuer-profile IDs,
+  signing-service IDs, key references, KMS/provider selectors, and internal
+  flow-definition routing are rejected.
 - Made public Credential Templates DID-only. Active templates now require
   `issuer_did`; issuer-profile IDs, verification-method selectors, algorithms,
   certificate bindings, KMS providers, signing-service IDs, key references,

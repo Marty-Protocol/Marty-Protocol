@@ -328,6 +328,24 @@ Policy Set references (Cedar):
       |                    |                    |
 ```
 
+### 4.8 Public Issuance and Verification Operations
+
+Public implementations MUST validate issuance requests against
+[`schemas/issuance-request.json`](schemas/issuance-request.json), verification
+flow requests against
+[`schemas/verification-flow-start-request.json`](schemas/verification-flow-start-request.json),
+and their public start responses against
+[`schemas/verification-flow-start-response.json`](schemas/verification-flow-start-response.json).
+
+The public signing identity is `organization_id` plus `issuer_did`. A Credential
+Template MAY supply the issuer DID for template-based issuance. Public requests
+and responses MUST NOT contain issuer-profile IDs, signing-service IDs, key
+references, verification-method selectors, KMS/provider selectors, or internal
+flow-definition routing. Implementations MUST resolve the DID to exactly one
+authorized active issuer profile in the named organization and sign only
+through that profile. Unknown, inactive, ambiguous, incompatible, mismatched,
+or cross-organization resolution MUST fail closed.
+
 ---
 
 ## 5. Trust Profile

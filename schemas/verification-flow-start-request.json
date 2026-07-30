@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/verification-flow-start-request.json",
+  "title": "VerificationFlowStartRequest",
+  "description": "Public request to start an OID4VP or SIOPv2 flow using a DID-resolved verifier profile.",
+  "type": "object",
+  "required": ["organization_id", "issuer_did"],
+  "additionalProperties": false,
+  "properties": {
+    "presentation_policy_id": {"type": ["string", "null"], "minLength": 1, "maxLength": 255},
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "issuer_did": {"type": "string", "pattern": "^did:", "maxLength": 2048},
+    "response_type": {"type": "string", "enum": ["vp_token", "id_token"], "default": "vp_token"},
+    "trust_profile_id": {"type": ["string", "null"], "minLength": 1, "maxLength": 255},
+    "deployment_profile_id": {"type": ["string", "null"], "minLength": 1, "maxLength": 255},
+    "external_reference": {"type": ["string", "null"], "maxLength": 2048},
+    "callback_url": {"type": ["string", "null"], "format": "uri", "maxLength": 2048},
+    "expiry_minutes": {"type": "integer", "minimum": 1, "maximum": 1440, "default": 15},
+    "oid4vp_profile": {"type": "string", "enum": ["standard", "haip"], "default": "standard"},
+    "request_transport": {
+      "type": "string",
+      "enum": ["request_uri", "request_object", "url_query"],
+      "default": "request_uri"
+    },
+    "request_uri_method": {"type": "string", "enum": ["get", "post"], "default": "get"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"response_type": {"const": "id_token"}},
+        "required": ["response_type"]
+      },
+      "else": {"required": ["presentation_policy_id"]}
+    },
+    {
+      "if": {
+        "properties": {"response_type": {"const": "id_token"}},
+        "required": ["response_type"]
+      },
+      "then": {
+        "properties": {
+          "request_transport": {"enum": ["request_uri", "request_object"]}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {"request_transport": {"enum": ["request_object", "url_query"]}},
+        "required": ["request_transport"]
+      },
+      "then": {
+        "properties": {"request_uri_method": {"const": "get"}}
+      }
+    },
+    {
+      "if": {
+        "properties": {"request_transport": {"const": "url_query"}},
+        "required": ["request_transport"]
+      },
+      "then": {
+        "properties": {
+          "response_type": {"const": "vp_token"},
+          "oid4vp_profile": {"const": "standard"}
+        },
+        "required": ["presentation_policy_id"]
+      }
+    }
+  ]
+}

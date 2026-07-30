@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuance-request.json",
+  "title": "IssuanceRequest",
+  "description": "Public request to create a credential issuance. Custody and issuer-profile selectors are intentionally absent.",
+  "type": "object",
+  "required": ["organization_id"],
+  "additionalProperties": false,
+  "properties": {
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "credential_template_id": {"type": ["string", "null"], "minLength": 1, "maxLength": 255},
+    "issuer_did": {
+      "type": ["string", "null"],
+      "pattern": "^did:[a-z0-9]+:.+",
+      "maxLength": 2048,
+      "description": "Public issuer identity resolved within organization_id to exactly one authorized active issuer profile."
+    },
+    "subject_did": {"type": ["string", "null"], "pattern": "^did:", "maxLength": 2048},
+    "holder_did": {"type": ["string", "null"], "pattern": "^did:", "maxLength": 2048},
+    "authorized_client": {
+      "type": ["object", "null"],
+      "required": ["client_id", "jwks"],
+      "additionalProperties": false,
+      "properties": {
+        "client_id": {"type": "string", "minLength": 1, "maxLength": 512},
+        "jwks": {
+          "type": "object",
+          "required": ["keys"],
+          "additionalProperties": false,
+          "properties": {
+            "keys": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["kty", "crv", "kid", "x", "y"],
+                "additionalProperties": false,
+                "properties": {
+                  "kty": {"const": "EC"},
+                  "crv": {"const": "P-256"},
+                  "kid": {"type": "string", "minLength": 1, "maxLength": 256},
+                  "x": {"type": "string", "pattern": "^[A-Za-z0-9_-]{43}$"},
+                  "y": {"type": "string", "pattern": "^[A-Za-z0-9_-]{43}$"},
+                  "alg": {"type": ["string", "null"], "const": "ES256"},
+                  "use": {"type": ["string", "null"], "const": "sig"},
+                  "key_ops": {
+                    "type": ["array", "null"],
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {"const": "verify"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "application_id": {"type": ["string", "null"], "minLength": 1, "maxLength": 255},
+    "claims": {
+      "type": "object",
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "issuer_profile_id",
+            "issuer_key_id",
+            "issuer_algorithm",
+            "key_access_mode",
+            "verification_method_id",
+            "signing_service_id",
+            "signing_key_reference",
+            "key_reference",
+            "kms_provider",
+            "provider",
+            "key_name",
+            "key_version",
+            "transit_mount",
+            "_application_id",
+            "_credential_subject",
+            "_credential_document"
+          ]
+        }
+      }
+    },
+    "credential_subject": {
+      "type": ["object", "array", "null"],
+      "minProperties": 1,
+      "minItems": 1,
+      "items": {"type": "object", "minProperties": 1}
+    },
+    "credential_document": {
+      "type": ["object", "null"],
+      "required": ["@context", "type", "credentialSubject"],
+      "minProperties": 3,
+      "not": {"required": ["proof"]},
+      "properties": {
+        "@context": {
+          "type": "array",
+          "minItems": 1,
+          "prefixItems": [{"const": "https://www.w3.org/ns/credentials/v2"}]
+        },
+        "type": {
+          "type": ["string", "array"],
+          "contains": {"const": "VerifiableCredential"}
+        },
+        "credentialSubject": {
+          "type": ["object", "array"],
+          "minProperties": 1,
+          "minItems": 1,
+          "items": {"type": "object", "minProperties": 1}
+        }
+      }
+    }
+  },
+  "anyOf": [
+    {"required": ["credential_template_id"]},
+    {"required": ["issuer_did"]}
+  ],
+  "allOf": [
+    {
+      "not": {
+        "anyOf": [
+          {"required": ["claims", "credential_subject"]},
+          {"required": ["claims", "credential_document"]},
+          {"required": ["credential_subject", "credential_document"]}
+        ]
+      }
+    }
+  ]
+}
