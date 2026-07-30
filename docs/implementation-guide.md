@@ -87,10 +87,14 @@ See [Cedar Policies Documentation](cedar-policies.md) for policy authoring detai
 
 ### credential_type naming conventions
 
-- MUST be PascalCase: `EmployeeAccessBadge`, `PreBoardingClearance`
-- MUST start with an uppercase letter
+- VC and SD-JWT VC semantic types MUST be PascalCase:
+  `EmployeeAccessBadge`, `PreBoardingClearance`
+- ISO mdoc templates MUST use the reverse-domain ISO document type as both
+  `credential_type` and `doctype`, for example `org.iso.18013.5.1.mDL`
 - SHOULD be descriptive and globally unique within your organization
-- MUST match the pattern `^[A-Z][a-zA-Z0-9]+$`
+- Signing algorithms, keys, certificates, and custody providers are not
+  Credential Template inputs; implementations resolve them from
+  `organization_id` and `issuer_did`
 
 ### Claim naming conventions
 
@@ -289,6 +293,7 @@ Run the full conformance suite against your implementation:
 | Mistake | Correct Approach |
 |---------|-----------------|
 | `credential_type: "myCredential"` | Must be PascalCase: `"MyCredential"` |
+| MDOC template without `doctype` | Set both `credential_type` and `doctype` to the reverse-domain ISO document type |
 | Including credential data in FCM notification | Include only the OID4VCI offer URI |
 | `fallback_policy: "DENY"` + `fallback_claim_name` set | DENY means no fallback; remove `fallback_claim_name` |
 | Missing `public_key_kid` when setting `public_key_der` | Compute RFC 7638 JWK Thumbprint and include it |

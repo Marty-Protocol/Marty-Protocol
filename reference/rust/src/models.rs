@@ -291,6 +291,8 @@ pub struct CredentialTemplate {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub vct: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub doctype: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub credential_payload_format: Option<CredentialFormat>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub application_template_id: Option<String>,

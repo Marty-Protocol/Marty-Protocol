@@ -235,6 +235,7 @@ organization and issuer DID."""
     description: str | None = None
     compliance_profile_id: str
     vct: str | None = None
+    doctype: str | None = None
     credential_payload_format: CredentialFormat | None = None
     application_template_id: str | None = None
     trust_profile_id: str | None = None
