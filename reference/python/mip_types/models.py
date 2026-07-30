@@ -422,6 +422,22 @@ claims, hashes, signing references, and opaque subject identifiers are prohibite
     offset: int
 
 
+class IssuanceRequest(BaseModel):
+    """Public request to create a credential issuance. Custody and issuer-profile selectors are
+intentionally absent."""
+
+    organization_id: str
+    credential_template_id: str | None = None
+    issuer_did: str | None = None
+    subject_did: str | None = None
+    holder_did: str | None = None
+    authorized_client: dict[str, Any] | None = None
+    application_id: str | None = None
+    claims: dict[str, Any] | None = None
+    credential_subject: dict[str, Any] | None = None
+    credential_document: dict[str, Any] | None = None
+
+
 class IssuanceRecord(BaseModel):
     """Record of a credential issuance event"""
 
@@ -856,6 +872,36 @@ downloading the full trust store on every launch."""
     generated_at: datetime
 
 
+class VerificationFlowStartRequest(BaseModel):
+    """Public request to start an OID4VP or SIOPv2 flow using a DID-resolved verifier profile."""
+
+    presentation_policy_id: str | None = None
+    organization_id: str
+    issuer_did: str
+    response_type: Literal["vp_token", "id_token"] | None = None
+    trust_profile_id: str | None = None
+    deployment_profile_id: str | None = None
+    external_reference: str | None = None
+    callback_url: str | None = None
+    expiry_minutes: int | None = None
+    oid4vp_profile: Literal["standard", "haip"] | None = None
+    request_transport: Literal["request_uri", "request_object", "url_query"] | None = None
+    request_uri_method: Literal["get", "post"] | None = None
+
+
+class VerificationFlowStartResponse(BaseModel):
+    """Public response for a newly started verification flow. Internal flow-definition routing
+is intentionally absent."""
+
+    instance_id: str
+    request_uri: str
+    qr_code_data: str
+    presentation_policy_id: str
+    nonce: str
+    expires_at: datetime
+    status: str
+
+
 class VerificationSession(BaseModel):
     """A single presentation-request/response cycle instance"""
 
@@ -971,6 +1017,7 @@ FlowExecution.model_rebuild()
 FlowExtension.model_rebuild()
 Flow.model_rebuild()
 HolderCredentialInventory.model_rebuild()
+IssuanceRequest.model_rebuild()
 IssuanceRecord.model_rebuild()
 IssuedCredential.model_rebuild()
 IssuerEntity.model_rebuild()
@@ -994,6 +1041,8 @@ TrustFramework.model_rebuild()
 TrustProfileIssuer.model_rebuild()
 TrustProfile.model_rebuild()
 TrustRegistrySync.model_rebuild()
+VerificationFlowStartRequest.model_rebuild()
+VerificationFlowStartResponse.model_rebuild()
 VerificationSession.model_rebuild()
 VettingCheck.model_rebuild()
 WalletProfile.model_rebuild()

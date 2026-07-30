@@ -371,6 +371,20 @@ export interface HolderCredentialInventory {
   offset: number;
 }
 
+/** Public request to create a credential issuance. Custody and issuer-profile selectors are intentionally absent. */
+export interface IssuanceRequest {
+  organization_id: string;
+  credential_template_id?: string | null;
+  issuer_did?: string | null;
+  subject_did?: string | null;
+  holder_did?: string | null;
+  authorized_client?: Record<string, unknown> | null;
+  application_id?: string | null;
+  claims?: Record<string, unknown>;
+  credential_subject?: Record<string, unknown> | null;
+  credential_document?: Record<string, unknown> | null;
+}
+
 /** Record of a credential issuance event */
 export interface IssuanceRecord {
   id: string;
@@ -747,6 +761,33 @@ export interface TrustRegistrySync {
   entries: Record<string, unknown>[];
   has_more?: boolean;
   generated_at: string;
+}
+
+/** Public request to start an OID4VP or SIOPv2 flow using a DID-resolved verifier profile. */
+export interface VerificationFlowStartRequest {
+  presentation_policy_id?: string | null;
+  organization_id: string;
+  issuer_did: string;
+  response_type?: 'vp_token' | 'id_token';
+  trust_profile_id?: string | null;
+  deployment_profile_id?: string | null;
+  external_reference?: string | null;
+  callback_url?: string | null;
+  expiry_minutes?: number;
+  oid4vp_profile?: 'standard' | 'haip';
+  request_transport?: 'request_uri' | 'request_object' | 'url_query';
+  request_uri_method?: 'get' | 'post';
+}
+
+/** Public response for a newly started verification flow. Internal flow-definition routing is intentionally absent. */
+export interface VerificationFlowStartResponse {
+  instance_id: string;
+  request_uri: string;
+  qr_code_data: string;
+  presentation_policy_id: string;
+  nonce: string;
+  expires_at: string;
+  status: string;
 }
 
 /** A single presentation-request/response cycle instance */

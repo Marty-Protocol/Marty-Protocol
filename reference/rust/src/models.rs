@@ -552,6 +552,31 @@ pub struct HolderCredentialInventory {
     pub offset: i64,
 }
 
+/// Public request to create a credential issuance. Custody and issuer-profile selectors are
+/// intentionally absent.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IssuanceRequest {
+    pub organization_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_template_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub issuer_did: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subject_did: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub holder_did: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub authorized_client: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub claims: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_subject: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_document: Option<serde_json::Value>,
+}
+
 /// Record of a credential issuance event
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct IssuanceRecord {
@@ -1141,6 +1166,46 @@ pub struct TrustRegistrySync {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub has_more: Option<bool>,
     pub generated_at: String,
+}
+
+/// Public request to start an OID4VP or SIOPv2 flow using a DID-resolved verifier profile.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VerificationFlowStartRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub presentation_policy_id: Option<String>,
+    pub organization_id: String,
+    pub issuer_did: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub response_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trust_profile_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deployment_profile_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub external_reference: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub callback_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub expiry_minutes: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub oid4vp_profile: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub request_transport: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub request_uri_method: Option<String>,
+}
+
+/// Public response for a newly started verification flow. Internal flow-definition routing
+/// is intentionally absent.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VerificationFlowStartResponse {
+    pub instance_id: String,
+    pub request_uri: String,
+    pub qr_code_data: String,
+    pub presentation_policy_id: String,
+    pub nonce: String,
+    pub expires_at: String,
+    pub status: String,
 }
 
 /// A single presentation-request/response cycle instance
