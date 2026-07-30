@@ -4,21 +4,38 @@
   "title": "PresentationPolicy",
   "description": "Minimum disclosure requirements, predicates, and holder binding for credential verification",
   "type": "object",
-  "required": ["id", "organization_id", "name", "required_claims", "created_at"],
+  "required": [
+    "id",
+    "organization_id",
+    "name",
+    "status",
+    "required_claims",
+    "accepted_credential_types",
+    "holder_binding",
+    "prefer_predicates",
+    "supported_circuits",
+    "credential_ranking_strategy",
+    "version",
+    "created_at",
+    "updated_at"
+  ],
   "additionalProperties": false,
   "properties": {
     "id": {"type": "string", "format": "uuid"},
     "organization_id": {"type": "string", "format": "uuid"},
-    "name": {"type": "string", "minLength": 1, "maxLength": 128},
-    "description": {"type": "string", "maxLength": 1024},
+    "name": {"type": "string", "minLength": 1, "maxLength": 255},
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "suspended", "archived"]
+    },
+    "description": {"type": "string", "maxLength": 2000},
     "purpose": {
       "type": "string",
-      "maxLength": 512,
+      "maxLength": 2000,
       "description": "Human-readable consent description shown in the wallet UI during presentation request, e.g. 'Age verification for access control'"
     },
     "required_claims": {
       "type": "array",
-      "minItems": 1,
       "items": {
         "type": "object",
         "required": ["claim_name"],
@@ -54,6 +71,196 @@
       "type": "array",
       "items": {"type": "string"}
     },
+    "display_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "description",
+        "purpose",
+        "verifier_name"
+      ],
+      "properties": {
+        "title": {"type": "string", "maxLength": 255},
+        "description": {"type": "string", "maxLength": 2000},
+        "purpose": {
+          "type": "string",
+          "enum": [
+            "identity_verification",
+            "age_verification",
+            "employment_verification",
+            "address_verification",
+            "qualification_verification",
+            "authorization",
+            "compliance",
+            "other"
+          ]
+        },
+        "purpose_description": {"type": ["string", "null"], "maxLength": 2000},
+        "verifier_name": {"type": "string", "maxLength": 255},
+        "verifier_logo_url": {"type": ["string", "null"], "format": "uri"},
+        "privacy_policy_url": {"type": ["string", "null"], "format": "uri"},
+        "terms_of_service_url": {"type": ["string", "null"], "format": "uri"}
+      }
+    },
+    "credential_requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "credential_template_id",
+          "display_name",
+          "required",
+          "credential_payload_format",
+          "requested_claims",
+          "require_fresh_issuance"
+        ],
+        "properties": {
+          "credential_template_id": {"type": "string", "minLength": 1},
+          "display_name": {"type": "string", "maxLength": 255},
+          "description": {"type": ["string", "null"], "maxLength": 2000},
+          "required": {"type": "boolean"},
+          "credential_payload_format": {"type": "string", "minLength": 1},
+          "requested_claims": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "claim_name",
+                "display_name",
+                "required",
+                "selective_disclosure",
+                "accept_derived",
+                "constraints"
+              ],
+              "properties": {
+                "claim_name": {"type": "string", "minLength": 1},
+                "display_name": {"type": "string", "maxLength": 255},
+                "description": {"type": ["string", "null"], "maxLength": 2000},
+                "required": {"type": "boolean"},
+                "selective_disclosure": {"type": "boolean"},
+                "accept_derived": {"type": "boolean"},
+                "predicate_spec": {"type": ["object", "null"]},
+                "constraints": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["claim_name", "constraint_type"],
+                    "properties": {
+                      "claim_name": {"type": "string", "minLength": 1},
+                      "constraint_type": {
+                        "type": "string",
+                        "enum": [
+                          "equals",
+                          "not_equals",
+                          "greater_than",
+                          "less_than",
+                          "greater_or_equal",
+                          "less_or_equal",
+                          "in_set",
+                          "not_in_set",
+                          "presence",
+                          "regex",
+                          "age_over"
+                        ]
+                      },
+                      "value": {},
+                      "description": {"type": ["string", "null"], "maxLength": 2000}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "trust_profile_id": {"type": ["string", "null"]},
+          "max_age_seconds": {"type": ["integer", "null"], "minimum": 1},
+          "require_fresh_issuance": {"type": "boolean"}
+        }
+      }
+    },
+    "alternative_requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "credential_requirements", "min_satisfied"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1, "maxLength": 255},
+          "description": {"type": ["string", "null"], "maxLength": 2000},
+          "credential_requirements": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "credential_template_id",
+                "display_name",
+                "required",
+                "credential_payload_format",
+                "requested_claims",
+                "require_fresh_issuance"
+              ],
+              "properties": {
+                "credential_template_id": {"type": "string", "minLength": 1},
+                "display_name": {"type": "string", "maxLength": 255},
+                "description": {"type": ["string", "null"], "maxLength": 2000},
+                "required": {"type": "boolean"},
+                "credential_payload_format": {"type": "string", "minLength": 1},
+                "requested_claims": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "claim_name",
+                      "display_name",
+                      "required",
+                      "selective_disclosure",
+                      "accept_derived",
+                      "constraints"
+                    ],
+                    "properties": {
+                      "claim_name": {"type": "string", "minLength": 1},
+                      "display_name": {"type": "string", "maxLength": 255},
+                      "description": {"type": ["string", "null"], "maxLength": 2000},
+                      "required": {"type": "boolean"},
+                      "selective_disclosure": {"type": "boolean"},
+                      "accept_derived": {"type": "boolean"},
+                      "predicate_spec": {"type": ["object", "null"]},
+                      "constraints": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["claim_name", "constraint_type"],
+                          "properties": {
+                            "claim_name": {"type": "string", "minLength": 1},
+                            "constraint_type": {"type": "string"},
+                            "value": {},
+                            "description": {"type": ["string", "null"], "maxLength": 2000}
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "trust_profile_id": {"type": ["string", "null"]},
+                "max_age_seconds": {"type": ["integer", "null"], "minimum": 1},
+                "require_fresh_issuance": {"type": "boolean"}
+              }
+            }
+          },
+          "min_satisfied": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "compliance_profile_id": {"type": ["string", "null"]},
     "trust_profile_id": {"type": ["string", "null"], "format": "uuid"},
     "holder_binding": {
       "type": "object",
@@ -158,11 +365,26 @@
       "description": "When a wallet holds multiple matching credentials, this determines which is preferred. FRESHEST_FIRST: most recently issued wins. HIGHEST_TRUST_FIRST: highest trust_level wins. CUSTOM: use credential_ranking_weights."
     },
     "credential_ranking_weights": {
-      "type": "object",
+      "type": ["object", "null"],
       "description": "Required when credential_ranking_strategy is CUSTOM. Maps ranking dimension to float weight.",
       "additionalProperties": {"type": "number"}
     },
+    "version": {"type": "integer", "minimum": 1},
     "created_at": {"type": "string", "format": "date-time"},
     "updated_at": {"type": "string", "format": "date-time"}
-  }
+  },
+  "anyOf": [
+    {
+      "required": ["required_claims"],
+      "properties": {"required_claims": {"minItems": 1}}
+    },
+    {
+      "required": ["credential_requirements"],
+      "properties": {"credential_requirements": {"minItems": 1}}
+    },
+    {
+      "required": ["alternative_requirements"],
+      "properties": {"alternative_requirements": {"minItems": 1}}
+    }
+  ]
 }

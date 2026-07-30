@@ -924,34 +924,38 @@ pub struct PresentationPolicy {
     pub id: String,
     pub organization_id: String,
     pub name: String,
+    pub status: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub purpose: Option<String>,
     pub required_claims: Vec<serde_json::Value>,
+    pub accepted_credential_types: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub accepted_credential_types: Option<Vec<String>>,
+    pub display_metadata: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_requirements: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub alternative_requirements: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub compliance_profile_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trust_profile_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub holder_binding: Option<serde_json::Value>,
+    pub holder_binding: serde_json::Value,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub freshness: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub prefer_predicates: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub supported_circuits: Option<Vec<String>>,
+    pub prefer_predicates: bool,
+    pub supported_circuits: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fallback_policy: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub issuer_constraints: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub credential_ranking_strategy: Option<String>,
+    pub credential_ranking_strategy: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub credential_ranking_weights: Option<serde_json::Value>,
+    pub version: i64,
     pub created_at: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub updated_at: Option<String>,
+    pub updated_at: String,
 }
 
 /// A time-bounded exclusive lock that prevents two reviewers from acting on the same

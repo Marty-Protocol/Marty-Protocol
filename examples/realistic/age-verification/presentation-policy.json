@@ -2,6 +2,7 @@
   "id": "pp-age-21-example",
   "organization_id": "org-retailer-example",
   "name": "Age 21+ Verification Policy",
+  "status": "active",
   "description": "Requests an age attestation predicate from an AAMVA mDL. Accepts the age_over_21 boolean element — no date of birth is disclosed. Falls back to requesting date_of_birth selectively disclosed if the wallet does not support age predicates.",
   "required_claims": [
     {
@@ -31,5 +32,9 @@
     "revocation_grace_seconds": 0
   },
   "prefer_predicates": true,
-  "created_at": "2026-03-11T00:00:00Z"
+  "supported_circuits": [],
+  "credential_ranking_strategy": "FRESHEST_FIRST",
+  "version": 1,
+  "created_at": "2026-03-11T00:00:00Z",
+  "updated_at": "2026-03-11T00:00:00Z"
 }

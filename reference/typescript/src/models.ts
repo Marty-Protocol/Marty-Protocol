@@ -606,21 +606,27 @@ export interface PresentationPolicy {
   id: string;
   organization_id: string;
   name: string;
+  status: 'draft' | 'active' | 'suspended' | 'archived';
   description?: string;
   purpose?: string;
   required_claims: Record<string, unknown>[];
-  accepted_credential_types?: string[];
+  accepted_credential_types: string[];
+  display_metadata?: Record<string, unknown>;
+  credential_requirements?: Record<string, unknown>[];
+  alternative_requirements?: Record<string, unknown>[];
+  compliance_profile_id?: string | null;
   trust_profile_id?: string | null;
-  holder_binding?: Record<string, unknown>;
+  holder_binding: Record<string, unknown>;
   freshness?: Record<string, unknown>;
-  prefer_predicates?: boolean;
-  supported_circuits?: string[];
+  prefer_predicates: boolean;
+  supported_circuits: string[];
   fallback_policy?: 'REQUIRE_PREDICATE' | 'ACCEPT_RAW' | 'DENY';
   issuer_constraints?: Record<string, unknown>;
-  credential_ranking_strategy?: 'FRESHEST_FIRST' | 'HIGHEST_TRUST_FIRST' | 'CUSTOM';
-  credential_ranking_weights?: Record<string, unknown>;
+  credential_ranking_strategy: 'FRESHEST_FIRST' | 'HIGHEST_TRUST_FIRST' | 'CUSTOM';
+  credential_ranking_weights?: Record<string, unknown> | null;
+  version: number;
   created_at: string;
-  updated_at?: string;
+  updated_at: string;
 }
 
 /** A time-bounded exclusive lock that prevents two reviewers from acting on the same applicant simultaneously. A lock MUST be acquired before transitioning an applicant out of SUBMITTED or UNDER_REVIEW. Locks expire automatically; the default TTL is 1800 seconds (30 minutes). */

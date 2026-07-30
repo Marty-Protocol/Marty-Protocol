@@ -2,6 +2,7 @@
   "id": "pp-invalid-001",
   "organization_id": "org-conformance",
   "name": "Invalid Presentation Policy — DENY fallback with raw claim",
+  "status": "draft",
   "required_claims": [
     {
       "claim_name": "age",
@@ -24,5 +25,9 @@
     "require_not_revoked": false
   },
   "prefer_predicates": true,
-  "created_at": "2026-01-01T00:00:00Z"
+  "supported_circuits": [],
+  "credential_ranking_strategy": "FRESHEST_FIRST",
+  "version": 1,
+  "created_at": "2026-01-01T00:00:00Z",
+  "updated_at": "2026-01-01T00:00:00Z"
 }
