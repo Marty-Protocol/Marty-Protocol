@@ -78,6 +78,14 @@ def test_issuance_without_template_or_issuer_did_fails_closed() -> None:
         validate_instance(ISSUANCE, request)
 
 
+def test_null_template_and_issuer_did_do_not_select_an_identity() -> None:
+    request = _issuance()
+    request["issuer_did"] = None
+    request["credential_template_id"] = None
+    with pytest.raises(ValidationError):
+        validate_instance(ISSUANCE, request)
+
+
 @pytest.mark.parametrize("field", sorted(FORBIDDEN_CUSTODY_FIELDS))
 def test_issuance_rejects_private_selector_at_root_or_in_claims(field: str) -> None:
     root = _issuance()
@@ -107,6 +115,39 @@ def test_public_authorized_client_rejects_private_jwk_material() -> None:
                 }
             ]
         },
+    }
+    with pytest.raises(ValidationError):
+        validate_instance(ISSUANCE, request)
+
+
+def test_public_authorized_client_accepts_omitted_or_null_optional_metadata() -> None:
+    request = _issuance()
+    request["authorized_client"] = {
+        "client_id": "wallet-client",
+        "jwks": {
+            "keys": [
+                {
+                    "kty": "EC",
+                    "crv": "P-256",
+                    "kid": "wallet-key",
+                    "x": "A" * 43,
+                    "y": "B" * 43,
+                    "alg": None,
+                    "use": None,
+                }
+            ]
+        },
+    }
+    validate_instance(ISSUANCE, request)
+
+
+def test_vcdm_document_requires_verifiable_credential_type() -> None:
+    request = _issuance()
+    request.pop("claims")
+    request["credential_document"] = {
+        "@context": ["https://www.w3.org/ns/credentials/v2"],
+        "type": "NotAVerifiableCredential",
+        "credentialSubject": {"id": "did:example:holder"},
     }
     with pytest.raises(ValidationError):
         validate_instance(ISSUANCE, request)
