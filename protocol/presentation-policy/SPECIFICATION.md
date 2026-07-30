@@ -31,18 +31,27 @@ Presentation Policies change when business rules change — they are the most fr
 |----------|------|----------|------------|
 | `id` | UUID | Yes | Unique |
 | `organization_id` | UUID | Yes | Must reference existing organization |
-| `name` | string | Yes | 1–128 characters |
-| `description` | string | No | Max 1024 characters |
-| `required_claims` | RequiredClaim[] | Yes | At least one entry |
-| `accepted_credential_types` | string[] | No | If empty, all types accepted |
+| `name` | string | Yes | 1–255 characters |
+| `status` | string | Yes | `draft`, `active`, `suspended`, or `archived` |
+| `description` | string | No | Max 2000 characters |
+| `purpose` | string | No | Max 2000 characters; shown to the holder |
+| `required_claims` | RequiredClaim[] | Yes | May be empty only when a template-bound or alternative requirement is present |
+| `accepted_credential_types` | string[] | Yes | If empty, types are derived from template-bound requirements |
+| `display_metadata` | object | No | Holder-facing verifier, purpose, privacy-policy, and terms metadata |
+| `credential_requirements` | CredentialRequirement[] | No | Template-bound grouped claims and format/trust constraints |
+| `alternative_requirements` | AlternativeRequirement[] | No | Threshold alternatives composed from credential requirements |
+| `compliance_profile_id` | string | No | Compliance rules applied to verification |
 | `trust_profile_id` | UUID | No | Issuer trust constraints |
 | `holder_binding` | HolderBinding | No | See below |
 | `freshness` | FreshnessConfig | No | See below |
 | `prefer_predicates` | boolean | No | Default false |
 | `supported_circuits` | string[] | No | ZK circuit identifiers |
 | `fallback_policy` | FallbackPolicy | No | Default `ACCEPT_RAW` |
+| `credential_ranking_strategy` | string | Yes | `FRESHEST_FIRST`, `HIGHEST_TRUST_FIRST`, or `CUSTOM` |
+| `credential_ranking_weights` | object | No | Required for `CUSTOM` ranking |
+| `version` | integer | Yes | Immutable policy version, starting at 1 |
 | `created_at` | datetime | Yes | ISO 8601 |
-| `updated_at` | datetime | No | ISO 8601 |
+| `updated_at` | datetime | Yes | ISO 8601 |
 
 ### RequiredClaim Fields
 
@@ -129,7 +138,10 @@ The selected `proof_profiles` define the wire checks. Implementations MUST valid
 
 ## Constraints
 
-1. `required_claims` MUST NOT be empty.
+1. At least one of `required_claims`, `credential_requirements`, or
+   `alternative_requirements` MUST NOT be empty. Template-bound requirements
+   preserve the authoritative Credential Template identity and format; they
+   are public policy semantics, not verifier implementation metadata.
 2. A `predicate_spec` with `predicate_type: RANGE_PROOF` MUST have either (`threshold` + `comparison`) or (`min` + `max`) in `params`.
 3. `fallback_policy: REQUIRE_PREDICATE` MUST only be used when `supported_circuits` is non-empty.
 4. `trust_profile_id` MUST reference an existing Trust Profile if present.

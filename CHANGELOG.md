@@ -10,6 +10,12 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 ## [Unreleased]
 
 ### Changed
+- Classified Presentation Policy status, version, holder-facing display
+  metadata, compliance linkage, authoritative Credential Template
+  requirements, and alternative requirements as public protocol semantics.
+  A policy must contain at least one canonical claim, template-bound
+  requirement, or alternative requirement; private custody routing remains
+  prohibited.
 - Defined canonical public issuance and verification-flow operation schemas.
   Public callers select signing identities only with `organization_id` and
   `issuer_did` (or a DID-bearing Credential Template); issuer-profile IDs,

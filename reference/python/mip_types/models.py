@@ -688,21 +688,27 @@ verification"""
     id: str
     organization_id: str
     name: str
+    status: Literal["draft", "active", "suspended", "archived"]
     description: str | None = None
     purpose: str | None = None
     required_claims: list[dict[str, Any]]
-    accepted_credential_types: list[str] | None = None
+    accepted_credential_types: list[str]
+    display_metadata: dict[str, Any] | None = None
+    credential_requirements: list[dict[str, Any]] | None = None
+    alternative_requirements: list[dict[str, Any]] | None = None
+    compliance_profile_id: str | None = None
     trust_profile_id: str | None = None
-    holder_binding: dict[str, Any] | None = None
+    holder_binding: dict[str, Any]
     freshness: dict[str, Any] | None = None
-    prefer_predicates: bool | None = None
-    supported_circuits: list[str] | None = None
+    prefer_predicates: bool
+    supported_circuits: list[str]
     fallback_policy: Literal["REQUIRE_PREDICATE", "ACCEPT_RAW", "DENY"] | None = None
     issuer_constraints: dict[str, Any] | None = None
-    credential_ranking_strategy: Literal["FRESHEST_FIRST", "HIGHEST_TRUST_FIRST", "CUSTOM"] | None = None
+    credential_ranking_strategy: Literal["FRESHEST_FIRST", "HIGHEST_TRUST_FIRST", "CUSTOM"]
     credential_ranking_weights: dict[str, Any] | None = None
+    version: int
     created_at: datetime
-    updated_at: datetime | None = None
+    updated_at: datetime
 
 
 class ReviewerLock(BaseModel):
