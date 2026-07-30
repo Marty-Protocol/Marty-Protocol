@@ -497,7 +497,7 @@ pub struct FlowExecution {
 pub struct FlowExtension {
     pub extension_uri: String,
     pub extension_version: String,
-    pub extends_flow_type: FlowType,
+    pub extends_flow_type: serde_json::Value,
     pub entry_step_id: String,
     pub steps: Vec<serde_json::Value>,
     pub transitions: Vec<serde_json::Value>,
@@ -915,6 +915,89 @@ pub struct PolicySet {
     pub created_at: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<String>,
+}
+
+/// Create a tenant-scoped Presentation Policy through the public API
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PresentationPolicyCreateRequest {
+    pub organization_id: String,
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub purpose: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display_metadata: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub required_claims: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub accepted_credential_types: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trust_profile_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_requirements: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub alternative_requirements: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub compliance_profile_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prefer_predicates: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fallback_policy: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub supported_circuits: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_ranking_strategy: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_ranking_weights: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub holder_binding: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub issuer_constraints: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub freshness: Option<serde_json::Value>,
+}
+
+/// Partially update a draft Presentation Policy through an explicit tenant scope
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PresentationPolicyUpdateRequest {
+    pub organization_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub purpose: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display_metadata: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub required_claims: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub accepted_credential_types: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trust_profile_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_requirements: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub alternative_requirements: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub compliance_profile_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prefer_predicates: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fallback_policy: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub supported_circuits: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_ranking_strategy: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_ranking_weights: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub holder_binding: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub issuer_constraints: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub freshness: Option<serde_json::Value>,
 }
 
 /// Minimum disclosure requirements, predicates, and holder binding for credential

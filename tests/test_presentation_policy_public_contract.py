@@ -10,6 +10,12 @@ from .helpers import REPO_ROOT, validate_instance
 
 
 SCHEMA = REPO_ROOT / "schemas" / "presentation-policy.json"
+CREATE_SCHEMA = (
+    REPO_ROOT / "schemas" / "presentation-policy-create-request.json"
+)
+UPDATE_SCHEMA = (
+    REPO_ROOT / "schemas" / "presentation-policy-update-request.json"
+)
 
 
 def _policy() -> dict:
@@ -143,3 +149,64 @@ def test_policy_rejects_custody_and_internal_routing_fields(field: str) -> None:
 def test_schema_declares_exact_public_resource_fields() -> None:
     schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
     assert set(schema["properties"]) == set(_policy())
+
+
+def _create_request() -> dict:
+    policy = _policy()
+    for field in (
+        "id",
+        "status",
+        "version",
+        "created_at",
+        "updated_at",
+    ):
+        policy.pop(field)
+    return policy
+
+
+def test_create_request_preserves_template_bound_public_semantics() -> None:
+    validate_instance(CREATE_SCHEMA, _create_request())
+
+
+def test_create_request_rejects_unknown_and_custody_fields() -> None:
+    for field in ("unmodeled_field", "issuer_profile_id", "kms_provider"):
+        request = _create_request()
+        request[field] = "must-not-pass"
+        with pytest.raises(ValidationError):
+            validate_instance(CREATE_SCHEMA, request)
+
+
+def test_create_request_requires_at_least_one_requirement_form() -> None:
+    request = _create_request()
+    request["required_claims"] = []
+    request["credential_requirements"] = []
+    request["alternative_requirements"] = []
+    with pytest.raises(ValidationError):
+        validate_instance(CREATE_SCHEMA, request)
+
+
+def test_update_request_is_tenant_scoped_and_partial() -> None:
+    validate_instance(
+        UPDATE_SCHEMA,
+        {
+            "organization_id": "org-conformance",
+            "name": "Updated policy",
+            "credential_requirements": _create_request()[
+                "credential_requirements"
+            ],
+        },
+    )
+
+
+def test_update_request_rejects_missing_tenant_or_unknown_fields() -> None:
+    with pytest.raises(ValidationError):
+        validate_instance(UPDATE_SCHEMA, {"name": "No tenant"})
+
+    with pytest.raises(ValidationError):
+        validate_instance(
+            UPDATE_SCHEMA,
+            {
+                "organization_id": "org-conformance",
+                "signing_service_id": "private-selector",
+            },
+        )

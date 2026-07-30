@@ -380,7 +380,7 @@ cannot claim the conformance semantics of a standard FlowType."""
 
     extension_uri: str
     extension_version: str
-    extends_flow_type: FlowType
+    extends_flow_type: dict[str, Any]
     entry_step_id: str
     steps: list[dict[str, Any]]
     transitions: list[dict[str, Any]]
@@ -679,6 +679,54 @@ match."""
     status: Literal["DRAFT", "ACTIVE", "ARCHIVED"]
     created_at: datetime
     updated_at: datetime | None = None
+
+
+class PresentationPolicyCreateRequest(BaseModel):
+    """Create a tenant-scoped Presentation Policy through the public API"""
+
+    organization_id: str
+    name: str
+    description: str | None = None
+    purpose: str | None = None
+    display_metadata: dict[str, Any] | None = None
+    required_claims: list[dict[str, Any]] | None = None
+    accepted_credential_types: list[str] | None = None
+    trust_profile_id: str | None = None
+    credential_requirements: list[dict[str, Any]] | None = None
+    alternative_requirements: list[dict[str, Any]] | None = None
+    compliance_profile_id: str | None = None
+    prefer_predicates: bool | None = None
+    fallback_policy: Literal["REQUIRE_PREDICATE", "ACCEPT_RAW", "DENY"] | None = None
+    supported_circuits: list[str] | None = None
+    credential_ranking_strategy: Literal["FRESHEST_FIRST", "HIGHEST_TRUST_FIRST", "CUSTOM"] | None = None
+    credential_ranking_weights: dict[str, Any] | None = None
+    holder_binding: dict[str, Any] | None = None
+    issuer_constraints: dict[str, Any] | None = None
+    freshness: dict[str, Any] | None = None
+
+
+class PresentationPolicyUpdateRequest(BaseModel):
+    """Partially update a draft Presentation Policy through an explicit tenant scope"""
+
+    organization_id: str
+    name: str | None = None
+    description: str | None = None
+    purpose: str | None = None
+    display_metadata: dict[str, Any] | None = None
+    required_claims: list[dict[str, Any]] | None = None
+    accepted_credential_types: list[str] | None = None
+    trust_profile_id: str | None = None
+    credential_requirements: list[dict[str, Any]] | None = None
+    alternative_requirements: list[dict[str, Any]] | None = None
+    compliance_profile_id: str | None = None
+    prefer_predicates: bool | None = None
+    fallback_policy: Literal["REQUIRE_PREDICATE", "ACCEPT_RAW", "DENY"] | None = None
+    supported_circuits: list[str] | None = None
+    credential_ranking_strategy: Literal["FRESHEST_FIRST", "HIGHEST_TRUST_FIRST", "CUSTOM"] | None = None
+    credential_ranking_weights: dict[str, Any] | None = None
+    holder_binding: dict[str, Any] | None = None
+    issuer_constraints: dict[str, Any] | None = None
+    freshness: dict[str, Any] | None = None
 
 
 class PresentationPolicy(BaseModel):
@@ -1036,6 +1084,8 @@ OrganizationTrustProfile.model_rebuild()
 Organization.model_rebuild()
 PhysicalDocumentJob.model_rebuild()
 PolicySet.model_rebuild()
+PresentationPolicyCreateRequest.model_rebuild()
+PresentationPolicyUpdateRequest.model_rebuild()
 PresentationPolicy.model_rebuild()
 ReviewerLock.model_rebuild()
 RevocationBatch.model_rebuild()
