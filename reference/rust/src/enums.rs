@@ -428,4 +428,3 @@ pub enum ZkCircuitSystem {
     #[serde(rename = "longfellow-libzk-v1")]
     LongfellowLibzkV1,
 }
-

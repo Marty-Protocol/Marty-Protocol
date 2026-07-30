@@ -195,7 +195,7 @@ export interface ComplianceProfile {
   updated_at?: string;
 }
 
-/** Master issuance configuration combining schema, compliance profile, and cryptographic materials */
+/** Public issuance configuration combining claims, compliance, issuer DID, and validity rules. Custody and signing-profile metadata are resolved internally from the organization and issuer DID. */
 export interface CredentialTemplate {
   id: string;
   organization_id: string;
@@ -210,14 +210,7 @@ export interface CredentialTemplate {
   revocation_profile_id?: string | null;
   claims: Record<string, unknown>[];
   validity_rules: Record<string, unknown>;
-  issuer_key_id?: string;
-  issuer_algorithm?: string;
-  key_access_mode?: 'KEY_VAULT' | 'HSM' | 'LOCAL' | 'REMOTE_SIGNING';
-  issuer_certificate_chain_pem?: string;
   issuer_did?: string;
-  issuer_identity?: Record<string, unknown>;
-  remote_signing_config?: Record<string, unknown>;
-  auto_generate_artifacts?: boolean;
   privacy_posture?: Record<string, unknown>;
   status: 'DRAFT' | 'ACTIVE' | 'DEPRECATED';
   created_at: string;

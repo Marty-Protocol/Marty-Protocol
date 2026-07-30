@@ -224,8 +224,9 @@ class ComplianceProfile(BaseModel):
 
 
 class CredentialTemplate(BaseModel):
-    """Master issuance configuration combining schema, compliance profile, and cryptographic
-materials"""
+    """Public issuance configuration combining claims, compliance, issuer DID, and validity
+rules. Custody and signing-profile metadata are resolved internally from the
+organization and issuer DID."""
 
     id: str
     organization_id: str
@@ -240,14 +241,7 @@ materials"""
     revocation_profile_id: str | None = None
     claims: list[dict[str, Any]]
     validity_rules: dict[str, Any]
-    issuer_key_id: str | None = None
-    issuer_algorithm: str | None = None
-    key_access_mode: Literal["KEY_VAULT", "HSM", "LOCAL", "REMOTE_SIGNING"] | None = None
-    issuer_certificate_chain_pem: str | None = None
     issuer_did: str | None = None
-    issuer_identity: dict[str, Any] | None = None
-    remote_signing_config: dict[str, Any] | None = None
-    auto_generate_artifacts: bool | None = None
     privacy_posture: dict[str, Any] | None = None
     status: Literal["DRAFT", "ACTIVE", "DEPRECATED"]
     created_at: datetime

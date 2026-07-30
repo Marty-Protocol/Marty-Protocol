@@ -498,7 +498,11 @@ The `CUSTOM` profile type is always compatible with any compliance code, providi
 
 ### 6.1 Purpose
 
-A Credential Template is the **master issuance configuration**. It combines schema (what the credential contains), compliance profile (format and framework), cryptographic materials (keys, certs, DIDs), validity rules, and optional application workflow references.
+A Credential Template is the **master public issuance configuration**. It
+combines schema, compliance profile, issuer DID, validity rules, and optional
+application workflow references. The owning organization and issuer DID are
+resolved to an internal issuer profile; signing keys, certificates, algorithms,
+verification methods, and custody providers are not public template fields.
 
 ### 6.2 Properties
 
@@ -515,13 +519,7 @@ A Credential Template is the **master issuance configuration**. It combines sche
 | `revocation_profile_id` | UUID | No | Revocation configuration |
 | `claims` | ClaimDefinition[] | Yes | Claim schema |
 | `validity_rules` | ValidityRules | Yes | TTL, reissue, renewable |
-| `issuer_key_id` | string | No | Key ID in key vault |
-| `issuer_algorithm` | Algorithm | No | Signing algorithm |
-| `key_access_mode` | KeyAccessMode | No | `KEY_VAULT`, `HSM`, `LOCAL` |
-| `issuer_certificate_chain_pem` | string | No | X.509 issuer cert chain (for mDoc/X.509 credentials) |
-| `issuer_did` | string | No | Issuer DID (for DID-based credentials) |
-| `issuer_identity` | IssuerIdentity | No | DID-first issuer identity binding for remote/KMS-backed issuance |
-| `auto_generate_artifacts` | boolean | No | Auto-generate keys/certs for dev environments |
+| `issuer_did` | string | Conditional | Required for every `ACTIVE` issuance template |
 | `vct` | string | Conditional | Verifiable Credential Type URI (per SD-JWT-VC §3.2.1). REQUIRED when `credential_format` is `SD_JWT_VC`. MUST be an absolute URI identifying the credential type. |
 | `credential_payload_format` | string | No | Payload envelope format: `w3c_vcdm_v2_sd_jwt`, `ietf_sd_jwt_vc`, `iso_mdoc`, `jwt_vc`. Defaults from `credential_format` if omitted. |
 | `privacy_posture` | PrivacyPosture | No | Fields intended for selective disclosure |
@@ -553,27 +551,16 @@ A Credential Template is the **master issuance configuration**. It combines sche
 
 ### 6.5 Validation Rules
 
-- Exactly one of `issuer_key_id`, `issuer_certificate_chain_pem`, or `issuer_did` MUST be present for `ACTIVE` templates, unless `auto_generate_artifacts` is `true`.
-- DID-backed templates SHOULD use `issuer_identity` instead of raw `issuer_key_id`. When `issuer_identity` is present, `issuer_identity.issuer_did` is the public issuer identity and any `remote_key_binding` fields are private deployment metadata. Implementations MUST resolve signing through the organization issuer identity registry and MUST NOT expose opaque KMS key IDs as public trust anchors.
+- Every `ACTIVE` issuance template MUST contain `issuer_did`.
+- Public template input and output MUST reject issuer-profile IDs, verification-method selectors, algorithms, certificate bindings, KMS providers, signing-service IDs, key references, and artifact-generation controls.
+- Implementations MUST resolve `organization_id` + `issuer_did` + operation/purpose + credential format + algorithm to exactly one authorized active issuer profile and fail closed for unknown, inactive, ambiguous, incompatible, mismatched, or cross-organization mappings.
+- Signing MUST execute through that issuer profile. Public callers never select or invoke KMS custody directly.
 - `compliance_profile_id` MUST reference an existing Compliance Profile by ID. Embedding a compliance profile object MUST be rejected.
 - `claims` MUST contain at least one entry.
 - `vct` MUST be present and MUST be an absolute URI when `credential_format` is `SD_JWT_VC`.
 - A template with `status: DRAFT` MUST NOT be used in an active issuance.
 - `application_template_id` MUST be null when the template is used for direct/batch issuance.
 - Derived claims MUST reference an existing claim in the same template via `derived_from`.
-
-### 6.5.1 IssuerIdentity
-
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `issuer_did` | string | Yes | Public issuer DID that appears in issued credentials |
-| `issuer_profile_id` | string | No | Organization issuer profile binding the DID to a signing service |
-| `verification_method_id` | string | No | DID URL of the verification method used for signing (`kid`) |
-| `key_purpose` | string | No | Purpose such as `vc_jwt_issuer`, `mdoc_dsc`, or `vdsnc_signing` |
-| `algorithm` | Algorithm | No | Expected signing algorithm |
-| `remote_key_binding` | object | No | Private resolver metadata for the deployment, such as organization registry or signing service references |
-
-The `remote_key_binding` object is not a portable trust anchor. It MAY contain implementation-specific references such as `signing_service_id`, `signing_key_reference`, or `kms_provider`, but verifiers MUST validate credentials through the issuer DID and DID verification method. This preserves interoperability while allowing deployments to keep private keys in KMS/HSM backends.
 
 ### 6.6 API
 
@@ -2159,7 +2146,9 @@ See per-entity sections (5–15) for entity-specific rules.
 
 ### 19.1 Cross-Entity Rules
 
-- A Credential Template MUST NOT reference a Compliance Profile with an incompatible combination of `credential_format` and `issuer_key_id` algorithm.
+- A Credential Template's Compliance Profile and requested operation MUST be
+  compatible with the algorithm and purpose of the issuer profile resolved
+  from its organization and `issuer_did`.
 - A Presentation Policy MUST NOT reference claim names that contradict the ZK circuit requirements of its `supported_circuits`.
 - A Deployment Profile MUST NOT be `ACTIVE` in a Flow if any of its Presentation Policies are in `DRAFT` status.
 

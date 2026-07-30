@@ -10,6 +10,12 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 ## [Unreleased]
 
 ### Changed
+- Made public Credential Templates DID-only. Active templates now require
+  `issuer_did`; issuer-profile IDs, verification-method selectors, algorithms,
+  certificate bindings, KMS providers, signing-service IDs, key references,
+  remote-signing configuration, and artifact-generation controls are rejected.
+  Implementations resolve and sign through an organization-scoped internal
+  issuer profile without exposing custody metadata.
 - Replaced Presentation Policy `NONCE` binding with explicit credential, device, or session control methods plus proof-profile and proof-freshness requirements.
 - Aligned OID4VCI issuance with the 1.0 Final Nonce Endpoint and plural `proofs` parameter; Token Responses no longer carry draft-era credential nonce fields.
 - Renamed Deployment Profile `biometric_required` to `operator_biometric_authentication_required` with a bounded read-compatibility alias.

@@ -41,7 +41,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Install ajv-cli
         run: npm install -g ajv-cli ajv-formats
@@ -52,6 +52,10 @@ jobs:
             python3 -c "import json, sys; json.load(open('$f'))" || exit 1
           done
           echo "All JSON files are well-formed."
+
+      - name: Build generated TypeScript bindings
+        working-directory: reference/typescript
+        run: npm ci --ignore-scripts && npm run build
 
   dco-check:
     name: DCO Sign-off Check
