@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/flow-create-request.json",
+  "title": "FlowCreateRequest",
+  "description": "Create a tenant-scoped orchestration definition through the public API.",
+  "type": "object",
+  "required": ["organization_id", "name", "flow_type"],
+  "additionalProperties": false,
+  "properties": {
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "name": {"type": "string", "minLength": 1, "maxLength": 255},
+    "description": {"type": ["string", "null"], "maxLength": 2000},
+    "flow_type": {"$ref": "../enums/flow-types.json"},
+    "trust_profile_id": {"type": ["string", "null"], "maxLength": 255},
+    "credential_template_id": {"type": ["string", "null"], "maxLength": 255},
+    "application_template_id": {"type": ["string", "null"], "maxLength": 255},
+    "presentation_policy_id": {"type": ["string", "null"], "maxLength": 255},
+    "delivery_destination_profile_id": {"type": ["string", "null"], "maxLength": 128},
+    "deployment_profile_ids": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1, "maxLength": 255},
+      "uniqueItems": true
+    },
+    "approval_strategy": {"$ref": "../enums/approval-strategies.json"},
+    "hooks": {"$ref": "flow.json#/properties/hooks"},
+    "trigger": {"$ref": "flow.json#/properties/trigger"},
+    "extension": {"$ref": "flow.json#/properties/extension"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"flow_type": {"enum": ["oid4vci_pre_authorized", "oid4vci_authorization_code", "mdl_issuance", "credential_renewal", "credential_revocation"]}}, "required": ["flow_type"]},
+      "then": {"required": ["credential_template_id"], "properties": {"credential_template_id": {"type": "string", "minLength": 1}}}
+    },
+    {
+      "if": {"properties": {"flow_type": {"const": "application_approval_issuance"}}, "required": ["flow_type"]},
+      "then": {"required": ["application_template_id"], "properties": {"application_template_id": {"type": "string", "minLength": 1}}}
+    },
+    {
+      "if": {"properties": {"flow_type": {"enum": ["oid4vp_presentation", "mdl_presentation", "siopv2"]}}, "required": ["flow_type"]},
+      "then": {"required": ["presentation_policy_id"], "properties": {"presentation_policy_id": {"type": "string", "minLength": 1}}}
+    },
+    {
+      "if": {"properties": {"flow_type": {"const": "combined"}}, "required": ["flow_type"]},
+      "then": {
+        "required": ["credential_template_id", "presentation_policy_id"],
+        "properties": {
+          "credential_template_id": {"type": "string", "minLength": 1},
+          "presentation_policy_id": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"flow_type": {"const": "physical_document_issuance"}}, "required": ["flow_type"]},
+      "then": {
+        "required": ["credential_template_id", "application_template_id", "delivery_destination_profile_id"],
+        "properties": {
+          "credential_template_id": {"type": "string", "minLength": 1},
+          "application_template_id": {"type": "string", "minLength": 1},
+          "delivery_destination_profile_id": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"flow_type": {"const": "custom"}}, "required": ["flow_type"]},
+      "then": {"required": ["extension"], "properties": {"extension": {"$ref": "flow-extension.json"}}},
+      "else": {"properties": {"extension": {"type": "null"}}}
+    }
+  ]
+}

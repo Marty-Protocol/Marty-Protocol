@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuance-response.json",
+  "title": "IssuanceResponse",
+  "description": "Public result of initiating credential issuance. The offer URI is the wallet handoff; the underlying pre-authorized code is never returned as a separate management API field.",
+  "type": "object",
+  "required": ["id", "organization_id", "credential_template_id", "status", "credential_offer_uri", "credential_offer_uris", "credential_offer_labels", "expires_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "credential_template_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "status": {
+      "type": "string",
+      "enum": ["pending", "authorized", "signing", "issued", "failed", "expired", "revoked"]
+    },
+    "credential_offer_uri": {"type": "string", "minLength": 1, "maxLength": 16384},
+    "credential_offer_uris": {
+      "type": "object",
+      "propertyNames": {"minLength": 1, "maxLength": 255},
+      "additionalProperties": {"type": "string", "minLength": 1, "maxLength": 16384}
+    },
+    "credential_offer_labels": {
+      "type": "object",
+      "propertyNames": {"minLength": 1, "maxLength": 255},
+      "additionalProperties": {"type": "string", "minLength": 1, "maxLength": 255}
+    },
+    "expires_at": {"type": "string", "format": "date-time"}
+  }
+}

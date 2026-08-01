@@ -1,0 +1,9 @@
+{
+  "instance_id": "instance-1",
+  "status": "COMPLETED",
+  "result": "passed",
+  "decision": "APPROVED",
+  "decision_reason": null,
+  "verified_claims": {"age_over_21": true},
+  "evaluation_timestamp": "2026-07-31T12:00:00Z"
+}

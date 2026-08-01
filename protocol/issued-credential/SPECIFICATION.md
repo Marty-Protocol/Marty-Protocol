@@ -21,34 +21,34 @@ IssuedCredential does **not** store the credential payload. It stores only metad
 ## Lifecycle States
 
 ```
-          issued
+          ISSUED
             │
             ▼
-         active ──────────────────────┐
+         ACTIVE ──────────────────────┐
             │                         │
      (holder request                  │ (compliance event,
       or admin action)                │  issuer revocation,
             │                         │  cascade revocation)
             ▼                         ▼
-        suspended ──────────────→  revoked
+        SUSPENDED ──────────────→  REVOKED
             │
      (suspension lifted)
             │
             ▼
-         active
+         ACTIVE
             │
      (valid_until reached)
             │
             ▼
-         expired
+         EXPIRED
 ```
 
 | Status | Meaning |
 |--------|---------|
-| `active` | Credential is valid and usable |
-| `suspended` | Credential temporarily invalid; may be reactivated |
-| `revoked` | Credential permanently invalid; cannot be reactivated |
-| `expired` | Credential reached `valid_until`; informational only |
+| `ACTIVE` | Credential is valid and usable |
+| `SUSPENDED` | Credential temporarily invalid; may be reactivated |
+| `REVOKED` | Credential permanently invalid; cannot be reactivated |
+| `EXPIRED` | Credential reached `valid_until`; informational only |
 
 ---
 
@@ -65,6 +65,8 @@ IssuedCredential does **not** store the credential payload. It stores only metad
 | GET | `/v1/issued-credentials/mine?status&limit&offset` | Authenticated holder inventory |
 
 IssuedCredentials are never created directly via API; they are created by the system when a FlowExecution completes.
+
+All management endpoints are authenticated and tenant-bound. List operations require the selected `organization_id`; ID-based operations MUST hide a resource from callers authorized for another organization. Public records never include delivery routing records, issuer-profile IDs, signing-service IDs, key references, KMS/provider selectors, bearer tokens, or pre-authorized codes.
 
 ### Holder Inventory
 
@@ -107,12 +109,11 @@ Revocation writes to all entries atomically.
 Request body:
 ```json
 {
-  "reason": "KEY_COMPROMISE",
-  "notes": "Holder reported device lost"
+  "reason": "Holder reported device lost"
 }
 ```
 
-`reason` must be one of the values in `enums/revocation-reasons.json`.
+`reason` is optional public audit text of at most 2,000 characters. Services may map it to a controlled internal revocation taxonomy without exposing internal state.
 
 ## Renewal
 
@@ -129,7 +130,7 @@ An abandoned or expired replacement offer leaves the source active and may be re
 
 ### Cascade revocation
 
-If the associated IssuerEntity is revoked, and the `TrustProfileIssuer.cascade_revocation_policy` is `AUTO_CASCADE`, a CascadeRevocationOperation is created covering all `active` IssuedCredentials for that issuer. See `protocol/issuer-registry/SPECIFICATION.md` for details.
+If the associated IssuerEntity is revoked, and the `TrustProfileIssuer.cascade_revocation_policy` is `AUTO_CASCADE`, a CascadeRevocationOperation is created covering all `ACTIVE` IssuedCredentials for that issuer. See `protocol/issuer-registry/SPECIFICATION.md` for details.
 
 ---
 
@@ -146,13 +147,13 @@ Key fields:
 | `flow_execution_id` | UUID | Yes | The FlowExecution that produced this credential |
 | `application_id` | UUID | No | Set when flow_type is `application_approval_issuance` |
 | `credential_template_id` | UUID | Yes | Template used during issuance |
-| `issuer_entity_id` | UUID | Yes | The IssuerEntity that signed the credential |
-| `subject_id` | UUID | Yes | Opaque subject identifier |
+| `issuer_did` | string | No | Public DID that signed the credential; custody/profile selectors remain private |
+| `subject_id` | string | Yes | DID, device key, or opaque holder identifier |
 | `credential_format` | string | Yes | One of `enums/credential-formats.json` values: `MDOC`, `SD_JWT_VC`, `VC_JWT`, `JSON_LD` |
-| `credential_hash` | string | Yes | SHA-256 hex of issued credential bytes |
-| `subject_claims_hash` | string | Yes | SHA-256 hex of canonical subject claims JSON |
-| `status` | string | Yes | `active`, `suspended`, `revoked`, `expired` |
-| `status_list_entries` | array | No | Zero or more status list slot references |
+| `credential_hash` | string | No | SHA-256 hex of issued credential bytes |
+| `subject_claims_hash` | string | No | SHA-256 hex of canonical subject claims JSON |
+| `status` | string | Yes | `ACTIVE`, `SUSPENDED`, `REVOKED`, `EXPIRED` |
+| `status_list_entries` | array | Yes | Zero or more status list slot references |
 | `renewed_from_credential_id` | string | No | Source credential replaced by this credential |
 | `renewed_to_credential_id` | string | No | Replacement credential that superseded this credential |
 | `renewable` | boolean | No | Whether the source issuance policy permits renewal |
@@ -172,9 +173,9 @@ FlowExecution ──────────────→ IssuedCredential
                                      │
                ┌─────────────────────┼──────────────────────┐
                ▼                     ▼                       ▼
-        IssuerEntity       CredentialTemplate        StatusListEntry
+          issuer_did       CredentialTemplate        StatusListEntry
 ```
 
 - One FlowExecution creates zero or one IssuedCredential
-- One IssuedCredential references exactly one IssuerEntity and one CredentialTemplate
+- One IssuedCredential records its public `issuer_did` when available and references exactly one CredentialTemplate
 - One IssuedCredential may have multiple StatusListEntries (one per revocation mechanism)

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/flow-execution-start-request.json",
+  "title": "FlowExecutionStartRequest",
+  "description": "Start an authorized Flow execution in an explicitly selected organization.",
+  "type": "object",
+  "required": ["organization_id", "flow_definition_id"],
+  "additionalProperties": false,
+  "properties": {
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "flow_definition_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "subject_id": {"type": ["string", "null"], "maxLength": 255},
+    "subject_type": {"type": "string", "minLength": 1, "maxLength": 50, "default": "applicant"},
+    "external_reference": {"type": ["string", "null"], "maxLength": 500},
+    "initial_context": {"$ref": "flow-execution.json#/$defs/publicObject"}
+  }
+}

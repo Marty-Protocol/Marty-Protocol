@@ -195,6 +195,16 @@ export interface ComplianceProfile {
   updated_at?: string;
 }
 
+/** Public wallet handoff produced for an eligible issued-credential renewal. */
+export interface CredentialRenewalOfferResponse {
+  source_credential_id: string;
+  transaction_id: string;
+  credential_offer_uri: string;
+  credential_offer_uris: Record<string, unknown>;
+  credential_offer_labels: Record<string, unknown>;
+  expires_at: string;
+}
+
 /** Public issuance configuration combining claims, compliance, issuer DID, and validity rules. Custody and signing-profile metadata are resolved internally from the organization and issuer DID. */
 export interface CredentialTemplate {
   id: string;
@@ -308,25 +318,54 @@ export interface EvidenceFact {
   created_at: string;
 }
 
-/** Runtime state of a single flow instance. Tracks current step, step results, context data, and lifecycle transitions. Created when a flow is initiated; updated as steps complete. */
+/** Create a tenant-scoped orchestration definition through the public API. */
+export interface FlowCreateRequest {
+  organization_id: string;
+  name: string;
+  description?: string | null;
+  flow_type: FlowType;
+  trust_profile_id?: string | null;
+  credential_template_id?: string | null;
+  application_template_id?: string | null;
+  presentation_policy_id?: string | null;
+  delivery_destination_profile_id?: string | null;
+  deployment_profile_ids?: string[];
+  approval_strategy?: ApprovalStrategy;
+  hooks?: Record<string, unknown>;
+  trigger?: Record<string, unknown>;
+  extension?: Record<string, unknown>;
+}
+
+/** Start an authorized Flow execution in an explicitly selected organization. */
+export interface FlowExecutionStartRequest {
+  organization_id: string;
+  flow_definition_id: string;
+  subject_id?: string | null;
+  subject_type?: string;
+  external_reference?: string | null;
+  initial_context?: Record<string, unknown>;
+}
+
+/** Public, tenant-scoped projection of a single Flow execution. Internal custody selectors, bearer credentials, pre-authorized codes, and service state are never part of this representation. */
 export interface FlowExecution {
   id: string;
-  flow_id: string;
-  flow_type: FlowType;
+  flow_id: string | null;
+  flow_type: FlowType | null;
   organization_id: string;
   status: FlowInstanceStatus;
   current_step?: string | null;
-  current_step_index?: number;
-  step_results?: Record<string, unknown>;
-  context_data?: Record<string, unknown>;
+  current_step_index?: number | null;
+  step_results: Record<string, unknown>;
+  context_data: Record<string, unknown>;
   issued_credential_id?: string | null;
   started_at?: string | null;
   completed_at?: string | null;
   expires_at?: string | null;
   error_code?: string | null;
-  metadata?: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  state_history: Record<string, unknown>[];
   created_at: string;
-  updated_at?: string;
+  updated_at: string;
 }
 
 /** Versioned non-standard orchestration envelope. A custom Flow uses this object so it cannot claim the conformance semantics of a standard FlowType. */
@@ -340,14 +379,33 @@ export interface FlowExtension {
   config?: Record<string, unknown>;
 }
 
+/** Patch a tenant-scoped Flow. The service validates the complete merged definition before persisting it. */
+export interface FlowUpdateRequest {
+  organization_id: string;
+  name?: string;
+  description?: string | null;
+  flow_type?: FlowType;
+  trust_profile_id?: string | null;
+  credential_template_id?: string | null;
+  application_template_id?: string | null;
+  presentation_policy_id?: string | null;
+  delivery_destination_profile_id?: string | null;
+  deployment_profile_ids?: string[];
+  approval_strategy?: ApprovalStrategy;
+  hooks?: Record<string, unknown>;
+  trigger?: Record<string, unknown>;
+  extension?: Record<string, unknown>;
+}
+
 /** End-to-end identity lifecycle orchestration. Standard FlowTypes have fixed protocol sequences; non-standard graphs use flow_type custom with a versioned extension envelope. */
 export interface Flow {
   id: string;
   organization_id: string;
   name: string;
-  description?: string;
+  description?: string | null;
   flow_type: FlowType;
-  flow_category?: 'ISSUANCE' | 'VERIFICATION' | 'RENEWAL' | 'REVOCATION' | 'COMBINED';
+  flow_category: 'ISSUANCE' | 'VERIFICATION' | 'RENEWAL' | 'REVOCATION' | 'COMBINED';
+  resolved_steps: string[];
   trust_profile_id?: string | null;
   credential_template_id?: string | null;
   application_template_id?: string | null;
@@ -356,11 +414,12 @@ export interface Flow {
   deployment_profile_ids?: string[];
   approval_strategy: ApprovalStrategy;
   hooks?: Record<string, unknown>;
-  trigger?: Record<string, unknown>;
-  extension?: FlowExtension;
+  trigger?: Record<string, unknown> | null;
+  extension?: FlowExtension | null;
   status: 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'ARCHIVED';
+  version: number;
   created_at: string;
-  updated_at?: string;
+  updated_at: string;
 }
 
 /** Privacy-filtered response from GET /v1/issued-credentials/mine. Credential material, claims, hashes, signing references, and opaque subject identifiers are prohibited. */
@@ -385,24 +444,37 @@ export interface IssuanceRequest {
   credential_document?: Record<string, unknown> | null;
 }
 
-/** Record of a credential issuance event */
-export interface IssuanceRecord {
+/** Public result of initiating credential issuance. The offer URI is the wallet handoff; the underlying pre-authorized code is never returned as a separate management API field. */
+export interface IssuanceResponse {
   id: string;
-  flow_id: string;
-  flow_execution_id?: string | null;
-  application_id?: string | null;
+  organization_id: string;
   credential_template_id: string;
-  holder_id: string;
-  credential_id?: string | null;
-  credential_format?: 'MDOC' | 'SD_JWT_VC' | 'VC_JWT' | 'JSON_LD';
-  offer_uri?: string | null;
-  offer_expires_at?: string | null;
-  status: 'PENDING' | 'OFFER_SENT' | 'CLAIMED' | 'EXPIRED' | 'FAILED' | 'REVOKED';
-  revocation_index?: number | null;
-  valid_from?: string | null;
-  valid_until?: string | null;
+  status: 'pending' | 'authorized' | 'signing' | 'issued' | 'failed' | 'expired' | 'revoked';
+  credential_offer_uri: string;
+  credential_offer_uris: Record<string, unknown>;
+  credential_offer_labels: Record<string, unknown>;
+  expires_at: string;
+}
+
+/** Public management projection of a tenant-scoped credential issuance transaction. OAuth tokens, pre-authorized codes, custody selectors, signing-service identifiers, keys, and raw credential payloads are excluded. */
+export interface IssuanceTransaction {
+  id: string;
+  organization_id: string;
+  credential_template_id: string;
+  applicant_id?: string | null;
+  application_id?: string | null;
+  subject_did?: string | null;
+  status: 'pending' | 'authorized' | 'signing' | 'issued' | 'failed' | 'expired' | 'revoked';
   created_at: string;
-  claimed_at?: string | null;
+  expires_at?: string | null;
+  issued_at?: string | null;
+  revoked_at?: string | null;
+  revocation_reason?: string | null;
+}
+
+/** Reason supplied for a tenant-bound issued-credential lifecycle transition. */
+export interface IssuedCredentialLifecycleRequest {
+  reason?: string | null;
 }
 
 /** Lifecycle record for an issued credential. Stores metadata without raw credential data (only a SHA-256 hash for integrity). Links FlowExecution to credential status, status list entries, and revocation history. */
@@ -422,18 +494,19 @@ export interface IssuedCredential {
   renewal_eligible_at?: string | null;
   can_renew?: boolean;
   subject_id: string;
+  issuer_did?: string | null;
   subject_claims_hash?: string | null;
   issued_at: string;
   valid_from?: string | null;
   valid_until?: string | null;
   status: 'ACTIVE' | 'SUSPENDED' | 'REVOKED' | 'EXPIRED';
-  status_list_entries?: Record<string, unknown>[];
+  status_list_entries: Record<string, unknown>[];
   credential_hash?: string | null;
   revoked_at?: string | null;
   revocation_reason?: string | null;
   revoked_by?: string | null;
   created_at: string;
-  updated_at?: string;
+  updated_at?: string | null;
 }
 
 /** Create an organization-scoped issuer trust-registry record. Global/system issuers are managed outside this public operation. */
@@ -920,6 +993,17 @@ export interface VerificationFlowStartResponse {
   nonce: string;
   expires_at: string;
   status: string;
+}
+
+/** Public result projection for an authorized verification Flow execution. */
+export interface VerificationResultResponse {
+  instance_id: string;
+  status: FlowInstanceStatus;
+  result?: string | null;
+  decision?: string | null;
+  decision_reason?: string | null;
+  verified_claims: Record<string, unknown>;
+  evaluation_timestamp?: string | null;
 }
 
 /** A single presentation-request/response cycle instance */

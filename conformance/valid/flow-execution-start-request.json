@@ -1,0 +1,10 @@
+{
+  "organization_id": "org-1",
+  "flow_definition_id": "flow-1",
+  "subject_id": "applicant-1",
+  "subject_type": "applicant",
+  "initial_context": {
+    "application_id": "application-1",
+    "requested_claims": ["given_name", "family_name"]
+  }
+}

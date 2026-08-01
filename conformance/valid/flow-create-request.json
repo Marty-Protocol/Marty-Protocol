@@ -1,0 +1,8 @@
+{
+  "organization_id": "org-1",
+  "name": "Employee credential issuance",
+  "flow_type": "oid4vci_pre_authorized",
+  "credential_template_id": "template-1",
+  "approval_strategy": "AUTO",
+  "deployment_profile_ids": []
+}

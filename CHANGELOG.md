@@ -10,6 +10,13 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 ## [Unreleased]
 
 ### Changed
+- Made Flow definition creation, partial update, execution start, execution
+  projection, verification result, issuance initiation, issuance transaction,
+  issued-credential lifecycle, and renewal-offer operations explicit public
+  contracts. Every management operation is tenant-bound; Flow context and
+  responses recursively prohibit custody selectors and reusable secrets, and
+  public issuance responses expose wallet offer URIs without separate
+  pre-authorized codes.
 - Distinguished issuer trust records from signing identities. Added strict,
   organization-scoped IssuerEntity create and partial-update contracts plus a
   DID-only IssuerIdentity projection. Public callers cannot create or mutate
@@ -49,6 +56,9 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 - Replaced compatibility/deprecation guidance with exact-version, atomic-release requirements.
 
 ### Fixed
+- Aligned Flow and issued-credential documentation, conformance fixtures, and
+  generated bindings with production response fields, uppercase lifecycle
+  states, public `issuer_did`, and private delivery-routing state.
 - Model ISO mdoc `doctype` explicitly in the public Credential Template
   contract while keeping every signing-custody selector private.
 - Brought bundled system Compliance Profiles under schema validation, including `holder_binding_required` and their ecosystem requirement fields.

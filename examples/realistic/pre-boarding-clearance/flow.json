@@ -5,9 +5,12 @@
   "description": "OID4VCI pre-authorized code flow. Passenger checks in via airline app; a short-lived PreBoardingClearance credential is issued to the passenger's wallet for subsequent gate verification.",
   "flow_type": "oid4vci_pre_authorized",
   "flow_category": "ISSUANCE",
+  "resolved_steps": ["create_offer", "token_exchange", "credential_request", "issue_credential"],
   "credential_template_id": "b4000001-0002-4000-8000-000000000002",
   "trust_profile_id": "b4000001-0003-4000-8000-000000000003",
   "approval_strategy": "AUTO",
   "status": "ACTIVE",
-  "created_at": "2026-03-11T00:00:00Z"
+  "version": 1,
+  "created_at": "2026-03-11T00:00:00Z",
+  "updated_at": "2026-03-11T00:00:00Z"
 }

@@ -276,6 +276,17 @@ pub struct ComplianceProfile {
     pub updated_at: Option<String>,
 }
 
+/// Public wallet handoff produced for an eligible issued-credential renewal.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CredentialRenewalOfferResponse {
+    pub source_credential_id: String,
+    pub transaction_id: String,
+    pub credential_offer_uri: String,
+    pub credential_offer_uris: serde_json::Value,
+    pub credential_offer_labels: serde_json::Value,
+    pub expires_at: String,
+}
+
 /// Public issuance configuration combining claims, compliance, issuer DID, and validity
 /// rules. Custody and signing-profile metadata are resolved internally from the
 /// organization and issuer DID.
@@ -456,24 +467,67 @@ pub struct EvidenceFact {
     pub created_at: String,
 }
 
-/// Runtime state of a single flow instance. Tracks current step, step results, context
-/// data, and lifecycle transitions. Created when a flow is initiated; updated as steps
-/// complete.
+/// Create a tenant-scoped orchestration definition through the public API.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FlowCreateRequest {
+    pub organization_id: String,
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub flow_type: FlowType,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trust_profile_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_template_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub application_template_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub presentation_policy_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delivery_destination_profile_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deployment_profile_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub approval_strategy: Option<ApprovalStrategy>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hooks: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trigger: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub extension: Option<serde_json::Value>,
+}
+
+/// Start an authorized Flow execution in an explicitly selected organization.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FlowExecutionStartRequest {
+    pub organization_id: String,
+    pub flow_definition_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subject_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subject_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub external_reference: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub initial_context: Option<serde_json::Value>,
+}
+
+/// Public, tenant-scoped projection of a single Flow execution. Internal custody selectors,
+/// bearer credentials, pre-authorized codes, and service state are never part of this
+/// representation.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FlowExecution {
     pub id: String,
-    pub flow_id: String,
-    pub flow_type: FlowType,
+    pub flow_id: Option<String>,
+    pub flow_type: Option<FlowType>,
     pub organization_id: String,
     pub status: FlowInstanceStatus,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub current_step: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub current_step_index: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub step_results: Option<serde_json::Value>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub context_data: Option<serde_json::Value>,
+    pub step_results: serde_json::Value,
+    pub context_data: serde_json::Value,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub issued_credential_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -484,11 +538,10 @@ pub struct FlowExecution {
     pub expires_at: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_code: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub metadata: Option<serde_json::Value>,
+    pub metadata: serde_json::Value,
+    pub state_history: Vec<serde_json::Value>,
     pub created_at: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub updated_at: Option<String>,
+    pub updated_at: String,
 }
 
 /// Versioned non-standard orchestration envelope. A custom Flow uses this object so it
@@ -505,6 +558,39 @@ pub struct FlowExtension {
     pub config: Option<serde_json::Value>,
 }
 
+/// Patch a tenant-scoped Flow. The service validates the complete merged definition before
+/// persisting it.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FlowUpdateRequest {
+    pub organization_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flow_type: Option<FlowType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trust_profile_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_template_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub application_template_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub presentation_policy_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delivery_destination_profile_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deployment_profile_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub approval_strategy: Option<ApprovalStrategy>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hooks: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trigger: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub extension: Option<serde_json::Value>,
+}
+
 /// End-to-end identity lifecycle orchestration. Standard FlowTypes have fixed protocol
 /// sequences; non-standard graphs use flow_type custom with a versioned extension envelope.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -515,8 +601,8 @@ pub struct Flow {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub flow_type: FlowType,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub flow_category: Option<String>,
+    pub flow_category: String,
+    pub resolved_steps: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trust_profile_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -537,9 +623,9 @@ pub struct Flow {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub extension: Option<FlowExtension>,
     pub status: String,
+    pub version: i64,
     pub created_at: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub updated_at: Option<String>,
+    pub updated_at: String,
 }
 
 /// Privacy-filtered response from GET /v1/issued-credentials/mine. Credential material,
@@ -577,35 +663,51 @@ pub struct IssuanceRequest {
     pub credential_document: Option<serde_json::Value>,
 }
 
-/// Record of a credential issuance event
+/// Public result of initiating credential issuance. The offer URI is the wallet handoff;
+/// the underlying pre-authorized code is never returned as a separate management API field.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct IssuanceRecord {
+pub struct IssuanceResponse {
     pub id: String,
-    pub flow_id: String,
+    pub organization_id: String,
+    pub credential_template_id: String,
+    pub status: String,
+    pub credential_offer_uri: String,
+    pub credential_offer_uris: serde_json::Value,
+    pub credential_offer_labels: serde_json::Value,
+    pub expires_at: String,
+}
+
+/// Public management projection of a tenant-scoped credential issuance transaction. OAuth
+/// tokens, pre-authorized codes, custody selectors, signing-service identifiers, keys, and
+/// raw credential payloads are excluded.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IssuanceTransaction {
+    pub id: String,
+    pub organization_id: String,
+    pub credential_template_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub flow_execution_id: Option<String>,
+    pub applicant_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub application_id: Option<String>,
-    pub credential_template_id: String,
-    pub holder_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub credential_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub credential_format: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub offer_uri: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub offer_expires_at: Option<String>,
+    pub subject_did: Option<String>,
     pub status: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub revocation_index: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub valid_from: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub valid_until: Option<String>,
     pub created_at: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub claimed_at: Option<String>,
+    pub expires_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub issued_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub revoked_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub revocation_reason: Option<String>,
+}
+
+/// Reason supplied for a tenant-bound issued-credential lifecycle transition.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IssuedCredentialLifecycleRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
 }
 
 /// Lifecycle record for an issued credential. Stores metadata without raw credential data
@@ -636,6 +738,8 @@ pub struct IssuedCredential {
     pub can_renew: Option<bool>,
     pub subject_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub issuer_did: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub subject_claims_hash: Option<String>,
     pub issued_at: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -643,8 +747,7 @@ pub struct IssuedCredential {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub valid_until: Option<String>,
     pub status: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub status_list_entries: Option<Vec<serde_json::Value>>,
+    pub status_list_entries: Vec<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub credential_hash: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1422,6 +1525,22 @@ pub struct VerificationFlowStartResponse {
     pub nonce: String,
     pub expires_at: String,
     pub status: String,
+}
+
+/// Public result projection for an authorized verification Flow execution.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VerificationResultResponse {
+    pub instance_id: String,
+    pub status: FlowInstanceStatus,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub result: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub decision: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub decision_reason: Option<String>,
+    pub verified_claims: serde_json::Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub evaluation_timestamp: Option<String>,
 }
 
 /// A single presentation-request/response cycle instance

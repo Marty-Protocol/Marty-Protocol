@@ -1,0 +1,9 @@
+{
+  "organization_id": "org-1",
+  "flow_definition_id": "flow-1",
+  "initial_context": {
+    "signing": {
+      "signing_service_id": "private-service"
+    }
+  }
+}

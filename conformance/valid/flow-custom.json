@@ -4,6 +4,7 @@
   "name": "Conditional Badge Issuance Extension",
   "flow_type": "custom",
   "flow_category": "ISSUANCE",
+  "resolved_steps": ["policy_gate", "issue"],
   "credential_template_id": "4bd47e7a-3a4f-4e6b-b8e2-5d7a2bcf1234",
   "approval_strategy": "RULES_BASED",
   "extension": {
@@ -20,5 +21,7 @@
     ]
   },
   "status": "DRAFT",
-  "created_at": "2026-07-11T00:00:00Z"
+  "version": 1,
+  "created_at": "2026-07-11T00:00:00Z",
+  "updated_at": "2026-07-11T00:00:00Z"
 }

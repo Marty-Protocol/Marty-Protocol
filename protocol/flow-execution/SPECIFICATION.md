@@ -17,17 +17,24 @@ One `Flow` definition → many `FlowExecution` instances over time.
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `id` | UUID | Yes | Unique execution identifier |
-| `flow_id` | UUID | Yes | References `Flow.id` |
+| `id` | string | Yes | Unique execution identifier |
+| `flow_id` | string\|null | Yes | References `Flow.id`; null only for a supported system-defined verification flow |
+| `flow_type` | FlowType\|null | Yes | Flow type copied at instantiation time |
+| `organization_id` | string | Yes | Tenant that owns the execution |
 | `status` | FlowStatus | Yes | See lifecycle below; from `enums/flow-statuses.json` |
 | `current_step` | string\|null | No | Name of the currently executing step |
 | `current_step_index` | integer | No | 0-based index into the flow's step sequence |
-| `step_results` | object | No | Keyed by step name; each value: `{result, completed_at}` |
-| `context_data` | object | No | Shared execution context across steps (applicant data, session tokens) |
-| `issued_credential_id` | UUID\|null | No | References `IssuedCredential.id`; populated after successful issuance |
+| `step_results` | object | Yes | Public result values keyed by step name |
+| `context_data` | object | Yes | Public, non-secret context shared across steps |
+| `issued_credential_id` | string\|null | No | References `IssuedCredential.id`; populated after successful issuance |
 | `started_at` | datetime\|null | No | When `status` first transitioned to `IN_PROGRESS` |
 | `completed_at` | datetime\|null | No | When `status` reached a terminal state |
-| `error` | string\|null | No | Error message if `FAILED`, or rejection reason |
+| `expires_at` | datetime\|null | No | Execution expiry |
+| `error_code` | string\|null | No | Stable public error code; no internal exception text |
+| `metadata` | object | Yes | Public execution metadata |
+| `state_history` | array | Yes | Public lifecycle transitions |
+| `created_at` | datetime | Yes | Creation time |
+| `updated_at` | datetime | Yes | Last update time |
 
 ## Lifecycle
 
@@ -147,7 +154,8 @@ On successful completion of an issuance flow, `FlowExecution.issued_credential_i
 
 ## Constraints
 
-1. A `FlowExecution` is immutable once it reaches a terminal status (`rejected`, `completed`, `failed`, `cancelled`).
+1. A `FlowExecution` is immutable once it reaches a terminal status (`COMPLETED`, `FAILED`, `EXPIRED`, `CANCELLED`).
 2. `current_step` MUST be a valid step name from the flow's step sequence.
 3. `issued_credential_id` MUST only be set on executions with `flow_type` in the issuance category.
-4. `context_data` MUST NOT contain raw credential private key material — use key references only.
+4. `context_data`, `step_results`, `metadata`, and `state_history` are public projections. They MUST NOT contain custody selectors or reusable secrets, including issuer-profile IDs, signing-service IDs, key references, KMS/provider selectors, private keys, bearer tokens, pre-authorized codes, client secrets, session tokens, or API keys.
+5. The start request is tenant-bound and MUST reject private service state at any nesting depth. Internal orchestration may retain that state separately, but it is never accepted from or returned to a public caller.
