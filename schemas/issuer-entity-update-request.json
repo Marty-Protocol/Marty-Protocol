@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuer-entity-update-request.json",
+  "title": "IssuerEntityUpdateRequest",
+  "description": "Partially update an organization-scoped issuer trust-registry record. organization_id binds the mutation to its tenant.",
+  "type": "object",
+  "required": ["organization_id"],
+  "minProperties": 2,
+  "additionalProperties": false,
+  "properties": {
+    "organization_id": {"type": "string", "format": "uuid"},
+    "display_name": {"type": "string", "minLength": 1, "maxLength": 256},
+    "description": {"type": ["string", "null"], "maxLength": 1024},
+    "issuer_type": {
+      "type": "string",
+      "enum": ["ORGANIZATION", "GOVERNMENT", "DEVICE"]
+    },
+    "compliance_status": {
+      "type": "string",
+      "enum": ["ACCREDITED", "COMPLIANT", "SUSPENDED", "REVOKED"]
+    },
+    "accreditation_body": {"type": ["string", "null"], "maxLength": 256},
+    "accreditation_date": {"type": ["string", "null"], "format": "date-time"},
+    "valid_from": {"type": "string", "format": "date-time"},
+    "valid_until": {"type": ["string", "null"], "format": "date-time"},
+    "trust_anchor_id": {"type": ["string", "null"], "format": "uuid"},
+    "metadata": {"$ref": "issuer-entity.json#/$defs/publicMetadata"},
+    "revocation_reason": {"type": "string", "minLength": 1, "maxLength": 512}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"compliance_status": {"const": "REVOKED"}},
+        "required": ["compliance_status"]
+      },
+      "then": {"required": ["revocation_reason"]}
+    },
+    {
+      "if": {"required": ["revocation_reason"]},
+      "then": {
+        "required": ["compliance_status"],
+        "properties": {"compliance_status": {"const": "REVOKED"}}
+      }
+    }
+  ]
+}

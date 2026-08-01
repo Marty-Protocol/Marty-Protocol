@@ -10,6 +10,11 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 ## [Unreleased]
 
 ### Changed
+- Distinguished issuer trust records from signing identities. Added strict,
+  organization-scoped IssuerEntity create and partial-update contracts plus a
+  DID-only IssuerIdentity projection. Public callers cannot create or mutate
+  global/system issuers, forge revocation attribution, or pass custody/KMS
+  selectors through metadata; ambiguous active DID mappings fail closed.
 - Aligned the Organization resource with the production tenant, discovery,
   admission, contact, and caller-membership semantics. Added strict create and
   tenant-bound partial-update schemas, made `PATCH` canonical, and removed the

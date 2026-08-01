@@ -658,6 +658,62 @@ pub struct IssuedCredential {
     pub updated_at: Option<String>,
 }
 
+/// Create an organization-scoped issuer trust-registry record. Global/system issuers are
+/// managed outside this public operation.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IssuerEntityCreateRequest {
+    pub organization_id: String,
+    pub issuer_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub issuer_type: Option<String>,
+    pub display_name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub compliance_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub accreditation_body: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub accreditation_date: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub valid_from: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub valid_until: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trust_anchor_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metadata: Option<serde_json::Value>,
+}
+
+/// Partially update an organization-scoped issuer trust-registry record. organization_id
+/// binds the mutation to its tenant.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IssuerEntityUpdateRequest {
+    pub organization_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub issuer_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub compliance_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub accreditation_body: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub accreditation_date: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub valid_from: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub valid_until: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trust_anchor_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metadata: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub revocation_reason: Option<String>,
+}
+
 /// An organisation or authority that issues credentials. Separate from Trust Anchors
 /// (cryptographic roots). An issuer may be backed by one or more trust anchors. Supports
 /// full lifecycle: accreditation, suspension, and revocation.
@@ -671,8 +727,7 @@ pub struct IssuerEntity {
     pub display_name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub is_system_issuer: Option<bool>,
+    pub is_system_issuer: bool,
     pub compliance_status: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub accreditation_body: Option<String>,
@@ -689,11 +744,26 @@ pub struct IssuerEntity {
     pub revocation_reason: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub revoked_by: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub metadata: Option<serde_json::Value>,
+    pub metadata: serde_json::Value,
     pub created_at: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub updated_at: Option<String>,
+    pub updated_at: String,
+}
+
+/// Public issuer identities available in the authenticated organization scope.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IssuerIdentityListResponse {
+    pub identities: Vec<IssuerIdentity>,
+}
+
+/// A tenant-scoped public DID projection that callers may select for issuance or signed
+/// verification. Custody coordinates and internal issuer-profile IDs are never part of this
+/// resource.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IssuerIdentity {
+    pub issuer_did: String,
+    pub key_purpose: String,
+    pub algorithm: String,
+    pub status: String,
 }
 
 /// Logical device grouping within a Deployment Profile

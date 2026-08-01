@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuer-identity-list-response.json",
+  "title": "IssuerIdentityListResponse",
+  "description": "Public issuer identities available in the authenticated organization scope.",
+  "type": "object",
+  "required": ["identities"],
+  "additionalProperties": false,
+  "properties": {
+    "identities": {
+      "type": "array",
+      "items": {"$ref": "issuer-identity.json"}
+    }
+  }
+}

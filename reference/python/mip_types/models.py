@@ -493,6 +493,42 @@ list entries, and revocation history."""
     updated_at: datetime | None = None
 
 
+class IssuerEntityCreateRequest(BaseModel):
+    """Create an organization-scoped issuer trust-registry record. Global/system issuers are
+managed outside this public operation."""
+
+    organization_id: str
+    issuer_id: str
+    issuer_type: Literal["ORGANIZATION", "GOVERNMENT", "DEVICE"] | None = None
+    display_name: str
+    description: str | None = None
+    compliance_status: Literal["ACCREDITED", "COMPLIANT", "SUSPENDED"] | None = None
+    accreditation_body: str | None = None
+    accreditation_date: datetime | None = None
+    valid_from: datetime | None = None
+    valid_until: datetime | None = None
+    trust_anchor_id: str | None = None
+    metadata: dict[str, Any] | None = None
+
+
+class IssuerEntityUpdateRequest(BaseModel):
+    """Partially update an organization-scoped issuer trust-registry record. organization_id
+binds the mutation to its tenant."""
+
+    organization_id: str
+    display_name: str | None = None
+    description: str | None = None
+    issuer_type: Literal["ORGANIZATION", "GOVERNMENT", "DEVICE"] | None = None
+    compliance_status: Literal["ACCREDITED", "COMPLIANT", "SUSPENDED", "REVOKED"] | None = None
+    accreditation_body: str | None = None
+    accreditation_date: datetime | None = None
+    valid_from: datetime | None = None
+    valid_until: datetime | None = None
+    trust_anchor_id: str | None = None
+    metadata: dict[str, Any] | None = None
+    revocation_reason: str | None = None
+
+
 class IssuerEntity(BaseModel):
     """An organisation or authority that issues credentials. Separate from Trust Anchors
 (cryptographic roots). An issuer may be backed by one or more trust anchors. Supports
@@ -504,7 +540,7 @@ full lifecycle: accreditation, suspension, and revocation."""
     issuer_type: Literal["ORGANIZATION", "GOVERNMENT", "DEVICE"]
     display_name: str
     description: str | None = None
-    is_system_issuer: bool | None = None
+    is_system_issuer: bool
     compliance_status: Literal["ACCREDITED", "COMPLIANT", "SUSPENDED", "REVOKED"]
     accreditation_body: str | None = None
     accreditation_date: datetime | None = None
@@ -514,9 +550,26 @@ full lifecycle: accreditation, suspension, and revocation."""
     revoked_at: datetime | None = None
     revocation_reason: str | None = None
     revoked_by: str | None = None
-    metadata: dict[str, Any] | None = None
+    metadata: dict[str, Any]
     created_at: datetime
-    updated_at: datetime | None = None
+    updated_at: datetime
+
+
+class IssuerIdentityListResponse(BaseModel):
+    """Public issuer identities available in the authenticated organization scope."""
+
+    identities: list[IssuerIdentity]
+
+
+class IssuerIdentity(BaseModel):
+    """A tenant-scoped public DID projection that callers may select for issuance or signed
+verification. Custody coordinates and internal issuer-profile IDs are never part of this
+resource."""
+
+    issuer_did: str
+    key_purpose: Literal["vc_jwt_issuer", "mdoc_dsc", "x509_doc_signer", "holder_binding", "presentation_signing", "oid4vp_request_signing", "vdsnc_signing", "csca", "jwks_signing", "lti_tool_signing"]
+    algorithm: Literal["ES256", "ES384", "RS256", "EdDSA"]
+    status: Literal["active"]
 
 
 class Lane(BaseModel):
@@ -1113,7 +1166,11 @@ HolderCredentialInventory.model_rebuild()
 IssuanceRequest.model_rebuild()
 IssuanceRecord.model_rebuild()
 IssuedCredential.model_rebuild()
+IssuerEntityCreateRequest.model_rebuild()
+IssuerEntityUpdateRequest.model_rebuild()
 IssuerEntity.model_rebuild()
+IssuerIdentityListResponse.model_rebuild()
+IssuerIdentity.model_rebuild()
 Lane.model_rebuild()
 MipConfigurationDiscoveryDocument.model_rebuild()
 NotificationPayload.model_rebuild()
