@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuer-entity-create-request.json",
+  "title": "IssuerEntityCreateRequest",
+  "description": "Create an organization-scoped issuer trust-registry record. Global/system issuers are managed outside this public operation.",
+  "type": "object",
+  "required": ["organization_id", "issuer_id", "display_name"],
+  "additionalProperties": false,
+  "properties": {
+    "organization_id": {"type": "string", "format": "uuid"},
+    "issuer_id": {"type": "string", "minLength": 1, "maxLength": 512},
+    "issuer_type": {
+      "type": "string",
+      "enum": ["ORGANIZATION", "GOVERNMENT", "DEVICE"],
+      "default": "ORGANIZATION"
+    },
+    "display_name": {"type": "string", "minLength": 1, "maxLength": 256},
+    "description": {"type": ["string", "null"], "maxLength": 1024},
+    "compliance_status": {
+      "type": "string",
+      "enum": ["ACCREDITED", "COMPLIANT", "SUSPENDED"],
+      "default": "COMPLIANT"
+    },
+    "accreditation_body": {"type": ["string", "null"], "maxLength": 256},
+    "accreditation_date": {"type": ["string", "null"], "format": "date-time"},
+    "valid_from": {"type": ["string", "null"], "format": "date-time"},
+    "valid_until": {"type": ["string", "null"], "format": "date-time"},
+    "trust_anchor_id": {"type": ["string", "null"], "format": "uuid"},
+    "metadata": {"$ref": "issuer-entity.json#/$defs/publicMetadata"}
+  }
+}

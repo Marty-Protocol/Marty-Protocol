@@ -1,6 +1,6 @@
 # Issuer Registry — Entity Specification
 
-**Entity:** IssuerEntity, TrustProfileIssuer
+**Entity:** IssuerEntity, IssuerIdentity, TrustProfileIssuer
 **Version:** 0.3.1
 **Stability:** Stable
 **Section in root spec:** §5.3
@@ -16,6 +16,10 @@ The Issuer Registry tracks the **lifecycle of credential-issuing authorities** a
 ### IssuerEntity
 
 Represents a named credential issuer with full lifecycle management.
+
+`IssuerEntity` is a trust-registry record. It does not identify a KMS service,
+key reference, or internal issuer profile and MUST NOT be used as a custody
+selector.
 
 | Property | Type | Required | Constraint |
 |----------|------|----------|------------|
@@ -35,14 +39,58 @@ Represents a named credential issuer with full lifecycle management.
 | `revoked_at` | datetime\|null | No | Populated on revocation |
 | `revocation_reason` | string\|null | No | See `revocation-reasons` enum |
 | `revoked_by` | string\|null | No | Who revoked |
+| `metadata` | object | Yes | Public descriptive metadata only; custody and key-routing selectors are prohibited recursively |
+| `created_at` | datetime | Yes | Creation time |
+| `updated_at` | datetime | Yes | Last update time |
+
+#### Public operations
+
+```
+GET     /v1/issuer-entities                         List issuer trust records
+POST    /v1/issuer-entities                         Create a tenant record
+GET     /v1/issuer-entities/{id}                    Get a trust record
+PATCH   /v1/issuer-entities/{id}                    Partially update a tenant record
+DELETE  /v1/issuer-entities/{id}                    Delete a tenant record
+GET     /v1/signing-keys/issuer-identities          List public DID signing identities
+```
+
+- Public create requires `organization_id`; callers cannot create or claim a
+  global/system issuer.
+- Public partial update requires `organization_id` and uses `PATCH` semantics.
+- `revoked_by` is assigned from the authenticated actor and is never accepted
+  from the public request.
+- Global/system issuer mutation is an internal governance operation. A public
+  endpoint MUST fail closed for update or deletion of such a record.
+- Successful public responses MUST be validated against `issuer-entity.json`
+  before they leave an implementation boundary.
 
 #### Compliance Status Lifecycle
 
 ```
 ACCREDITED → COMPLIANT → SUSPENDED → COMPLIANT  (reinstatement)
                      ↘
-                   REVOKED (terminal)
+                  REVOKED (terminal)
 ```
+
+### IssuerIdentity
+
+`IssuerIdentity` is the tenant-scoped public DID projection used to select a
+signing identity. It is deliberately distinct from both `IssuerEntity` and the
+private issuer profile that resolves to managed custody.
+
+| Property | Type | Required | Constraint |
+|----------|------|----------|------------|
+| `issuer_did` | DID URI | Yes | Public signing identity |
+| `key_purpose` | enum | Yes | Intended signing or trust purpose |
+| `algorithm` | enum | Yes | Public algorithm compatibility dimension |
+| `status` | string | Yes | Always `active` in the public projection |
+
+The list operation is authenticated and organization-scoped. It MUST project
+only active identities. If the same organization, DID, purpose, and algorithm
+resolve to more than one active private issuer profile, the operation MUST fail
+with an ambiguity error rather than choose one. Internal profile IDs,
+verification-method selectors, signing-service IDs, key references, provider
+names, KMS coordinates, or key versions MUST NOT appear in the response.
 
 ### TrustProfileIssuer
 
@@ -82,3 +130,7 @@ If `affected_credential_count >= circuit_breaker_threshold` (default 1000), the 
 3. A `TrustProfileIssuer` cannot exist without both a valid `TrustProfile` and `IssuerEntity`.
 4. Revoking an `IssuerEntity` triggers a `CascadeRevocationOperation` based on its `TrustProfileIssuer.cascade_revocation_policy`.
 5. A `REVOKED` issuer cannot be reinstated (use `superseded` + create new IssuerEntity instead).
+6. Public `IssuerEntity` metadata MUST reject custody and key-routing selectors
+   at every nesting depth.
+7. `IssuerIdentity` lookup MUST be scoped by the authenticated organization and
+   MUST fail closed for inactive or ambiguous mappings.

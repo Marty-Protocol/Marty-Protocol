@@ -436,6 +436,38 @@ export interface IssuedCredential {
   updated_at?: string;
 }
 
+/** Create an organization-scoped issuer trust-registry record. Global/system issuers are managed outside this public operation. */
+export interface IssuerEntityCreateRequest {
+  organization_id: string;
+  issuer_id: string;
+  issuer_type?: 'ORGANIZATION' | 'GOVERNMENT' | 'DEVICE';
+  display_name: string;
+  description?: string | null;
+  compliance_status?: 'ACCREDITED' | 'COMPLIANT' | 'SUSPENDED';
+  accreditation_body?: string | null;
+  accreditation_date?: string | null;
+  valid_from?: string | null;
+  valid_until?: string | null;
+  trust_anchor_id?: string | null;
+  metadata?: Record<string, unknown>;
+}
+
+/** Partially update an organization-scoped issuer trust-registry record. organization_id binds the mutation to its tenant. */
+export interface IssuerEntityUpdateRequest {
+  organization_id: string;
+  display_name?: string;
+  description?: string | null;
+  issuer_type?: 'ORGANIZATION' | 'GOVERNMENT' | 'DEVICE';
+  compliance_status?: 'ACCREDITED' | 'COMPLIANT' | 'SUSPENDED' | 'REVOKED';
+  accreditation_body?: string | null;
+  accreditation_date?: string | null;
+  valid_from?: string;
+  valid_until?: string | null;
+  trust_anchor_id?: string | null;
+  metadata?: Record<string, unknown>;
+  revocation_reason?: string;
+}
+
 /** An organisation or authority that issues credentials. Separate from Trust Anchors (cryptographic roots). An issuer may be backed by one or more trust anchors. Supports full lifecycle: accreditation, suspension, and revocation. */
 export interface IssuerEntity {
   id: string;
@@ -444,7 +476,7 @@ export interface IssuerEntity {
   issuer_type: 'ORGANIZATION' | 'GOVERNMENT' | 'DEVICE';
   display_name: string;
   description?: string;
-  is_system_issuer?: boolean;
+  is_system_issuer: boolean;
   compliance_status: 'ACCREDITED' | 'COMPLIANT' | 'SUSPENDED' | 'REVOKED';
   accreditation_body?: string | null;
   accreditation_date?: string | null;
@@ -454,9 +486,22 @@ export interface IssuerEntity {
   revoked_at?: string | null;
   revocation_reason?: string | null;
   revoked_by?: string | null;
-  metadata?: Record<string, unknown>;
+  metadata: Record<string, unknown>;
   created_at: string;
-  updated_at?: string;
+  updated_at: string;
+}
+
+/** Public issuer identities available in the authenticated organization scope. */
+export interface IssuerIdentityListResponse {
+  identities: IssuerIdentity[];
+}
+
+/** A tenant-scoped public DID projection that callers may select for issuance or signed verification. Custody coordinates and internal issuer-profile IDs are never part of this resource. */
+export interface IssuerIdentity {
+  issuer_did: string;
+  key_purpose: 'vc_jwt_issuer' | 'mdoc_dsc' | 'x509_doc_signer' | 'holder_binding' | 'presentation_signing' | 'oid4vp_request_signing' | 'vdsnc_signing' | 'csca' | 'jwks_signing' | 'lti_tool_signing';
+  algorithm: 'ES256' | 'ES384' | 'RS256' | 'EdDSA';
+  status: 'active';
 }
 
 /** Logical device grouping within a Deployment Profile */

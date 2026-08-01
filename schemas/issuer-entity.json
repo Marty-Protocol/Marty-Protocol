@@ -4,7 +4,7 @@
   "title": "IssuerEntity",
   "description": "An organisation or authority that issues credentials. Separate from Trust Anchors (cryptographic roots). An issuer may be backed by one or more trust anchors. Supports full lifecycle: accreditation, suspension, and revocation.",
   "type": "object",
-  "required": ["id", "issuer_id", "issuer_type", "display_name", "compliance_status", "valid_from", "created_at"],
+  "required": ["id", "issuer_id", "issuer_type", "display_name", "is_system_issuer", "compliance_status", "valid_from", "metadata", "created_at", "updated_at"],
   "additionalProperties": false,
   "properties": {
     "id": {"type": "string", "format": "uuid"},
@@ -48,8 +48,52 @@
     "revoked_at": {"type": ["string", "null"], "format": "date-time"},
     "revocation_reason": {"type": ["string", "null"], "maxLength": 512},
     "revoked_by": {"type": ["string", "null"], "maxLength": 256},
-    "metadata": {"type": "object"},
+    "metadata": {"$ref": "#/$defs/publicMetadata"},
     "created_at": {"type": "string", "format": "date-time"},
     "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "publicMetadata": {
+      "type": "object",
+      "description": "Public descriptive metadata. Custody, key-routing, profile, KMS, and provider selectors are prohibited at every depth.",
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "issuer_profile_id",
+            "issuer_key_id",
+            "issuer_algorithm",
+            "key_access_mode",
+            "key_binding",
+            "key_management",
+            "verification_method_id",
+            "signing_service_id",
+            "signing_key_reference",
+            "key_reference",
+            "kms_arn",
+            "kms_provider",
+            "kms_region",
+            "managed_key_id",
+            "provider",
+            "service_id",
+            "signing_agent_auth",
+            "signing_agent_url",
+            "key_name",
+            "key_version",
+            "transit_mount"
+          ]
+        }
+      },
+      "additionalProperties": {"$ref": "#/$defs/publicMetadataValue"}
+    },
+    "publicMetadataValue": {
+      "anyOf": [
+        {"type": ["string", "number", "boolean", "null"]},
+        {
+          "type": "array",
+          "items": {"$ref": "#/$defs/publicMetadataValue"}
+        },
+        {"$ref": "#/$defs/publicMetadata"}
+      ]
+    }
   }
 }
