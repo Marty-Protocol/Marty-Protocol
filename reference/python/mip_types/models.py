@@ -594,6 +594,20 @@ Cache-Control: no-store."""
     c_nonce: str
 
 
+class OrganizationCreateRequest(BaseModel):
+    """Create an Organization through the public API. Discovery and admission settings are
+explicit and persisted."""
+
+    name: str
+    display_name: str
+    description: str | None = None
+    org_type: Literal["enterprise", "startup", "individual", "government", "education", "healthcare", "financial", "other"] | None = None
+    contact_email: str | None = None
+    visibility: Literal["PUBLIC", "PRIVATE"] | None = None
+    join_mechanism: Literal["open", "code", "invite", "domain"] | None = None
+    requires_approval: bool | None = None
+
+
 class OrganizationTrustProfile(BaseModel):
     """Organisation-specific overlay of a TrustFramework. Separates shared framework
 definitions from per-org policy overrides, issuer allow/deny lists, and jurisdiction
@@ -621,6 +635,23 @@ filters."""
     updated_at: datetime | None = None
 
 
+class OrganizationUpdateRequest(BaseModel):
+    """Partially update an Organization through the public API. organization_id is required to
+bind the mutation to its tenant."""
+
+    organization_id: str
+    name: str | None = None
+    display_name: str | None = None
+    description: str | None = None
+    org_type: Literal["enterprise", "startup", "individual", "government", "education", "healthcare", "financial", "other"] | None = None
+    contact_email: str | None = None
+    contact_phone: str | None = None
+    website: str | None = None
+    visibility: Literal["PUBLIC", "PRIVATE"] | None = None
+    join_mechanism: Literal["open", "code", "invite", "domain"] | None = None
+    requires_approval: bool | None = None
+
+
 class Organization(BaseModel):
     """The primary multi-tenant boundary in MIP. All configuration resources are scoped to an
 organization."""
@@ -632,7 +663,15 @@ organization."""
     join_code: str | None = None
     visibility: Literal["PUBLIC", "PRIVATE"]
     owner_id: str
-    status: Literal["ACTIVE", "SUSPENDED", "DELETED"]
+    status: Literal["active", "suspended", "pending"]
+    org_type: Literal["enterprise", "startup", "individual", "government", "education", "healthcare", "financial", "other"]
+    join_mechanism: Literal["open", "code", "invite", "domain"]
+    requires_approval: bool
+    is_discoverable: bool
+    contact_email: str | None = None
+    contact_phone: str | None = None
+    website: str | None = None
+    membership: dict[str, Any] | None = None
     created_at: datetime
     updated_at: datetime | None = None
 
@@ -1080,7 +1119,9 @@ MipConfigurationDiscoveryDocument.model_rebuild()
 NotificationPayload.model_rebuild()
 NotificationTarget.model_rebuild()
 OID4VCINonceResponse.model_rebuild()
+OrganizationCreateRequest.model_rebuild()
 OrganizationTrustProfile.model_rebuild()
+OrganizationUpdateRequest.model_rebuild()
 Organization.model_rebuild()
 PhysicalDocumentJob.model_rebuild()
 PolicySet.model_rebuild()
