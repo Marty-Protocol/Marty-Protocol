@@ -2,72 +2,97 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/flow-execution.json",
   "title": "FlowExecution",
-  "description": "Runtime state of a single flow instance. Tracks current step, step results, context data, and lifecycle transitions. Created when a flow is initiated; updated as steps complete.",
+  "description": "Public, tenant-scoped projection of a single Flow execution. Internal custody selectors, bearer credentials, pre-authorized codes, and service state are never part of this representation.",
   "type": "object",
-  "required": ["id", "flow_id", "flow_type", "organization_id", "status", "created_at"],
+  "required": ["id", "flow_id", "flow_type", "organization_id", "status", "context_data", "step_results", "metadata", "state_history", "created_at", "updated_at"],
   "additionalProperties": false,
   "properties": {
-    "id": {"type": "string", "format": "uuid"},
+    "id": {"type": "string", "minLength": 1, "maxLength": 255},
     "flow_id": {
-      "type": "string",
-      "format": "uuid",
-      "description": "References Flow.id"
+      "type": ["string", "null"],
+      "maxLength": 255,
+      "description": "References Flow.id. Null only for a supported system-defined verification flow."
     },
     "flow_type": {
-      "$ref": "../enums/flow-types.json",
-      "description": "Copied from the Flow definition at instantiation time. Immutable after creation."
+      "oneOf": [
+        {"$ref": "../enums/flow-types.json"},
+        {"type": "null"}
+      ],
+      "description": "Copied from the Flow definition at instantiation time."
     },
-    "organization_id": {
-      "type": "string",
-      "format": "uuid",
-      "description": "Owning organization. Copied from the Flow definition at instantiation time."
-    },
-    "status": {
-      "$ref": "../enums/flow-statuses.json",
-      "description": "FlowInstance lifecycle state. See \u00a79.9.2 for states and \u00a79.9.3 for normative transitions."
-    },
-    "current_step": {
-      "type": ["string", "null"],
-      "description": "Name of the currently executing step (from the FLOW_STEPS sequence for this flow_type)"
-    },
-    "current_step_index": {
-      "type": "integer",
-      "minimum": 0,
-      "default": 0
-    },
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "status": {"$ref": "../enums/flow-statuses.json"},
+    "current_step": {"type": ["string", "null"], "maxLength": 255},
+    "current_step_index": {"type": ["integer", "null"], "minimum": 0},
     "step_results": {
       "type": "object",
-      "description": "Keyed by step name. Each value records the step result and completion timestamp.",
+      "propertyNames": {"minLength": 1, "maxLength": 255},
       "additionalProperties": {
         "type": "object",
+        "required": ["result"],
+        "additionalProperties": false,
         "properties": {
-          "result": {},
-          "completed_at": {"type": "string", "format": "date-time"}
+          "result": {"$ref": "#/$defs/publicValue"},
+          "completed_at": {"type": ["string", "null"], "format": "date-time"}
         }
       }
     },
-    "context_data": {
-      "type": "object",
-      "description": "Arbitrary execution context shared across steps (e.g. applicant data, session tokens)"
-    },
-    "issued_credential_id": {
-      "type": ["string", "null"],
-      "format": "uuid",
-      "description": "References IssuedCredential.id, populated after successful issuance"
-    },
+    "context_data": {"$ref": "#/$defs/publicObject"},
+    "issued_credential_id": {"type": ["string", "null"], "maxLength": 255},
     "started_at": {"type": ["string", "null"], "format": "date-time"},
     "completed_at": {"type": ["string", "null"], "format": "date-time"},
-    "expires_at": {
-      "type": ["string", "null"],
-      "format": "date-time",
-      "description": "Hard expiry deadline. Instance transitions to EXPIRED if not completed by this time."
+    "expires_at": {"type": ["string", "null"], "format": "date-time"},
+    "error_code": {"type": ["string", "null"], "maxLength": 255},
+    "metadata": {"$ref": "#/$defs/publicObject"},
+    "state_history": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/publicObject"}
     },
-    "error_code": {
-      "type": ["string", "null"],
-      "description": "Terminal error code (present when status is FAILED). See protocol/messages/SPECIFICATION.md for error code registry."
-    },
-    "metadata": {"type": "object"},
     "created_at": {"type": "string", "format": "date-time"},
     "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "forbiddenPropertyName": {
+      "enum": [
+        "issuer_profile_id",
+        "issuer_key_id",
+        "issuer_algorithm",
+        "key_access_mode",
+        "verification_method_id",
+        "signing_service_id",
+        "signing_key_reference",
+        "key_reference",
+        "kms_provider",
+        "provider",
+        "key_name",
+        "key_version",
+        "transit_mount",
+        "pre_auth_code",
+        "pre_authorized_code",
+        "pre-authorized_code",
+        "access_token",
+        "refresh_token",
+        "client_secret",
+        "private_key",
+        "private_key_jwk",
+        "session_token",
+        "api_key"
+      ]
+    },
+    "publicObject": {
+      "type": "object",
+      "propertyNames": {"not": {"$ref": "#/$defs/forbiddenPropertyName"}},
+      "additionalProperties": {"$ref": "#/$defs/publicValue"}
+    },
+    "publicValue": {
+      "anyOf": [
+        {"type": "null"},
+        {"type": "boolean"},
+        {"type": "number"},
+        {"type": "string"},
+        {"type": "array", "items": {"$ref": "#/$defs/publicValue"}},
+        {"$ref": "#/$defs/publicObject"}
+      ]
+    }
   }
 }

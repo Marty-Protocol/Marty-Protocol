@@ -223,6 +223,17 @@ class ComplianceProfile(BaseModel):
     updated_at: datetime | None = None
 
 
+class CredentialRenewalOfferResponse(BaseModel):
+    """Public wallet handoff produced for an eligible issued-credential renewal."""
+
+    source_credential_id: str
+    transaction_id: str
+    credential_offer_uri: str
+    credential_offer_uris: dict[str, Any]
+    credential_offer_labels: dict[str, Any]
+    expires_at: datetime
+
+
 class CredentialTemplate(BaseModel):
     """Public issuance configuration combining claims, compliance, issuer DID, and validity
 rules. Custody and signing-profile metadata are resolved internally from the
@@ -350,28 +361,59 @@ provider payloads."""
     created_at: datetime
 
 
+class FlowCreateRequest(BaseModel):
+    """Create a tenant-scoped orchestration definition through the public API."""
+
+    organization_id: str
+    name: str
+    description: str | None = None
+    flow_type: FlowType
+    trust_profile_id: str | None = None
+    credential_template_id: str | None = None
+    application_template_id: str | None = None
+    presentation_policy_id: str | None = None
+    delivery_destination_profile_id: str | None = None
+    deployment_profile_ids: list[str] | None = None
+    approval_strategy: ApprovalStrategy | None = None
+    hooks: dict[str, Any] | None = None
+    trigger: dict[str, Any] | None = None
+    extension: dict[str, Any] | None = None
+
+
+class FlowExecutionStartRequest(BaseModel):
+    """Start an authorized Flow execution in an explicitly selected organization."""
+
+    organization_id: str
+    flow_definition_id: str
+    subject_id: str | None = None
+    subject_type: str | None = None
+    external_reference: str | None = None
+    initial_context: dict[str, Any] | None = None
+
+
 class FlowExecution(BaseModel):
-    """Runtime state of a single flow instance. Tracks current step, step results, context
-data, and lifecycle transitions. Created when a flow is initiated; updated as steps
-complete."""
+    """Public, tenant-scoped projection of a single Flow execution. Internal custody selectors,
+bearer credentials, pre-authorized codes, and service state are never part of this
+representation."""
 
     id: str
-    flow_id: str
-    flow_type: FlowType
+    flow_id: str | None
+    flow_type: FlowType | None
     organization_id: str
     status: FlowInstanceStatus
     current_step: str | None = None
     current_step_index: int | None = None
-    step_results: dict[str, Any] | None = None
-    context_data: dict[str, Any] | None = None
+    step_results: dict[str, Any]
+    context_data: dict[str, Any]
     issued_credential_id: str | None = None
     started_at: datetime | None = None
     completed_at: datetime | None = None
     expires_at: datetime | None = None
     error_code: str | None = None
-    metadata: dict[str, Any] | None = None
+    metadata: dict[str, Any]
+    state_history: list[dict[str, Any]]
     created_at: datetime
-    updated_at: datetime | None = None
+    updated_at: datetime
 
 
 class FlowExtension(BaseModel):
@@ -387,6 +429,26 @@ cannot claim the conformance semantics of a standard FlowType."""
     config: dict[str, Any] | None = None
 
 
+class FlowUpdateRequest(BaseModel):
+    """Patch a tenant-scoped Flow. The service validates the complete merged definition before
+persisting it."""
+
+    organization_id: str
+    name: str | None = None
+    description: str | None = None
+    flow_type: FlowType | None = None
+    trust_profile_id: str | None = None
+    credential_template_id: str | None = None
+    application_template_id: str | None = None
+    presentation_policy_id: str | None = None
+    delivery_destination_profile_id: str | None = None
+    deployment_profile_ids: list[str] | None = None
+    approval_strategy: ApprovalStrategy | None = None
+    hooks: dict[str, Any] | None = None
+    trigger: dict[str, Any] | None = None
+    extension: dict[str, Any] | None = None
+
+
 class Flow(BaseModel):
     """End-to-end identity lifecycle orchestration. Standard FlowTypes have fixed protocol
 sequences; non-standard graphs use flow_type custom with a versioned extension envelope."""
@@ -396,7 +458,8 @@ sequences; non-standard graphs use flow_type custom with a versioned extension e
     name: str
     description: str | None = None
     flow_type: FlowType
-    flow_category: Literal["ISSUANCE", "VERIFICATION", "RENEWAL", "REVOCATION", "COMBINED"] | None = None
+    flow_category: Literal["ISSUANCE", "VERIFICATION", "RENEWAL", "REVOCATION", "COMBINED"]
+    resolved_steps: list[str]
     trust_profile_id: str | None = None
     credential_template_id: str | None = None
     application_template_id: str | None = None
@@ -408,8 +471,9 @@ sequences; non-standard graphs use flow_type custom with a versioned extension e
     trigger: dict[str, Any] | None = None
     extension: FlowExtension | None = None
     status: Literal["DRAFT", "ACTIVE", "PAUSED", "ARCHIVED"]
+    version: int
     created_at: datetime
-    updated_at: datetime | None = None
+    updated_at: datetime
 
 
 class HolderCredentialInventory(BaseModel):
@@ -438,25 +502,43 @@ intentionally absent."""
     credential_document: dict[str, Any] | None = None
 
 
-class IssuanceRecord(BaseModel):
-    """Record of a credential issuance event"""
+class IssuanceResponse(BaseModel):
+    """Public result of initiating credential issuance. The offer URI is the wallet handoff;
+the underlying pre-authorized code is never returned as a separate management API field."""
 
     id: str
-    flow_id: str
-    flow_execution_id: str | None = None
-    application_id: str | None = None
+    organization_id: str
     credential_template_id: str
-    holder_id: str
-    credential_id: str | None = None
-    credential_format: Literal["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"] | None = None
-    offer_uri: str | None = None
-    offer_expires_at: datetime | None = None
-    status: Literal["PENDING", "OFFER_SENT", "CLAIMED", "EXPIRED", "FAILED", "REVOKED"]
-    revocation_index: int | None = None
-    valid_from: datetime | None = None
-    valid_until: datetime | None = None
+    status: Literal["pending", "authorized", "signing", "issued", "failed", "expired", "revoked"]
+    credential_offer_uri: str
+    credential_offer_uris: dict[str, Any]
+    credential_offer_labels: dict[str, Any]
+    expires_at: datetime
+
+
+class IssuanceTransaction(BaseModel):
+    """Public management projection of a tenant-scoped credential issuance transaction. OAuth
+tokens, pre-authorized codes, custody selectors, signing-service identifiers, keys, and
+raw credential payloads are excluded."""
+
+    id: str
+    organization_id: str
+    credential_template_id: str
+    applicant_id: str | None = None
+    application_id: str | None = None
+    subject_did: str | None = None
+    status: Literal["pending", "authorized", "signing", "issued", "failed", "expired", "revoked"]
     created_at: datetime
-    claimed_at: datetime | None = None
+    expires_at: datetime | None = None
+    issued_at: datetime | None = None
+    revoked_at: datetime | None = None
+    revocation_reason: str | None = None
+
+
+class IssuedCredentialLifecycleRequest(BaseModel):
+    """Reason supplied for a tenant-bound issued-credential lifecycle transition."""
+
+    reason: str | None = None
 
 
 class IssuedCredential(BaseModel):
@@ -479,12 +561,13 @@ list entries, and revocation history."""
     renewal_eligible_at: datetime | None = None
     can_renew: bool | None = None
     subject_id: str
+    issuer_did: str | None = None
     subject_claims_hash: str | None = None
     issued_at: datetime
     valid_from: datetime | None = None
     valid_until: datetime | None = None
     status: Literal["ACTIVE", "SUSPENDED", "REVOKED", "EXPIRED"]
-    status_list_entries: list[dict[str, Any]] | None = None
+    status_list_entries: list[dict[str, Any]]
     credential_hash: str | None = None
     revoked_at: datetime | None = None
     revocation_reason: str | None = None
@@ -1048,6 +1131,18 @@ is intentionally absent."""
     status: str
 
 
+class VerificationResultResponse(BaseModel):
+    """Public result projection for an authorized verification Flow execution."""
+
+    instance_id: str
+    status: FlowInstanceStatus
+    result: str | None = None
+    decision: str | None = None
+    decision_reason: str | None = None
+    verified_claims: dict[str, Any]
+    evaluation_timestamp: datetime | None = None
+
+
 class VerificationSession(BaseModel):
     """A single presentation-request/response cycle instance"""
 
@@ -1154,17 +1249,23 @@ BiometricEnrollment.model_rebuild()
 CascadeRevocationOperation.model_rebuild()
 ClaimBlocker.model_rebuild()
 ComplianceProfile.model_rebuild()
+CredentialRenewalOfferResponse.model_rebuild()
 CredentialTemplate.model_rebuild()
 DeliveryDestinationProfile.model_rebuild()
 DeploymentProfile.model_rebuild()
 DeviceRegistration.model_rebuild()
 EvidenceFact.model_rebuild()
+FlowCreateRequest.model_rebuild()
+FlowExecutionStartRequest.model_rebuild()
 FlowExecution.model_rebuild()
 FlowExtension.model_rebuild()
+FlowUpdateRequest.model_rebuild()
 Flow.model_rebuild()
 HolderCredentialInventory.model_rebuild()
 IssuanceRequest.model_rebuild()
-IssuanceRecord.model_rebuild()
+IssuanceResponse.model_rebuild()
+IssuanceTransaction.model_rebuild()
+IssuedCredentialLifecycleRequest.model_rebuild()
 IssuedCredential.model_rebuild()
 IssuerEntityCreateRequest.model_rebuild()
 IssuerEntityUpdateRequest.model_rebuild()
@@ -1197,6 +1298,7 @@ TrustProfile.model_rebuild()
 TrustRegistrySync.model_rebuild()
 VerificationFlowStartRequest.model_rebuild()
 VerificationFlowStartResponse.model_rebuild()
+VerificationResultResponse.model_rebuild()
 VerificationSession.model_rebuild()
 VettingCheck.model_rebuild()
 WalletProfile.model_rebuild()

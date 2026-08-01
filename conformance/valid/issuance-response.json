@@ -1,0 +1,10 @@
+{
+  "id": "transaction-1",
+  "organization_id": "org-1",
+  "credential_template_id": "template-1",
+  "status": "pending",
+  "credential_offer_uri": "openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example%2Foffers%2Ftransaction-1",
+  "credential_offer_uris": {},
+  "credential_offer_labels": {},
+  "expires_at": "2026-07-31T12:15:00Z"
+}

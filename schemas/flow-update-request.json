@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/flow-update-request.json",
+  "title": "FlowUpdateRequest",
+  "description": "Patch a tenant-scoped Flow. The service validates the complete merged definition before persisting it.",
+  "type": "object",
+  "required": ["organization_id"],
+  "minProperties": 2,
+  "additionalProperties": false,
+  "properties": {
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "name": {"type": "string", "minLength": 1, "maxLength": 255},
+    "description": {"type": ["string", "null"], "maxLength": 2000},
+    "flow_type": {"$ref": "../enums/flow-types.json"},
+    "trust_profile_id": {"type": ["string", "null"], "maxLength": 255},
+    "credential_template_id": {"type": ["string", "null"], "maxLength": 255},
+    "application_template_id": {"type": ["string", "null"], "maxLength": 255},
+    "presentation_policy_id": {"type": ["string", "null"], "maxLength": 255},
+    "delivery_destination_profile_id": {"type": ["string", "null"], "maxLength": 128},
+    "deployment_profile_ids": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1, "maxLength": 255},
+      "uniqueItems": true
+    },
+    "approval_strategy": {"$ref": "../enums/approval-strategies.json"},
+    "hooks": {"$ref": "flow.json#/properties/hooks"},
+    "trigger": {"$ref": "flow.json#/properties/trigger"},
+    "extension": {"$ref": "flow.json#/properties/extension"}
+  }
+}

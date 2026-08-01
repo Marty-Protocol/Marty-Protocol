@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/verification-result-response.json",
+  "title": "VerificationResultResponse",
+  "description": "Public result projection for an authorized verification Flow execution.",
+  "type": "object",
+  "required": ["instance_id", "status", "verified_claims"],
+  "additionalProperties": false,
+  "properties": {
+    "instance_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "status": {"$ref": "../enums/flow-statuses.json"},
+    "result": {"type": ["string", "null"], "maxLength": 255},
+    "decision": {"type": ["string", "null"], "maxLength": 255},
+    "decision_reason": {"type": ["string", "null"], "maxLength": 2000},
+    "verified_claims": {"$ref": "flow-execution.json#/$defs/publicObject"},
+    "evaluation_timestamp": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

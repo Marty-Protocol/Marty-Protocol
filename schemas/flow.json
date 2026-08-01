@@ -4,13 +4,13 @@
   "title": "Flow",
   "description": "End-to-end identity lifecycle orchestration. Standard FlowTypes have fixed protocol sequences; non-standard graphs use flow_type custom with a versioned extension envelope.",
   "type": "object",
-  "required": ["id", "organization_id", "name", "flow_type", "approval_strategy", "status", "created_at"],
+  "required": ["id", "organization_id", "name", "flow_type", "flow_category", "resolved_steps", "approval_strategy", "status", "version", "created_at", "updated_at"],
   "additionalProperties": false,
   "properties": {
-    "id": {"type": "string", "format": "uuid"},
-    "organization_id": {"type": "string", "format": "uuid"},
-    "name": {"type": "string", "minLength": 1, "maxLength": 128},
-    "description": {"type": "string", "maxLength": 1024},
+    "id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "name": {"type": "string", "minLength": 1, "maxLength": 255},
+    "description": {"type": ["string", "null"], "maxLength": 2000},
     "flow_type": {"$ref": "../enums/flow-types.json"},
     "flow_category": {
       "type": "string",
@@ -18,14 +18,20 @@
       "readOnly": true,
       "description": "Derived from flow_type or, for custom flows, extension.extends_flow_type."
     },
-    "trust_profile_id": {"type": ["string", "null"], "format": "uuid"},
-    "credential_template_id": {"type": ["string", "null"], "format": "uuid"},
-    "application_template_id": {"type": ["string", "null"], "format": "uuid"},
-    "presentation_policy_id": {"type": ["string", "null"], "format": "uuid"},
+    "resolved_steps": {
+      "type": "array",
+      "readOnly": true,
+      "items": {"type": "string", "minLength": 1},
+      "description": "Server-resolved immutable step sequence for this definition version."
+    },
+    "trust_profile_id": {"type": ["string", "null"], "maxLength": 255},
+    "credential_template_id": {"type": ["string", "null"], "maxLength": 255},
+    "application_template_id": {"type": ["string", "null"], "maxLength": 255},
+    "presentation_policy_id": {"type": ["string", "null"], "maxLength": 255},
     "delivery_destination_profile_id": {"type": ["string", "null"], "maxLength": 128},
     "deployment_profile_ids": {
       "type": "array",
-      "items": {"type": "string", "format": "uuid"},
+      "items": {"type": "string", "minLength": 1, "maxLength": 255},
       "uniqueItems": true
     },
     "approval_strategy": {"$ref": "../enums/approval-strategies.json"},
@@ -48,7 +54,7 @@
       }
     },
     "trigger": {
-      "type": "object",
+      "type": ["object", "null"],
       "required": ["trigger_type"],
       "additionalProperties": false,
       "properties": {
@@ -56,35 +62,41 @@
         "config": {"type": "object"}
       }
     },
-    "extension": {"$ref": "flow-extension.json"},
+    "extension": {
+      "oneOf": [
+        {"$ref": "flow-extension.json"},
+        {"type": "null"}
+      ]
+    },
     "status": {"type": "string", "enum": ["DRAFT", "ACTIVE", "PAUSED", "ARCHIVED"]},
+    "version": {"type": "integer", "minimum": 1, "readOnly": true},
     "created_at": {"type": "string", "format": "date-time"},
     "updated_at": {"type": "string", "format": "date-time"}
   },
   "allOf": [
     {
       "if": {"properties": {"flow_type": {"enum": ["oid4vci_pre_authorized", "oid4vci_authorization_code", "mdl_issuance", "credential_renewal", "credential_revocation"]}}, "required": ["flow_type"]},
-      "then": {"required": ["credential_template_id"], "properties": {"credential_template_id": {"type": "string", "format": "uuid"}}}
+      "then": {"required": ["credential_template_id"], "properties": {"credential_template_id": {"type": "string", "minLength": 1}}}
     },
     {
       "if": {"properties": {"flow_type": {"const": "application_approval_issuance"}}, "required": ["flow_type"]},
       "then": {
         "required": ["application_template_id"],
-        "properties": {"application_template_id": {"type": "string", "format": "uuid"}},
+        "properties": {"application_template_id": {"type": "string", "minLength": 1}},
         "not": {"required": ["credential_template_id"], "properties": {"credential_template_id": {"type": "string"}}}
       }
     },
     {
       "if": {"properties": {"flow_type": {"enum": ["oid4vp_presentation", "mdl_presentation", "siopv2"]}}, "required": ["flow_type"]},
-      "then": {"required": ["presentation_policy_id"], "properties": {"presentation_policy_id": {"type": "string", "format": "uuid"}}}
+      "then": {"required": ["presentation_policy_id"], "properties": {"presentation_policy_id": {"type": "string", "minLength": 1}}}
     },
     {
       "if": {"properties": {"flow_type": {"const": "combined"}}, "required": ["flow_type"]},
       "then": {
         "required": ["credential_template_id", "presentation_policy_id"],
         "properties": {
-          "credential_template_id": {"type": "string", "format": "uuid"},
-          "presentation_policy_id": {"type": "string", "format": "uuid"}
+          "credential_template_id": {"type": "string", "minLength": 1},
+          "presentation_policy_id": {"type": "string", "minLength": 1}
         }
       }
     },
@@ -93,8 +105,8 @@
       "then": {
         "required": ["credential_template_id", "application_template_id", "delivery_destination_profile_id"],
         "properties": {
-          "credential_template_id": {"type": "string", "format": "uuid"},
-          "application_template_id": {"type": "string", "format": "uuid"},
+          "credential_template_id": {"type": "string", "minLength": 1},
+          "application_template_id": {"type": "string", "minLength": 1},
           "delivery_destination_profile_id": {"type": "string", "minLength": 1, "maxLength": 128}
         }
       }

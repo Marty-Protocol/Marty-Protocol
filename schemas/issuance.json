@@ -1,33 +1,26 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuance.json",
-  "title": "IssuanceRecord",
-  "description": "Record of a credential issuance event",
+  "title": "IssuanceTransaction",
+  "description": "Public management projection of a tenant-scoped credential issuance transaction. OAuth tokens, pre-authorized codes, custody selectors, signing-service identifiers, keys, and raw credential payloads are excluded.",
   "type": "object",
-  "required": ["id", "flow_id", "credential_template_id", "holder_id", "status", "created_at"],
+  "required": ["id", "organization_id", "credential_template_id", "status", "created_at"],
   "additionalProperties": false,
   "properties": {
-    "id": {"type": "string", "format": "uuid"},
-    "flow_id": {"type": "string", "format": "uuid"},
-    "flow_execution_id": {"type": ["string", "null"], "format": "uuid", "description": "References FlowExecution.id"},
-    "application_id": {"type": ["string", "null"], "format": "uuid"},
-    "credential_template_id": {"type": "string", "format": "uuid"},
-    "holder_id": {"type": "string"},
-    "credential_id": {"type": ["string", "null"]},
-    "credential_format": {
-      "type": "string",
-      "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]
-    },
-    "offer_uri": {"type": ["string", "null"], "format": "uri"},
-    "offer_expires_at": {"type": ["string", "null"], "format": "date-time"},
+    "id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "credential_template_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "applicant_id": {"type": ["string", "null"], "maxLength": 255},
+    "application_id": {"type": ["string", "null"], "maxLength": 255},
+    "subject_did": {"type": ["string", "null"], "pattern": "^did:", "maxLength": 2048},
     "status": {
       "type": "string",
-      "enum": ["PENDING", "OFFER_SENT", "CLAIMED", "EXPIRED", "FAILED", "REVOKED"]
+      "enum": ["pending", "authorized", "signing", "issued", "failed", "expired", "revoked"]
     },
-    "revocation_index": {"type": ["integer", "null"], "minimum": 0},
-    "valid_from": {"type": ["string", "null"], "format": "date-time"},
-    "valid_until": {"type": ["string", "null"], "format": "date-time"},
     "created_at": {"type": "string", "format": "date-time"},
-    "claimed_at": {"type": ["string", "null"], "format": "date-time"}
+    "expires_at": {"type": ["string", "null"], "format": "date-time"},
+    "issued_at": {"type": ["string", "null"], "format": "date-time"},
+    "revoked_at": {"type": ["string", "null"], "format": "date-time"},
+    "revocation_reason": {"type": ["string", "null"], "maxLength": 2000}
   }
 }

@@ -45,6 +45,23 @@ Its fixed sequence is `accept_application`, `validate_evidence`, `approval_decis
 - Active flows MUST reference active, organization-compatible objects and available runtime capabilities.
 - Physical flows MUST fail activation when signing or personalization capabilities are unavailable.
 
+## Public request boundary
+
+- Creation uses `schemas/flow-create-request.json`. The authenticated tenant and
+  `organization_id` MUST match.
+- Updates use `PATCH` and `schemas/flow-update-request.json`. A patch MUST include
+  `organization_id` plus at least one mutable field. The service MUST merge the
+  patch with the stored definition and validate the complete result before saving.
+- Starting an execution uses `schemas/flow-execution-start-request.json` and MUST
+  include both `organization_id` and `flow_definition_id`. A definition from a
+  different organization MUST be treated as not found.
+- Public requests and responses MUST NOT contain issuer-profile IDs, signing
+  service IDs, key references, KMS/provider selectors, private keys, bearer
+  tokens, pre-authorized codes, client secrets, or API keys. Those values remain
+  private service state.
+- Standard-flow responses omit `extension`; custom-flow responses include the
+  validated extension envelope.
+
 ## API
 
 ```text
@@ -59,6 +76,9 @@ POST   /v1/flows/definitions/{id}/activate
 POST   /v1/flows/instances
 GET    /v1/flows/instances
 GET    /v1/flows/instances/{id}
+POST   /v1/flows/instances/{id}/advance
+POST   /v1/flows/instances/{id}/cancel
+GET    /v1/flows/instances/{id}/result
 ```
 
 ## See Also

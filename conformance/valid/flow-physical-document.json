@@ -4,11 +4,14 @@
   "name": "ICAO ePassport Production",
   "flow_type": "physical_document_issuance",
   "flow_category": "ISSUANCE",
+  "resolved_steps": ["accept_application", "validate_evidence", "approval_decision", "generate_data_groups", "sign_sod", "submit_to_personalization", "track_production", "quality_verify", "activate_credential"],
   "credential_template_id": "4bd47e7a-3a4f-4e6b-b8e2-5d7a2bcf1234",
   "application_template_id": "4bd47e7a-3a4f-4e6b-b8e2-5d7a2bcf5678",
   "delivery_destination_profile_id": "passport-bureau-1",
   "approval_strategy": "MANUAL",
   "trigger": {"trigger_type": "APPLICATION_SUBMITTED"},
   "status": "DRAFT",
-  "created_at": "2026-07-11T00:00:00Z"
+  "version": 1,
+  "created_at": "2026-07-11T00:00:00Z",
+  "updated_at": "2026-07-11T00:00:00Z"
 }
