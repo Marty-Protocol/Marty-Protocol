@@ -6,7 +6,11 @@
   "visibility": "PUBLIC",
   "owner_id": "user-admin-001",
   "join_code": "ACME2026",
-  "status": "ACTIVE",
+  "status": "active",
+  "org_type": "enterprise",
+  "join_mechanism": "code",
+  "requires_approval": false,
+  "is_discoverable": true,
   "created_at": "2026-01-01T00:00:00Z",
   "updated_at": "2026-03-15T14:00:00Z"
 }

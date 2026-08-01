@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/organization-create-request.json",
+  "title": "OrganizationCreateRequest",
+  "description": "Create an Organization through the public API. Discovery and admission settings are explicit and persisted.",
+  "type": "object",
+  "required": ["name", "display_name"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+    },
+    "display_name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": ["string", "null"], "maxLength": 1024},
+    "org_type": {
+      "type": "string",
+      "enum": ["enterprise", "startup", "individual", "government", "education", "healthcare", "financial", "other"]
+    },
+    "contact_email": {
+      "oneOf": [
+        {"type": "string", "format": "email", "maxLength": 255},
+        {"type": "null"}
+      ]
+    },
+    "visibility": {
+      "type": "string",
+      "enum": ["PUBLIC", "PRIVATE"],
+      "default": "PRIVATE"
+    },
+    "join_mechanism": {
+      "type": "string",
+      "enum": ["open", "code", "invite", "domain"],
+      "default": "invite"
+    },
+    "requires_approval": {"type": "boolean", "default": false}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"join_mechanism": {"const": "open"}},
+        "required": ["join_mechanism"]
+      },
+      "then": {
+        "properties": {"visibility": {"const": "PUBLIC"}},
+        "required": ["visibility"]
+      }
+    }
+  ]
+}

@@ -2051,7 +2051,15 @@ MIP defines first-class resources for organization management and member identit
 | `join_code` | string | No | Short code for discoverable org joining |
 | `visibility` | string | Yes | `PUBLIC` or `PRIVATE` |
 | `owner_id` | string | Yes | User ID of the current owner |
-| `status` | string | Yes | `ACTIVE`, `SUSPENDED`, `DELETED` |
+| `status` | string | Yes | `active`, `suspended`, or `pending` |
+| `org_type` | string | Yes | Organization classification |
+| `join_mechanism` | string | Yes | `open`, `code`, `invite`, or `domain` |
+| `requires_approval` | boolean | Yes | Whether direct admission creates a pending membership |
+| `is_discoverable` | boolean | Yes | Derived from `visibility`; true only for `PUBLIC` organizations |
+| `contact_email` | email | No | Public administrative contact |
+| `contact_phone` | string | No | Public administrative telephone number |
+| `website` | URI | No | Public organization website |
+| `membership` | object | No | Caller-specific membership summary when the operation establishes or returns membership context |
 | `created_at` | datetime | Yes | ISO 8601 |
 | `updated_at` | datetime | No | ISO 8601 |
 
@@ -2061,8 +2069,7 @@ MIP defines first-class resources for organization management and member identit
 GET    /v1/organizations                            List organizations
 POST   /v1/organizations                            Create organization
 GET    /v1/organizations/{id}                       Get organization
-PUT    /v1/organizations/{id}                       Update organization
-DELETE /v1/organizations/{id}                       Delete organization
+PATCH  /v1/organizations/{id}                       Partially update organization
 GET    /v1/organizations/mine                       Get caller's organizations
 GET    /v1/organizations/discover                   List PUBLIC organizations
 POST   /v1/organizations/join/code                  Join by join_code
@@ -2070,6 +2077,13 @@ GET    /v1/organizations/join/code/validate         Validate join code (no auth)
 POST   /v1/organizations/{id}/join                  Join by org ID
 POST   /v1/organizations/{id}/transfer-ownership    Initiate ownership transfer
 ```
+
+Create and update operations accept only the fields published in
+`organization-create-request.json` and `organization-update-request.json`.
+The update body repeats `organization_id`, which MUST equal the path resource,
+so a tenant-bound mutation cannot be redirected by substituting only a path ID.
+`settings`, plan/billing fields, custody selectors, and provider coordinates
+are internal implementation state and MUST NOT be accepted or returned here.
 
 ### 18.4 Invitation Workflow
 

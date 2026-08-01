@@ -800,6 +800,26 @@ pub struct OID4VCINonceResponse {
     pub c_nonce: String,
 }
 
+/// Create an Organization through the public API. Discovery and admission settings are
+/// explicit and persisted.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OrganizationCreateRequest {
+    pub name: String,
+    pub display_name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub org_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub contact_email: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub visibility: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub join_mechanism: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub requires_approval: Option<bool>,
+}
+
 /// Organisation-specific overlay of a TrustFramework. Separates shared framework
 /// definitions from per-org policy overrides, issuer allow/deny lists, and jurisdiction
 /// filters.
@@ -841,6 +861,33 @@ pub struct OrganizationTrustProfile {
     pub updated_at: Option<String>,
 }
 
+/// Partially update an Organization through the public API. organization_id is required to
+/// bind the mutation to its tenant.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OrganizationUpdateRequest {
+    pub organization_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub org_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub contact_email: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub contact_phone: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub website: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub visibility: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub join_mechanism: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub requires_approval: Option<bool>,
+}
+
 /// The primary multi-tenant boundary in MIP. All configuration resources are scoped to an
 /// organization.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -855,6 +902,18 @@ pub struct Organization {
     pub visibility: String,
     pub owner_id: String,
     pub status: String,
+    pub org_type: String,
+    pub join_mechanism: String,
+    pub requires_approval: bool,
+    pub is_discoverable: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub contact_email: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub contact_phone: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub website: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub membership: Option<serde_json::Value>,
     pub created_at: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<String>,

@@ -526,6 +526,18 @@ export interface OID4VCINonceResponse {
   c_nonce: string;
 }
 
+/** Create an Organization through the public API. Discovery and admission settings are explicit and persisted. */
+export interface OrganizationCreateRequest {
+  name: string;
+  display_name: string;
+  description?: string | null;
+  org_type?: 'enterprise' | 'startup' | 'individual' | 'government' | 'education' | 'healthcare' | 'financial' | 'other';
+  contact_email?: string | null;
+  visibility?: 'PUBLIC' | 'PRIVATE';
+  join_mechanism?: 'open' | 'code' | 'invite' | 'domain';
+  requires_approval?: boolean;
+}
+
 /** Organisation-specific overlay of a TrustFramework. Separates shared framework definitions from per-org policy overrides, issuer allow/deny lists, and jurisdiction filters. */
 export interface OrganizationTrustProfile {
   id: string;
@@ -550,16 +562,39 @@ export interface OrganizationTrustProfile {
   updated_at?: string;
 }
 
+/** Partially update an Organization through the public API. organization_id is required to bind the mutation to its tenant. */
+export interface OrganizationUpdateRequest {
+  organization_id: string;
+  name?: string;
+  display_name?: string;
+  description?: string | null;
+  org_type?: 'enterprise' | 'startup' | 'individual' | 'government' | 'education' | 'healthcare' | 'financial' | 'other';
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  website?: string | null;
+  visibility?: 'PUBLIC' | 'PRIVATE';
+  join_mechanism?: 'open' | 'code' | 'invite' | 'domain';
+  requires_approval?: boolean;
+}
+
 /** The primary multi-tenant boundary in MIP. All configuration resources are scoped to an organization. */
 export interface Organization {
   id: string;
   name: string;
   display_name: string;
-  description?: string;
+  description?: string | null;
   join_code?: string | null;
   visibility: 'PUBLIC' | 'PRIVATE';
   owner_id: string;
-  status: 'ACTIVE' | 'SUSPENDED' | 'DELETED';
+  status: 'active' | 'suspended' | 'pending';
+  org_type: 'enterprise' | 'startup' | 'individual' | 'government' | 'education' | 'healthcare' | 'financial' | 'other';
+  join_mechanism: 'open' | 'code' | 'invite' | 'domain';
+  requires_approval: boolean;
+  is_discoverable: boolean;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  website?: string | null;
+  membership?: Record<string, unknown> | null;
   created_at: string;
   updated_at?: string | null;
 }

@@ -10,6 +10,11 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 ## [Unreleased]
 
 ### Changed
+- Aligned the Organization resource with the production tenant, discovery,
+  admission, contact, and caller-membership semantics. Added strict create and
+  tenant-bound partial-update schemas, made `PATCH` canonical, and removed the
+  unimplemented delete operation from the public contract. Internal settings,
+  plan/billing data, and custody selectors remain prohibited.
 - Classified Presentation Policy status, version, holder-facing display
   metadata, compliance linkage, authoritative Credential Template
   requirements, and alternative requirements as public protocol semantics.
