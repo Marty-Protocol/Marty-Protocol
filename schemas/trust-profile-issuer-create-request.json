@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/trust-profile-issuer-create-request.json",
+  "title": "TrustProfileIssuerCreateRequest",
+  "description": "Creates a trust relationship between an existing TrustProfile and IssuerEntity. Issuer identity and lifecycle fields belong to IssuerEntity and are not accepted here.",
+  "type": "object",
+  "required": ["issuer_id"],
+  "additionalProperties": false,
+  "properties": {
+    "issuer_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "References an existing IssuerEntity.id visible to the trust profile's organization."
+    },
+    "trust_level": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 100
+    },
+    "relationship_status": {
+      "type": "string",
+      "enum": ["TRUSTED", "DENIED", "UNDER_REVIEW"],
+      "default": "TRUSTED"
+    },
+    "cascade_revocation_policy": {
+      "type": "string",
+      "enum": ["AUTO_CASCADE", "MANUAL", "NOTIFY_ONLY"],
+      "default": "NOTIFY_ONLY"
+    },
+    "metadata": {
+      "type": "object",
+      "default": {}
+    }
+  }
+}

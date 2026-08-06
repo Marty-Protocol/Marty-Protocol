@@ -1065,6 +1065,27 @@ OrganizationTrustProfile."""
     updated_at: datetime | None = None
 
 
+class TrustProfileIssuerCreateRequest(BaseModel):
+    """Creates a trust relationship between an existing TrustProfile and IssuerEntity. Issuer
+identity and lifecycle fields belong to IssuerEntity and are not accepted here."""
+
+    issuer_id: str
+    trust_level: int | None = None
+    relationship_status: Literal["TRUSTED", "DENIED", "UNDER_REVIEW"] | None = None
+    cascade_revocation_policy: Literal["AUTO_CASCADE", "MANUAL", "NOTIFY_ONLY"] | None = None
+    metadata: dict[str, Any] | None = None
+
+
+class TrustProfileIssuerUpdateRequest(BaseModel):
+    """Updates trust-relationship policy only. IssuerEntity identity and lifecycle fields are
+updated through the IssuerEntity API."""
+
+    trust_level: int | None = None
+    relationship_status: Literal["TRUSTED", "DENIED", "UNDER_REVIEW"] | None = None
+    cascade_revocation_policy: Literal["AUTO_CASCADE", "MANUAL", "NOTIFY_ONLY"] | None = None
+    metadata: dict[str, Any] | None = None
+
+
 class TrustProfileIssuer(BaseModel):
     """Join entity between TrustProfile and IssuerEntity with trust scoring and cascade
 revocation policy. trust_level is a 0–100 score; future versions will auto-adjust based
@@ -1316,6 +1337,8 @@ MipScimRoleGroupExtension.model_rebuild()
 MipScimUserExtension.model_rebuild()
 Subscription.model_rebuild()
 TrustFramework.model_rebuild()
+TrustProfileIssuerCreateRequest.model_rebuild()
+TrustProfileIssuerUpdateRequest.model_rebuild()
 TrustProfileIssuer.model_rebuild()
 TrustProfile.model_rebuild()
 TrustRegistrySync.model_rebuild()

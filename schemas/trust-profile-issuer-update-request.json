@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/trust-profile-issuer-update-request.json",
+  "title": "TrustProfileIssuerUpdateRequest",
+  "description": "Updates trust-relationship policy only. IssuerEntity identity and lifecycle fields are updated through the IssuerEntity API.",
+  "type": "object",
+  "minProperties": 1,
+  "additionalProperties": false,
+  "properties": {
+    "trust_level": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "relationship_status": {
+      "type": "string",
+      "enum": ["TRUSTED", "DENIED", "UNDER_REVIEW"]
+    },
+    "cascade_revocation_policy": {
+      "type": "string",
+      "enum": ["AUTO_CASCADE", "MANUAL", "NOTIFY_ONLY"]
+    },
+    "metadata": {
+      "type": "object"
+    }
+  }
+}
