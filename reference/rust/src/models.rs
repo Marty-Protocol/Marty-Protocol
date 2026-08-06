@@ -1437,6 +1437,35 @@ pub struct TrustFramework {
     pub updated_at: Option<String>,
 }
 
+/// Creates a trust relationship between an existing TrustProfile and IssuerEntity. Issuer
+/// identity and lifecycle fields belong to IssuerEntity and are not accepted here.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TrustProfileIssuerCreateRequest {
+    pub issuer_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trust_level: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub relationship_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cascade_revocation_policy: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metadata: Option<serde_json::Value>,
+}
+
+/// Updates trust-relationship policy only. IssuerEntity identity and lifecycle fields are
+/// updated through the IssuerEntity API.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TrustProfileIssuerUpdateRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trust_level: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub relationship_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cascade_revocation_policy: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metadata: Option<serde_json::Value>,
+}
+
 /// Join entity between TrustProfile and IssuerEntity with trust scoring and cascade
 /// revocation policy. trust_level is a 0–100 score; future versions will auto-adjust based
 /// on issuer history (failed validations, revocation events, compliance lapses).

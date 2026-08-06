@@ -939,6 +939,23 @@ export interface TrustFramework {
   updated_at?: string;
 }
 
+/** Creates a trust relationship between an existing TrustProfile and IssuerEntity. Issuer identity and lifecycle fields belong to IssuerEntity and are not accepted here. */
+export interface TrustProfileIssuerCreateRequest {
+  issuer_id: string;
+  trust_level?: number;
+  relationship_status?: 'TRUSTED' | 'DENIED' | 'UNDER_REVIEW';
+  cascade_revocation_policy?: 'AUTO_CASCADE' | 'MANUAL' | 'NOTIFY_ONLY';
+  metadata?: Record<string, unknown>;
+}
+
+/** Updates trust-relationship policy only. IssuerEntity identity and lifecycle fields are updated through the IssuerEntity API. */
+export interface TrustProfileIssuerUpdateRequest {
+  trust_level?: number;
+  relationship_status?: 'TRUSTED' | 'DENIED' | 'UNDER_REVIEW';
+  cascade_revocation_policy?: 'AUTO_CASCADE' | 'MANUAL' | 'NOTIFY_ONLY';
+  metadata?: Record<string, unknown>;
+}
+
 /** Join entity between TrustProfile and IssuerEntity with trust scoring and cascade revocation policy. trust_level is a 0–100 score; future versions will auto-adjust based on issuer history (failed validations, revocation events, compliance lapses). */
 export interface TrustProfileIssuer {
   id: string;
