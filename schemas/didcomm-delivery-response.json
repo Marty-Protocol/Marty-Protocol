@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocol.elevenid.io/schemas/didcomm-delivery-response.json",
+  "title": "DidcommDeliveryResponse",
+  "description": "Result of encrypted DIDComm v2 credential delivery",
+  "type": "object",
+  "required": [
+    "transaction_id",
+    "credential_id",
+    "holder_did",
+    "service_endpoint",
+    "didcomm_message_id",
+    "status"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "transaction_id": {"type": "string", "minLength": 1},
+    "credential_id": {"type": "string", "minLength": 1},
+    "holder_did": {"type": "string", "pattern": "^did:", "minLength": 5},
+    "service_endpoint": {"type": "string", "format": "uri", "pattern": "^https://"},
+    "didcomm_message_id": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "enum": ["delivered", "delivery_failed"]},
+    "error": {"type": ["string", "null"]}
+  }
+}

@@ -449,6 +449,28 @@ pub struct DeviceRegistration {
     pub last_seen_at: Option<String>,
 }
 
+/// Tenant-scoped request to deliver an already-authorized issuance transaction over
+/// encrypted DIDComm v2
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DidcommDeliverRequest {
+    pub organization_id: String,
+    pub transaction_id: String,
+    pub holder_did: String,
+}
+
+/// Result of encrypted DIDComm v2 credential delivery
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DidcommDeliveryResponse {
+    pub transaction_id: String,
+    pub credential_id: String,
+    pub holder_did: String,
+    pub service_endpoint: String,
+    pub didcomm_message_id: String,
+    pub status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
 /// Immutable normalized fact derived from verified evidence. Provider adapters create
 /// EvidenceFacts from receipts so approval policy can evaluate facts without parsing
 /// provider payloads.

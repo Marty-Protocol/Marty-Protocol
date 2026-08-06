@@ -303,6 +303,24 @@ export interface DeviceRegistration {
   last_seen_at?: string;
 }
 
+/** Tenant-scoped request to deliver an already-authorized issuance transaction over encrypted DIDComm v2 */
+export interface DidcommDeliverRequest {
+  organization_id: string;
+  transaction_id: string;
+  holder_did: string;
+}
+
+/** Result of encrypted DIDComm v2 credential delivery */
+export interface DidcommDeliveryResponse {
+  transaction_id: string;
+  credential_id: string;
+  holder_did: string;
+  service_endpoint: string;
+  didcomm_message_id: string;
+  status: 'delivered' | 'delivery_failed';
+  error?: string | null;
+}
+
 /** Immutable normalized fact derived from verified evidence. Provider adapters create EvidenceFacts from receipts so approval policy can evaluate facts without parsing provider payloads. */
 export interface EvidenceFact {
   id: string;

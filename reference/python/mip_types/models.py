@@ -343,6 +343,27 @@ class DeviceRegistration(BaseModel):
     last_seen_at: datetime | None = None
 
 
+class DidcommDeliverRequest(BaseModel):
+    """Tenant-scoped request to deliver an already-authorized issuance transaction over
+encrypted DIDComm v2"""
+
+    organization_id: str
+    transaction_id: str
+    holder_did: str
+
+
+class DidcommDeliveryResponse(BaseModel):
+    """Result of encrypted DIDComm v2 credential delivery"""
+
+    transaction_id: str
+    credential_id: str
+    holder_did: str
+    service_endpoint: str
+    didcomm_message_id: str
+    status: Literal["delivered", "delivery_failed"]
+    error: str | None = None
+
+
 class EvidenceFact(BaseModel):
     """Immutable normalized fact derived from verified evidence. Provider adapters create
 EvidenceFacts from receipts so approval policy can evaluate facts without parsing
@@ -1254,6 +1275,8 @@ CredentialTemplate.model_rebuild()
 DeliveryDestinationProfile.model_rebuild()
 DeploymentProfile.model_rebuild()
 DeviceRegistration.model_rebuild()
+DidcommDeliverRequest.model_rebuild()
+DidcommDeliveryResponse.model_rebuild()
 EvidenceFact.model_rebuild()
 FlowCreateRequest.model_rebuild()
 FlowExecutionStartRequest.model_rebuild()

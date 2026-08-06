@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocol.elevenid.io/schemas/didcomm-deliver-request.json",
+  "title": "DidcommDeliverRequest",
+  "description": "Tenant-scoped request to deliver an already-authorized issuance transaction over encrypted DIDComm v2",
+  "type": "object",
+  "required": ["organization_id", "transaction_id", "holder_did"],
+  "additionalProperties": false,
+  "properties": {
+    "organization_id": {"type": "string", "minLength": 1},
+    "transaction_id": {"type": "string", "minLength": 1},
+    "holder_did": {"type": "string", "pattern": "^did:", "minLength": 5}
+  }
+}
