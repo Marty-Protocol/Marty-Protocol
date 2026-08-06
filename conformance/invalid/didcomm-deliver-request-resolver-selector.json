@@ -1,0 +1,6 @@
+{
+  "organization_id": "org-123",
+  "transaction_id": "tx-123",
+  "holder_did": "did:peer:2.Ez6LSExample.SeyJ0IjoiRElEQ29tbU1lc3NhZ2luZyJ9",
+  "universal_resolver_url": "https://attacker.example/1.0/identifiers"
+}

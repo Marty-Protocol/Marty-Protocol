@@ -1,0 +1,9 @@
+{
+  "transaction_id": "tx-123",
+  "credential_id": "urn:uuid:6e14d94a-9f4b-4da0-bc3d-05b8aca89de8",
+  "holder_did": "did:peer:2.Ez6LSExample.SeyJ0IjoiRElEQ29tbU1lc3NhZ2luZyJ9",
+  "service_endpoint": "https://wallet.example/didcomm",
+  "didcomm_message_id": "98c6d699-66f7-49bd-b92f-b726aa54164f",
+  "status": "delivered",
+  "error": null
+}

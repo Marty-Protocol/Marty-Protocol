@@ -82,6 +82,7 @@ def validate_instance(schema_path: pathlib.Path, instance: object) -> None:
 
 
 _REQUIRED_RE = re.compile(r"'(.+?)' is a required property")
+_UNEXPECTED_PROPERTY_RE = re.compile(r"'([^']+)' (?:was|were) unexpected")
 
 
 def all_error_pointers(exc: ValidationError) -> set[str]:
@@ -95,11 +96,21 @@ def all_error_pointers(exc: ValidationError) -> set[str]:
     def _walk(e: ValidationError) -> None:
         if e.absolute_path:
             pointers.add("/" + "/".join(str(p) for p in e.absolute_path))
+        else:
+            pointers.add("/")
         if e.validator == "required":
             m = _REQUIRED_RE.match(e.message)
             if m:
                 parent = ("/" + "/".join(str(p) for p in e.absolute_path)) if e.absolute_path else ""
                 pointers.add(parent + "/" + m.group(1))
+        if e.validator == "additionalProperties":
+            parent = (
+                "/" + "/".join(str(p) for p in e.absolute_path)
+                if e.absolute_path
+                else ""
+            )
+            for name in _UNEXPECTED_PROPERTY_RE.findall(e.message):
+                pointers.add(parent + "/" + name)
         for sub in e.context:
             _walk(sub)
 

@@ -1,0 +1,5 @@
+{
+  "pointer": "/universal_resolver_url",
+  "error_code": "PRIVATE_INFRASTRUCTURE_SELECTOR",
+  "message": "Resolver selection is deployment-managed and must not cross the public protocol boundary."
+}
