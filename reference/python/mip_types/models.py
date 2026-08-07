@@ -722,6 +722,7 @@ resource."""
 
     issuer_did: str
     key_purpose: Literal["vc_jwt_issuer", "mdoc_dsc", "x509_doc_signer", "holder_binding", "presentation_signing", "oid4vp_request_signing", "vdsnc_signing", "csca", "jwks_signing", "lti_tool_signing"]
+    credential_format: CredentialFormat
     algorithm: Literal["ES256", "ES384", "RS256", "EdDSA"]
     status: Literal["active"]
 

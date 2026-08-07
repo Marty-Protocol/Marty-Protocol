@@ -94,6 +94,9 @@ resolve to more than one active private issuer profile, the operation MUST fail
 with an ambiguity error rather than choose one. Internal profile IDs,
 verification-method selectors, signing-service IDs, key references, provider
 names, KMS coordinates, or key versions MUST NOT appear in the response.
+The public identity projection includes `credential_format`; implementations
+MUST NOT collapse format-specific identities into a purpose/algorithm-only
+projection.
 
 Create, certificate, and delete operations select the identity with the complete
 tuple `(organization_id, issuer_did, key_purpose, credential_format,

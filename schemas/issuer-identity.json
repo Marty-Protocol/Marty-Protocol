@@ -4,7 +4,7 @@
   "title": "IssuerIdentity",
   "description": "A tenant-scoped public DID projection that callers may select for issuance or signed verification. Custody coordinates and internal issuer-profile IDs are never part of this resource.",
   "type": "object",
-  "required": ["issuer_did", "key_purpose", "algorithm", "status"],
+  "required": ["issuer_did", "key_purpose", "credential_format", "algorithm", "status"],
   "additionalProperties": false,
   "properties": {
     "issuer_did": {"type": "string", "pattern": "^did:", "maxLength": 2048},
@@ -23,6 +23,7 @@
         "lti_tool_signing"
       ]
     },
+    "credential_format": {"$ref": "../enums/credential-formats.json"},
     "algorithm": {
       "type": "string",
       "enum": ["ES256", "ES384", "RS256", "EdDSA"]

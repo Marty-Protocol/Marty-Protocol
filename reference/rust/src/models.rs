@@ -938,6 +938,7 @@ pub struct IssuerIdentityOperationRequest {
 pub struct IssuerIdentity {
     pub issuer_did: String,
     pub key_purpose: String,
+    pub credential_format: CredentialFormat,
     pub algorithm: String,
     pub status: String,
 }

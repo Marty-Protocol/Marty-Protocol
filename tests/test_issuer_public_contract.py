@@ -82,6 +82,7 @@ def _identity() -> dict:
     return {
         "issuer_did": "did:web:issuer.example",
         "key_purpose": "vc_jwt_issuer",
+        "credential_format": "SD_JWT_VC",
         "algorithm": "ES256",
         "status": "active",
     }
