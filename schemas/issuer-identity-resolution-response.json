@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuer-identity-resolution-response.json",
+  "title": "IssuerIdentityResolutionResponse",
+  "description": "Public material resolved for exactly one DID identity tuple. The response never exposes or accepts a verification-method, profile, service, key-reference, provider, or KMS selector.",
+  "type": "object",
+  "required": ["identity", "public_jwk"],
+  "additionalProperties": false,
+  "properties": {
+    "identity": {"$ref": "issuer-identity.json"},
+    "public_jwk": {
+      "type": "object",
+      "minProperties": 2,
+      "description": "The public JWK selected internally by DID, purpose, credential format, and algorithm.",
+      "additionalProperties": true
+    }
+  }
+}

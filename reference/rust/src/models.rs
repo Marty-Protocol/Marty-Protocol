@@ -931,6 +931,15 @@ pub struct IssuerIdentityOperationRequest {
     pub algorithm: String,
 }
 
+/// Public material resolved for exactly one DID identity tuple. The response never exposes
+/// or accepts a verification-method, profile, service, key-reference, provider, or KMS
+/// selector.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IssuerIdentityResolutionResponse {
+    pub identity: IssuerIdentity,
+    pub public_jwk: serde_json::Value,
+}
+
 /// A tenant-scoped public DID projection that callers may select for issuance or signed
 /// verification. Custody coordinates and internal issuer-profile IDs are never part of this
 /// resource.

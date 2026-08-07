@@ -628,6 +628,12 @@ export interface IssuerIdentityOperationRequest {
   algorithm: 'ES256' | 'ES384' | 'RS256' | 'EdDSA';
 }
 
+/** Public material resolved for exactly one DID identity tuple. The response never exposes or accepts a verification-method, profile, service, key-reference, provider, or KMS selector. */
+export interface IssuerIdentityResolutionResponse {
+  identity: IssuerIdentity;
+  public_jwk: Record<string, unknown>;
+}
+
 /** A tenant-scoped public DID projection that callers may select for issuance or signed verification. Custody coordinates and internal issuer-profile IDs are never part of this resource. */
 export interface IssuerIdentity {
   issuer_did: string;

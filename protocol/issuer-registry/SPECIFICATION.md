@@ -53,6 +53,7 @@ PATCH   /v1/issuer-entities/{id}                    Partially update a tenant re
 DELETE  /v1/issuer-entities/{id}                    Delete a tenant record
 GET     /v1/signing-keys/issuer-identities          List public DID signing identities
 POST    /v1/signing-keys/issuer-identities          Provision or adopt a managed DID identity
+POST    /v1/signing-keys/issuer-identities/resolve  Resolve the exact identity's public JWK
 PUT     /v1/signing-keys/issuer-identities/certificate  Attach a matching public certificate chain
 DELETE  /v1/signing-keys/issuer-identities          Retire exactly one DID identity
 ```
@@ -97,6 +98,10 @@ names, KMS coordinates, or key versions MUST NOT appear in the response.
 The public identity projection includes `credential_format`; implementations
 MUST NOT collapse format-specific identities into a purpose/algorithm-only
 projection.
+Public-key resolution accepts the same complete tuple and returns only the
+provider-neutral identity plus its public JWK. The implementation selects the
+DID verification method internally; callers MUST NOT supply a verification
+method, key ID, profile, service, provider, or KMS coordinate.
 
 Create, certificate, and delete operations select the identity with the complete
 tuple `(organization_id, issuer_did, key_purpose, credential_format,

@@ -715,6 +715,15 @@ private issuer profile or custody binding."""
     algorithm: Literal["ES256", "ES384", "RS256", "EdDSA"]
 
 
+class IssuerIdentityResolutionResponse(BaseModel):
+    """Public material resolved for exactly one DID identity tuple. The response never exposes
+or accepts a verification-method, profile, service, key-reference, provider, or KMS
+selector."""
+
+    identity: IssuerIdentity
+    public_jwk: dict[str, Any]
+
+
 class IssuerIdentity(BaseModel):
     """A tenant-scoped public DID projection that callers may select for issuance or signed
 verification. Custody coordinates and internal issuer-profile IDs are never part of this
@@ -1392,6 +1401,7 @@ IssuerIdentityCreateResponse.model_rebuild()
 IssuerIdentityDeleteResponse.model_rebuild()
 IssuerIdentityListResponse.model_rebuild()
 IssuerIdentityOperationRequest.model_rebuild()
+IssuerIdentityResolutionResponse.model_rebuild()
 IssuerIdentity.model_rebuild()
 KeyAttestationPolicy.model_rebuild()
 Lane.model_rebuild()

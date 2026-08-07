@@ -18,6 +18,7 @@ ISSUER_IDENTITY_OPERATION = REPO_ROOT / "schemas" / "issuer-identity-operation-r
 ISSUER_IDENTITY_CERTIFICATE = REPO_ROOT / "schemas" / "issuer-identity-certificate-request.json"
 ISSUER_IDENTITY_CREATE_RESPONSE = REPO_ROOT / "schemas" / "issuer-identity-create-response.json"
 ISSUER_IDENTITY_DELETE_RESPONSE = REPO_ROOT / "schemas" / "issuer-identity-delete-response.json"
+ISSUER_IDENTITY_RESOLUTION_RESPONSE = REPO_ROOT / "schemas" / "issuer-identity-resolution-response.json"
 
 FORBIDDEN_CUSTODY_FIELDS = {
     "issuer_algorithm",
@@ -180,6 +181,10 @@ def test_public_issuer_identity_lifecycle_is_did_first_and_provider_neutral() ->
         {"identity": identity, "created": True},
     )
     validate_instance(ISSUER_IDENTITY_DELETE_RESPONSE, {"deleted": identity})
+    validate_instance(
+        ISSUER_IDENTITY_RESOLUTION_RESPONSE,
+        {"identity": identity, "public_jwk": {"kty": "EC", "crv": "P-256"}},
+    )
 
     validate_instance(
         ISSUER_IDENTITY_CREATE,
