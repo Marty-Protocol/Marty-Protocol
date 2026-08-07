@@ -154,6 +154,8 @@ pub enum ComplianceCode {
     Ob3Jwt,
     #[serde(rename = "OB3_JSONLD")]
     Ob3Jsonld,
+    #[serde(rename = "OB2_COMPATIBILITY")]
+    Ob2Compatibility,
     #[serde(rename = "SD_JWT_VC")]
     SdJwtVc,
     #[serde(rename = "ENTERPRISE_VC")]

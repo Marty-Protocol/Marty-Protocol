@@ -78,8 +78,10 @@ def test_public_template_rejects_every_private_custody_field(field: str) -> None
         validate_instance(SCHEMA, document)
 
 
-def test_active_template_without_issuer_did_fails_closed() -> None:
+@pytest.mark.parametrize("status", ["DRAFT", "ACTIVE", "DEPRECATED"])
+def test_every_template_without_issuer_did_fails_closed(status: str) -> None:
     document = _active_template()
+    document["status"] = status
     document.pop("issuer_did")
     with pytest.raises(ValidationError, match="issuer_did"):
         validate_instance(SCHEMA, document)

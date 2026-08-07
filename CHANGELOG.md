@@ -39,7 +39,7 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
   `issuer_did` (or a DID-bearing Credential Template); issuer-profile IDs,
   signing-service IDs, key references, KMS/provider selectors, and internal
   flow-definition routing are rejected.
-- Made public Credential Templates DID-only. Active templates now require
+- Made public Credential Templates DID-only. Every template now requires
   `issuer_did`; issuer-profile IDs, verification-method selectors, algorithms,
   certificate bindings, KMS providers, signing-service IDs, key references,
   remote-signing configuration, and artifact-generation controls are rejected.
@@ -48,7 +48,10 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 - Replaced Presentation Policy `NONCE` binding with explicit credential, device, or session control methods plus proof-profile and proof-freshness requirements.
 - Aligned OID4VCI issuance with the 1.0 Final Nonce Endpoint and plural `proofs` parameter; Token Responses no longer carry draft-era credential nonce fields.
 - Renamed Deployment Profile `biometric_required` to `operator_biometric_authentication_required` with a bounded read-compatibility alias.
-- Removed `OB2_COMPATIBILITY`; Open Badges support is version 3 only.
+- Retained `OB2_COMPATIBILITY` as the sole short-lived compatibility exception
+  while existing deployments migrate to Open Badges 3. It is reviewed on
+  2026-09-01 and targets removal on 2026-10-01 before 1.0; no new OB2-only
+  capabilities may be added.
 - Application Template evidence requirements now use only `auto_issue_on_permit`.
 - Application Template claim rules now use only `claim_name`, `source`, and `source_config`.
 - Removed Deployment Profile request/response aliases `default_presentation_policy_id` and `ux_config`.
