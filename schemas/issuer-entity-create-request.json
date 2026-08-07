@@ -21,7 +21,19 @@
       "enum": ["ACCREDITED", "COMPLIANT", "SUSPENDED"],
       "default": "COMPLIANT"
     },
-    "accreditation_body": {"type": ["string", "null"], "maxLength": 256},
+    "accreditation_body": {
+      "type": ["string", "null"],
+      "maxLength": 256,
+      "description": "The authority that certified the issuer; this is not an accreditation identifier."
+    },
+    "accreditations": {
+      "type": "array",
+      "description": "Initial complete set of accreditation identifiers held by this issuer. Defaults to an empty set.",
+      "items": {"type": "string", "minLength": 1, "maxLength": 128},
+      "maxItems": 64,
+      "uniqueItems": true,
+      "default": []
+    },
     "accreditation_date": {"type": ["string", "null"], "format": "date-time"},
     "valid_from": {"type": ["string", "null"], "format": "date-time"},
     "valid_until": {"type": ["string", "null"], "format": "date-time"},

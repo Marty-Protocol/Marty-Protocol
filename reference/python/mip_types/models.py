@@ -608,6 +608,7 @@ managed outside this public operation."""
     description: str | None = None
     compliance_status: Literal["ACCREDITED", "COMPLIANT", "SUSPENDED"] | None = None
     accreditation_body: str | None = None
+    accreditations: list[str] | None = None
     accreditation_date: datetime | None = None
     valid_from: datetime | None = None
     valid_until: datetime | None = None
@@ -625,6 +626,7 @@ binds the mutation to its tenant."""
     issuer_type: Literal["ORGANIZATION", "GOVERNMENT", "DEVICE"] | None = None
     compliance_status: Literal["ACCREDITED", "COMPLIANT", "SUSPENDED", "REVOKED"] | None = None
     accreditation_body: str | None = None
+    accreditations: list[str] | None = None
     accreditation_date: datetime | None = None
     valid_from: datetime | None = None
     valid_until: datetime | None = None
@@ -647,6 +649,7 @@ full lifecycle: accreditation, suspension, and revocation."""
     is_system_issuer: bool
     compliance_status: Literal["ACCREDITED", "COMPLIANT", "SUSPENDED", "REVOKED"]
     accreditation_body: str | None = None
+    accreditations: list[str]
     accreditation_date: datetime | None = None
     valid_from: datetime
     valid_until: datetime | None = None

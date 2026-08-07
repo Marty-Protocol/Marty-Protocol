@@ -4,7 +4,7 @@
   "title": "IssuerEntity",
   "description": "An organisation or authority that issues credentials. Separate from Trust Anchors (cryptographic roots). An issuer may be backed by one or more trust anchors. Supports full lifecycle: accreditation, suspension, and revocation.",
   "type": "object",
-  "required": ["id", "issuer_id", "issuer_type", "display_name", "is_system_issuer", "compliance_status", "valid_from", "metadata", "created_at", "updated_at"],
+  "required": ["id", "issuer_id", "issuer_type", "display_name", "is_system_issuer", "compliance_status", "accreditations", "valid_from", "metadata", "created_at", "updated_at"],
   "additionalProperties": false,
   "properties": {
     "id": {"type": "string", "format": "uuid"},
@@ -36,7 +36,18 @@
       "enum": ["ACCREDITED", "COMPLIANT", "SUSPENDED", "REVOKED"],
       "description": "ACCREDITED: formally certified by an accreditation body. COMPLIANT: meets required standards. SUSPENDED: temporarily inactive (reversible). REVOKED: permanently invalidated."
     },
-    "accreditation_body": {"type": ["string", "null"], "maxLength": 256},
+    "accreditation_body": {
+      "type": ["string", "null"],
+      "maxLength": 256,
+      "description": "The authority that certified the issuer; this is not evidence of which accreditations the issuer holds."
+    },
+    "accreditations": {
+      "type": "array",
+      "description": "Accreditation identifiers held by this issuer. Policy comparison is case-insensitive and requires every requested identifier.",
+      "items": {"type": "string", "minLength": 1, "maxLength": 128},
+      "maxItems": 64,
+      "uniqueItems": true
+    },
     "accreditation_date": {"type": ["string", "null"], "format": "date-time"},
     "valid_from": {"type": "string", "format": "date-time"},
     "valid_until": {"type": ["string", "null"], "format": "date-time", "description": "null = indefinite validity"},

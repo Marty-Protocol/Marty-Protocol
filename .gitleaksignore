@@ -1,4 +1,4 @@
-﻿# Exact reviewed false positives from the pre-publication full-history audit.
+# Exact reviewed false positives from the pre-publication full-history audit.
 # Each entry binds one finding to its commit, path, rule, and line; new findings still fail.
 
 0aa1752c47944ecf41d753adb626a042d1fd7e5b:conformance/valid/applicant.json:generic-api-key:5
@@ -21,3 +21,5 @@
 28c5af1af0e1723f9a9f1acfd9b9468f879fdf7f:conformance/valid/flow-physical-document.json:generic-api-key:7
 28c5af1af0e1723f9a9f1acfd9b9468f879fdf7f:conformance/valid/holder-credential-inventory.json:generic-api-key:7
 28c5af1af0e1723f9a9f1acfd9b9468f879fdf7f:conformance/valid/physical-document-job.json:generic-api-key:6
+85770d02b6c225acbe4fc3446b71c4d206933bfd:conformance/valid/issuance.json:generic-api-key:7
+d9a61c08ab33858b31678e4f0fbd0f3b19a8af9d:conformance/valid/issuance.json:generic-api-key:7

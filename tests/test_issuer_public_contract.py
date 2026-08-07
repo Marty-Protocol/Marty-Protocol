@@ -56,6 +56,7 @@ def _entity() -> dict:
         "is_system_issuer": False,
         "compliance_status": "COMPLIANT",
         "accreditation_body": None,
+        "accreditations": ["ISO27001", "FIPS140-2"],
         "accreditation_date": None,
         "valid_from": "2026-08-01T00:00:00Z",
         "valid_until": None,
@@ -109,6 +110,31 @@ def test_issuer_entity_resource_and_operations_validate() -> None:
             "display_name": "Updated Issuer",
         },
     )
+
+
+def test_issuer_accreditations_are_explicit_and_replaceable() -> None:
+    validate_instance(
+        ISSUER_ENTITY_UPDATE,
+        {
+            "organization_id": "20000000-0000-4000-8000-000000000001",
+            "accreditations": [],
+        },
+    )
+
+    missing = _entity()
+    missing.pop("accreditations")
+    with pytest.raises(ValidationError):
+        validate_instance(ISSUER_ENTITY, missing)
+
+    duplicate = _create()
+    duplicate["accreditations"] = ["ISO27001", "ISO27001"]
+    with pytest.raises(ValidationError):
+        validate_instance(ISSUER_ENTITY_CREATE, duplicate)
+
+    blank = _create()
+    blank["accreditations"] = [""]
+    with pytest.raises(ValidationError):
+        validate_instance(ISSUER_ENTITY_CREATE, blank)
 
 
 def test_public_create_cannot_claim_global_or_system_issuer_authority() -> None:
@@ -250,6 +276,7 @@ def test_generated_bindings_keep_trust_entities_and_did_identities_distinct() ->
     assert "class IssuerIdentity(BaseModel):" in python
     assert "class IssuerIdentityCreateRequest(BaseModel):" in python
     assert "class IssuerIdentityOperationRequest(BaseModel):" in python
+    assert "accreditations: list[str]" in python
     assert 'status: Literal["active"]' in python
 
     assert "pub struct IssuerEntityCreateRequest {" in rust
@@ -257,6 +284,7 @@ def test_generated_bindings_keep_trust_entities_and_did_identities_distinct() ->
     assert "pub struct IssuerIdentity {" in rust
     assert "pub struct IssuerIdentityCreateRequest {" in rust
     assert "pub struct IssuerIdentityOperationRequest {" in rust
+    assert "pub accreditations: Vec<String>," in rust
     assert "pub status: String," in rust
 
     assert "export interface IssuerEntityCreateRequest {" in typescript
@@ -264,4 +292,5 @@ def test_generated_bindings_keep_trust_entities_and_did_identities_distinct() ->
     assert "export interface IssuerIdentity {" in typescript
     assert "export interface IssuerIdentityCreateRequest {" in typescript
     assert "export interface IssuerIdentityOperationRequest {" in typescript
+    assert "accreditations: string[];" in typescript
     assert "status: 'active';" in typescript

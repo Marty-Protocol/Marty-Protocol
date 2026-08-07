@@ -536,6 +536,7 @@ export interface IssuerEntityCreateRequest {
   description?: string | null;
   compliance_status?: 'ACCREDITED' | 'COMPLIANT' | 'SUSPENDED';
   accreditation_body?: string | null;
+  accreditations?: string[];
   accreditation_date?: string | null;
   valid_from?: string | null;
   valid_until?: string | null;
@@ -551,6 +552,7 @@ export interface IssuerEntityUpdateRequest {
   issuer_type?: 'ORGANIZATION' | 'GOVERNMENT' | 'DEVICE';
   compliance_status?: 'ACCREDITED' | 'COMPLIANT' | 'SUSPENDED' | 'REVOKED';
   accreditation_body?: string | null;
+  accreditations?: string[];
   accreditation_date?: string | null;
   valid_from?: string;
   valid_until?: string | null;
@@ -570,6 +572,7 @@ export interface IssuerEntity {
   is_system_issuer: boolean;
   compliance_status: 'ACCREDITED' | 'COMPLIANT' | 'SUSPENDED' | 'REVOKED';
   accreditation_body?: string | null;
+  accreditations: string[];
   accreditation_date?: string | null;
   valid_from: string;
   valid_until?: string | null;
