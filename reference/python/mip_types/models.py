@@ -659,10 +659,60 @@ full lifecycle: accreditation, suspension, and revocation."""
     updated_at: datetime
 
 
+class IssuerIdentityCertificateRequest(BaseModel):
+    """Attach a public X.509 certificate chain to exactly one DID-selected issuer identity. The
+leaf public key must match the DID identity's managed key."""
+
+    organization_id: str
+    issuer_did: str
+    key_purpose: Literal["vc_jwt_issuer", "mdoc_dsc", "x509_doc_signer", "holder_binding", "presentation_signing", "oid4vp_request_signing", "vdsnc_signing", "csca", "jwks_signing", "lti_tool_signing"]
+    credential_format: CredentialFormat
+    algorithm: Literal["ES256", "ES384", "RS256", "EdDSA"]
+    cert_pem: str
+    cert_chain_pem: str | None = None
+
+
+class IssuerIdentityCreateRequest(BaseModel):
+    """Provision or adopt a tenant-scoped issuer DID using implementation-managed custody. The
+implementation selects the signing service and key; callers cannot provide custody
+coordinates."""
+
+    organization_id: str
+    issuer_did: str
+    key_purpose: Literal["vc_jwt_issuer", "mdoc_dsc", "x509_doc_signer", "holder_binding", "presentation_signing", "oid4vp_request_signing", "vdsnc_signing", "csca", "jwks_signing", "lti_tool_signing"]
+    credential_format: CredentialFormat
+    algorithm: Literal["ES256", "ES384", "RS256", "EdDSA"]
+    key_attestation_policy: KeyAttestationPolicy | None = None
+
+
+class IssuerIdentityCreateResponse(BaseModel):
+    """Provider-neutral result of ensuring a DID issuer identity."""
+
+    identity: IssuerIdentity
+    created: bool
+
+
+class IssuerIdentityDeleteResponse(BaseModel):
+    """Provider-neutral result of retiring a DID issuer identity."""
+
+    deleted: IssuerIdentity
+
+
 class IssuerIdentityListResponse(BaseModel):
     """Public issuer identities available in the authenticated organization scope."""
 
     identities: list[IssuerIdentity]
+
+
+class IssuerIdentityOperationRequest(BaseModel):
+    """Select exactly one tenant issuer identity for a lifecycle operation without exposing its
+private issuer profile or custody binding."""
+
+    organization_id: str
+    issuer_did: str
+    key_purpose: Literal["vc_jwt_issuer", "mdoc_dsc", "x509_doc_signer", "holder_binding", "presentation_signing", "oid4vp_request_signing", "vdsnc_signing", "csca", "jwks_signing", "lti_tool_signing"]
+    credential_format: CredentialFormat
+    algorithm: Literal["ES256", "ES384", "RS256", "EdDSA"]
 
 
 class IssuerIdentity(BaseModel):
@@ -674,6 +724,27 @@ resource."""
     key_purpose: Literal["vc_jwt_issuer", "mdoc_dsc", "x509_doc_signer", "holder_binding", "presentation_signing", "oid4vp_request_signing", "vdsnc_signing", "csca", "jwks_signing", "lti_tool_signing"]
     algorithm: Literal["ES256", "ES384", "RS256", "EdDSA"]
     status: Literal["active"]
+
+
+class KeyAttestationPolicy(BaseModel):
+    """Provider-neutral trust policy for holder-key attestations presented during issuance. It
+contains public trust material and validation requirements, never issuer custody
+coordinates."""
+
+    mode: Literal["disabled", "optional", "required"]
+    trusted_root_certificates_pem: list[str] | None = None
+    allowed_algorithms: list[str] | None = None
+    required_key_storage: list[str] | None = None
+    required_user_authentication: list[str] | None = None
+    max_age_seconds: int | None = None
+    require_nonce: bool | None = None
+    status_validation: Literal["disabled", "if_present", "required"] | None = None
+    status_list_allowed_origins: list[str] | None = None
+    status_list_trusted_root_certificates_pem: list[str] | None = None
+    status_list_allowed_algorithms: list[str] | None = None
+    status_list_max_age_seconds: int | None = None
+    status_list_allow_private_hosts: bool | None = None
+    status_list_tls_ca_certificates_pem: list[str] | None = None
 
 
 class Lane(BaseModel):
@@ -1314,8 +1385,14 @@ IssuedCredential.model_rebuild()
 IssuerEntityCreateRequest.model_rebuild()
 IssuerEntityUpdateRequest.model_rebuild()
 IssuerEntity.model_rebuild()
+IssuerIdentityCertificateRequest.model_rebuild()
+IssuerIdentityCreateRequest.model_rebuild()
+IssuerIdentityCreateResponse.model_rebuild()
+IssuerIdentityDeleteResponse.model_rebuild()
 IssuerIdentityListResponse.model_rebuild()
+IssuerIdentityOperationRequest.model_rebuild()
 IssuerIdentity.model_rebuild()
+KeyAttestationPolicy.model_rebuild()
 Lane.model_rebuild()
 MipConfigurationDiscoveryDocument.model_rebuild()
 NotificationPayload.model_rebuild()

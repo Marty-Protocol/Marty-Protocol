@@ -873,10 +873,62 @@ pub struct IssuerEntity {
     pub updated_at: String,
 }
 
+/// Attach a public X.509 certificate chain to exactly one DID-selected issuer identity. The
+/// leaf public key must match the DID identity's managed key.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IssuerIdentityCertificateRequest {
+    pub organization_id: String,
+    pub issuer_did: String,
+    pub key_purpose: String,
+    pub credential_format: CredentialFormat,
+    pub algorithm: String,
+    pub cert_pem: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cert_chain_pem: Option<String>,
+}
+
+/// Provision or adopt a tenant-scoped issuer DID using implementation-managed custody. The
+/// implementation selects the signing service and key; callers cannot provide custody
+/// coordinates.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IssuerIdentityCreateRequest {
+    pub organization_id: String,
+    pub issuer_did: String,
+    pub key_purpose: String,
+    pub credential_format: CredentialFormat,
+    pub algorithm: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub key_attestation_policy: Option<KeyAttestationPolicy>,
+}
+
+/// Provider-neutral result of ensuring a DID issuer identity.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IssuerIdentityCreateResponse {
+    pub identity: IssuerIdentity,
+    pub created: bool,
+}
+
+/// Provider-neutral result of retiring a DID issuer identity.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IssuerIdentityDeleteResponse {
+    pub deleted: IssuerIdentity,
+}
+
 /// Public issuer identities available in the authenticated organization scope.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct IssuerIdentityListResponse {
     pub identities: Vec<IssuerIdentity>,
+}
+
+/// Select exactly one tenant issuer identity for a lifecycle operation without exposing its
+/// private issuer profile or custody binding.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IssuerIdentityOperationRequest {
+    pub organization_id: String,
+    pub issuer_did: String,
+    pub key_purpose: String,
+    pub credential_format: CredentialFormat,
+    pub algorithm: String,
 }
 
 /// A tenant-scoped public DID projection that callers may select for issuance or signed
@@ -888,6 +940,40 @@ pub struct IssuerIdentity {
     pub key_purpose: String,
     pub algorithm: String,
     pub status: String,
+}
+
+/// Provider-neutral trust policy for holder-key attestations presented during issuance. It
+/// contains public trust material and validation requirements, never issuer custody
+/// coordinates.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct KeyAttestationPolicy {
+    pub mode: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trusted_root_certificates_pem: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub allowed_algorithms: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub required_key_storage: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub required_user_authentication: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_age_seconds: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub require_nonce: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status_validation: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status_list_allowed_origins: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status_list_trusted_root_certificates_pem: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status_list_allowed_algorithms: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status_list_max_age_seconds: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status_list_allow_private_hosts: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status_list_tls_ca_certificates_pem: Option<Vec<String>>,
 }
 
 /// Logical device grouping within a Deployment Profile

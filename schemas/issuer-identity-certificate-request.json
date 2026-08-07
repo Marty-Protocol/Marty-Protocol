@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuer-identity-certificate-request.json",
+  "title": "IssuerIdentityCertificateRequest",
+  "description": "Attach a public X.509 certificate chain to exactly one DID-selected issuer identity. The leaf public key must match the DID identity's managed key.",
+  "type": "object",
+  "required": ["organization_id", "issuer_did", "key_purpose", "credential_format", "algorithm", "cert_pem"],
+  "additionalProperties": false,
+  "properties": {
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "issuer_did": {"type": "string", "pattern": "^did:", "maxLength": 2048},
+    "key_purpose": {
+      "type": "string",
+      "enum": [
+        "vc_jwt_issuer",
+        "mdoc_dsc",
+        "x509_doc_signer",
+        "holder_binding",
+        "presentation_signing",
+        "oid4vp_request_signing",
+        "vdsnc_signing",
+        "csca",
+        "jwks_signing",
+        "lti_tool_signing"
+      ]
+    },
+    "credential_format": {"$ref": "../enums/credential-formats.json"},
+    "algorithm": {"type": "string", "enum": ["ES256", "ES384", "RS256", "EdDSA"]},
+    "cert_pem": {"type": "string", "minLength": 1, "maxLength": 1048576},
+    "cert_chain_pem": {"type": "string", "minLength": 1, "maxLength": 1048576}
+  }
+}

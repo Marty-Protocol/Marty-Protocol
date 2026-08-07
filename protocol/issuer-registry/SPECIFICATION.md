@@ -52,6 +52,9 @@ GET     /v1/issuer-entities/{id}                    Get a trust record
 PATCH   /v1/issuer-entities/{id}                    Partially update a tenant record
 DELETE  /v1/issuer-entities/{id}                    Delete a tenant record
 GET     /v1/signing-keys/issuer-identities          List public DID signing identities
+POST    /v1/signing-keys/issuer-identities          Provision or adopt a managed DID identity
+PUT     /v1/signing-keys/issuer-identities/certificate  Attach a matching public certificate chain
+DELETE  /v1/signing-keys/issuer-identities          Retire exactly one DID identity
 ```
 
 - Public create requires `organization_id`; callers cannot create or claim a
@@ -91,6 +94,23 @@ resolve to more than one active private issuer profile, the operation MUST fail
 with an ambiguity error rather than choose one. Internal profile IDs,
 verification-method selectors, signing-service IDs, key references, provider
 names, KMS coordinates, or key versions MUST NOT appear in the response.
+
+Create, certificate, and delete operations select the identity with the complete
+tuple `(organization_id, issuer_did, key_purpose, credential_format,
+algorithm)`. The implementation MUST resolve that tuple to exactly one active,
+compatible private issuer profile and MUST fail closed when it is unknown,
+inactive, ambiguous, incompatible, or owned by a different organization.
+Creation MAY provision a new managed key, but service, provider, key reference,
+and KMS selection are implementation decisions and MUST NOT be accepted from or
+returned to the public caller. A repeated create is idempotent only when the
+tuple resolves to exactly one compatible active identity. Certificate attachment
+MUST verify that the leaf certificate contains the same public key as the DID's
+managed verification method before persisting the public chain.
+
+Creation MAY include `key_attestation_policy`, a provider-neutral holder-key
+trust policy containing public trust anchors and validation requirements. This
+policy governs proofs accepted during issuance; it is not an issuer-key or KMS
+selector and MUST be validated before the private profile is activated.
 
 ### TrustProfileIssuer
 

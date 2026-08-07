@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuer-identity-delete-response.json",
+  "title": "IssuerIdentityDeleteResponse",
+  "description": "Provider-neutral result of retiring a DID issuer identity.",
+  "type": "object",
+  "required": ["deleted"],
+  "additionalProperties": false,
+  "properties": {
+    "deleted": {"$ref": "issuer-identity.json"}
+  }
+}

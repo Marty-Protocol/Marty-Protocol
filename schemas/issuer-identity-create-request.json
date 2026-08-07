@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuer-identity-create-request.json",
+  "title": "IssuerIdentityCreateRequest",
+  "description": "Provision or adopt a tenant-scoped issuer DID using implementation-managed custody. The implementation selects the signing service and key; callers cannot provide custody coordinates.",
+  "type": "object",
+  "required": ["organization_id", "issuer_did", "key_purpose", "credential_format", "algorithm"],
+  "additionalProperties": false,
+  "properties": {
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "issuer_did": {"type": "string", "pattern": "^did:", "maxLength": 2048},
+    "key_purpose": {
+      "type": "string",
+      "enum": [
+        "vc_jwt_issuer",
+        "mdoc_dsc",
+        "x509_doc_signer",
+        "holder_binding",
+        "presentation_signing",
+        "oid4vp_request_signing",
+        "vdsnc_signing",
+        "csca",
+        "jwks_signing",
+        "lti_tool_signing"
+      ]
+    },
+    "credential_format": {"$ref": "../enums/credential-formats.json"},
+    "algorithm": {"type": "string", "enum": ["ES256", "ES384", "RS256", "EdDSA"]},
+    "key_attestation_policy": {"$ref": "key-attestation-policy.json"}
+  }
+}
