@@ -221,7 +221,7 @@ export interface CredentialTemplate {
   revocation_profile_id?: string | null;
   claims: Record<string, unknown>[];
   validity_rules: Record<string, unknown>;
-  issuer_did?: string;
+  issuer_did: string;
   privacy_posture?: Record<string, unknown>;
   status: 'DRAFT' | 'ACTIVE' | 'DEPRECATED';
   created_at: string;

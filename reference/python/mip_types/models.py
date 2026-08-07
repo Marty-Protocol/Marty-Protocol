@@ -253,7 +253,7 @@ organization and issuer DID."""
     revocation_profile_id: str | None = None
     claims: list[dict[str, Any]]
     validity_rules: dict[str, Any]
-    issuer_did: str | None = None
+    issuer_did: str
     privacy_posture: dict[str, Any] | None = None
     status: Literal["DRAFT", "ACTIVE", "DEPRECATED"]
     created_at: datetime

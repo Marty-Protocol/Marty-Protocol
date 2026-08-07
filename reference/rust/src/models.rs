@@ -313,8 +313,7 @@ pub struct CredentialTemplate {
     pub revocation_profile_id: Option<String>,
     pub claims: Vec<serde_json::Value>,
     pub validity_rules: serde_json::Value,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub issuer_did: Option<String>,
+    pub issuer_did: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub privacy_posture: Option<serde_json::Value>,
     pub status: String,
