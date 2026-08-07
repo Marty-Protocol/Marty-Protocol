@@ -798,6 +798,8 @@ pub struct IssuerEntityCreateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub accreditation_body: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub accreditations: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub accreditation_date: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub valid_from: Option<String>,
@@ -824,6 +826,8 @@ pub struct IssuerEntityUpdateRequest {
     pub compliance_status: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub accreditation_body: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub accreditations: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub accreditation_date: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -855,6 +859,7 @@ pub struct IssuerEntity {
     pub compliance_status: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub accreditation_body: Option<String>,
+    pub accreditations: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub accreditation_date: Option<String>,
     pub valid_from: String,

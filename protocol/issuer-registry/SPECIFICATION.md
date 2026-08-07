@@ -32,6 +32,7 @@ selector.
 | `is_system_issuer` | boolean | No | `true` = auto-enrolled in all org trust profiles (ICAO/AAMVA states) |
 | `compliance_status` | ComplianceStatus | Yes | `ACCREDITED`, `COMPLIANT`, `SUSPENDED`, `REVOKED` |
 | `accreditation_body` | string | No | Who certified this issuer |
+| `accreditations` | string[] | Yes | Complete set of accreditation identifiers held by the issuer; empty when none are known |
 | `accreditation_date` | datetime | No | When certification was granted |
 | `valid_from` | datetime | Yes | Start of validity period |
 | `valid_until` | datetime\|null | No | `null` = indefinite |
@@ -67,6 +68,13 @@ DELETE  /v1/signing-keys/issuer-identities          Retire exactly one DID ident
   endpoint MUST fail closed for update or deletion of such a record.
 - Successful public responses MUST be validated against `issuer-entity.json`
   before they leave an implementation boundary.
+- `accreditation_body` identifies the certifying authority and MUST NOT be
+  treated as evidence that the issuer holds an accreditation. `accreditations`
+  is the evidence set used by presentation-policy evaluation. Implementations
+  MUST trim identifiers, reject blank values and case-insensitive duplicates,
+  compare identifiers case-insensitively, and require every accreditation named
+  by a policy. Existing records migrate to an explicit empty set and therefore
+  fail closed when a policy requires accreditation evidence.
 
 #### Compliance Status Lifecycle
 

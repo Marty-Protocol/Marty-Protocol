@@ -1,0 +1,6 @@
+{
+  "organization_id": "20000000-0000-4000-8000-000000000001",
+  "issuer_id": "did:web:issuer.example",
+  "display_name": "Example Issuer",
+  "accreditations": ["ISO27001", "ISO27001"]
+}

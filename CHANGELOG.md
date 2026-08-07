@@ -10,6 +10,10 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 ## [Unreleased]
 
 ### Changed
+- Made issuer accreditation evidence first-class. `IssuerEntity` responses now
+  carry an explicit `accreditations` set; create defaults it to empty and update
+  replaces the complete set. `accreditation_body` remains the certifying
+  authority and cannot satisfy an accreditation requirement by itself.
 - Made Flow definition creation, partial update, execution start, execution
   projection, verification result, issuance initiation, issuance transaction,
   issued-credential lifecycle, and renewal-offer operations explicit public
