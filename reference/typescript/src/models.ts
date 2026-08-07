@@ -582,17 +582,83 @@ export interface IssuerEntity {
   updated_at: string;
 }
 
+/** Attach a public X.509 certificate chain to exactly one DID-selected issuer identity. The leaf public key must match the DID identity's managed key. */
+export interface IssuerIdentityCertificateRequest {
+  organization_id: string;
+  issuer_did: string;
+  key_purpose: 'vc_jwt_issuer' | 'mdoc_dsc' | 'x509_doc_signer' | 'holder_binding' | 'presentation_signing' | 'oid4vp_request_signing' | 'vdsnc_signing' | 'csca' | 'jwks_signing' | 'lti_tool_signing';
+  credential_format: CredentialFormat;
+  algorithm: 'ES256' | 'ES384' | 'RS256' | 'EdDSA';
+  cert_pem: string;
+  cert_chain_pem?: string;
+}
+
+/** Provision or adopt a tenant-scoped issuer DID using implementation-managed custody. The implementation selects the signing service and key; callers cannot provide custody coordinates. */
+export interface IssuerIdentityCreateRequest {
+  organization_id: string;
+  issuer_did: string;
+  key_purpose: 'vc_jwt_issuer' | 'mdoc_dsc' | 'x509_doc_signer' | 'holder_binding' | 'presentation_signing' | 'oid4vp_request_signing' | 'vdsnc_signing' | 'csca' | 'jwks_signing' | 'lti_tool_signing';
+  credential_format: CredentialFormat;
+  algorithm: 'ES256' | 'ES384' | 'RS256' | 'EdDSA';
+  key_attestation_policy?: KeyAttestationPolicy;
+}
+
+/** Provider-neutral result of ensuring a DID issuer identity. */
+export interface IssuerIdentityCreateResponse {
+  identity: IssuerIdentity;
+  created: boolean;
+}
+
+/** Provider-neutral result of retiring a DID issuer identity. */
+export interface IssuerIdentityDeleteResponse {
+  deleted: IssuerIdentity;
+}
+
 /** Public issuer identities available in the authenticated organization scope. */
 export interface IssuerIdentityListResponse {
   identities: IssuerIdentity[];
+}
+
+/** Select exactly one tenant issuer identity for a lifecycle operation without exposing its private issuer profile or custody binding. */
+export interface IssuerIdentityOperationRequest {
+  organization_id: string;
+  issuer_did: string;
+  key_purpose: 'vc_jwt_issuer' | 'mdoc_dsc' | 'x509_doc_signer' | 'holder_binding' | 'presentation_signing' | 'oid4vp_request_signing' | 'vdsnc_signing' | 'csca' | 'jwks_signing' | 'lti_tool_signing';
+  credential_format: CredentialFormat;
+  algorithm: 'ES256' | 'ES384' | 'RS256' | 'EdDSA';
+}
+
+/** Public material resolved for exactly one DID identity tuple. The response never exposes or accepts a verification-method, profile, service, key-reference, provider, or KMS selector. */
+export interface IssuerIdentityResolutionResponse {
+  identity: IssuerIdentity;
+  public_jwk: Record<string, unknown>;
 }
 
 /** A tenant-scoped public DID projection that callers may select for issuance or signed verification. Custody coordinates and internal issuer-profile IDs are never part of this resource. */
 export interface IssuerIdentity {
   issuer_did: string;
   key_purpose: 'vc_jwt_issuer' | 'mdoc_dsc' | 'x509_doc_signer' | 'holder_binding' | 'presentation_signing' | 'oid4vp_request_signing' | 'vdsnc_signing' | 'csca' | 'jwks_signing' | 'lti_tool_signing';
+  credential_format: CredentialFormat;
   algorithm: 'ES256' | 'ES384' | 'RS256' | 'EdDSA';
   status: 'active';
+}
+
+/** Provider-neutral trust policy for holder-key attestations presented during issuance. It contains public trust material and validation requirements, never issuer custody coordinates. */
+export interface KeyAttestationPolicy {
+  mode: 'disabled' | 'optional' | 'required';
+  trusted_root_certificates_pem?: string[];
+  allowed_algorithms?: string[];
+  required_key_storage?: string[];
+  required_user_authentication?: string[];
+  max_age_seconds?: number;
+  require_nonce?: boolean;
+  status_validation?: 'disabled' | 'if_present' | 'required';
+  status_list_allowed_origins?: string[];
+  status_list_trusted_root_certificates_pem?: string[];
+  status_list_allowed_algorithms?: string[];
+  status_list_max_age_seconds?: number;
+  status_list_allow_private_hosts?: boolean;
+  status_list_tls_ca_certificates_pem?: string[];
 }
 
 /** Logical device grouping within a Deployment Profile */

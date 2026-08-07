@@ -1,12 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuer-identity.json",
-  "title": "IssuerIdentity",
-  "description": "A tenant-scoped public DID projection that callers may select for issuance or signed verification. Custody coordinates and internal issuer-profile IDs are never part of this resource.",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuer-identity-operation-request.json",
+  "title": "IssuerIdentityOperationRequest",
+  "description": "Select exactly one tenant issuer identity for a lifecycle operation without exposing its private issuer profile or custody binding.",
   "type": "object",
-  "required": ["issuer_did", "key_purpose", "credential_format", "algorithm", "status"],
+  "required": ["organization_id", "issuer_did", "key_purpose", "credential_format", "algorithm"],
   "additionalProperties": false,
   "properties": {
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
     "issuer_did": {"type": "string", "pattern": "^did:", "maxLength": 2048},
     "key_purpose": {
       "type": "string",
@@ -24,10 +25,6 @@
       ]
     },
     "credential_format": {"$ref": "../enums/credential-formats.json"},
-    "algorithm": {
-      "type": "string",
-      "enum": ["ES256", "ES384", "RS256", "EdDSA"]
-    },
-    "status": {"type": "string", "enum": ["active"]}
+    "algorithm": {"type": "string", "enum": ["ES256", "ES384", "RS256", "EdDSA"]}
   }
 }

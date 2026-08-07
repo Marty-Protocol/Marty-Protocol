@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/key-attestation-policy.json",
+  "title": "KeyAttestationPolicy",
+  "description": "Provider-neutral trust policy for holder-key attestations presented during issuance. It contains public trust material and validation requirements, never issuer custody coordinates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mode"],
+  "properties": {
+    "mode": {"type": "string", "enum": ["disabled", "optional", "required"]},
+    "trusted_root_certificates_pem": {"type": "array", "items": {"type": "string", "minLength": 1}, "maxItems": 64},
+    "allowed_algorithms": {"type": "array", "items": {"type": "string", "enum": ["ES256", "ES384", "RS256", "EdDSA"]}, "uniqueItems": true},
+    "required_key_storage": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "required_user_authentication": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "max_age_seconds": {"type": "integer", "minimum": 1, "maximum": 86400},
+    "require_nonce": {"type": "boolean"},
+    "status_validation": {"type": "string", "enum": ["disabled", "if_present", "required"]},
+    "status_list_allowed_origins": {"type": "array", "items": {"type": "string", "format": "uri", "pattern": "^https://"}, "uniqueItems": true},
+    "status_list_trusted_root_certificates_pem": {"type": "array", "items": {"type": "string", "minLength": 1}, "maxItems": 64},
+    "status_list_allowed_algorithms": {"type": "array", "items": {"type": "string", "enum": ["ES256", "ES384", "RS256", "EdDSA"]}, "uniqueItems": true},
+    "status_list_max_age_seconds": {"type": "integer", "minimum": 1, "maximum": 604800},
+    "status_list_allow_private_hosts": {"type": "boolean"},
+    "status_list_tls_ca_certificates_pem": {"type": "array", "items": {"type": "string", "minLength": 1}, "maxItems": 64}
+  }
+}

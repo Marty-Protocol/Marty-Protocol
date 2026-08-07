@@ -13,6 +13,12 @@ ISSUER_ENTITY_CREATE = REPO_ROOT / "schemas" / "issuer-entity-create-request.jso
 ISSUER_ENTITY_UPDATE = REPO_ROOT / "schemas" / "issuer-entity-update-request.json"
 ISSUER_IDENTITY = REPO_ROOT / "schemas" / "issuer-identity.json"
 ISSUER_IDENTITY_LIST = REPO_ROOT / "schemas" / "issuer-identity-list-response.json"
+ISSUER_IDENTITY_CREATE = REPO_ROOT / "schemas" / "issuer-identity-create-request.json"
+ISSUER_IDENTITY_OPERATION = REPO_ROOT / "schemas" / "issuer-identity-operation-request.json"
+ISSUER_IDENTITY_CERTIFICATE = REPO_ROOT / "schemas" / "issuer-identity-certificate-request.json"
+ISSUER_IDENTITY_CREATE_RESPONSE = REPO_ROOT / "schemas" / "issuer-identity-create-response.json"
+ISSUER_IDENTITY_DELETE_RESPONSE = REPO_ROOT / "schemas" / "issuer-identity-delete-response.json"
+ISSUER_IDENTITY_RESOLUTION_RESPONSE = REPO_ROOT / "schemas" / "issuer-identity-resolution-response.json"
 
 FORBIDDEN_CUSTODY_FIELDS = {
     "issuer_algorithm",
@@ -77,8 +83,19 @@ def _identity() -> dict:
     return {
         "issuer_did": "did:web:issuer.example",
         "key_purpose": "vc_jwt_issuer",
+        "credential_format": "SD_JWT_VC",
         "algorithm": "ES256",
         "status": "active",
+    }
+
+
+def _identity_operation() -> dict:
+    return {
+        "organization_id": "org-conformance",
+        "issuer_did": "did:web:issuer.example",
+        "key_purpose": "vc_jwt_issuer",
+        "credential_format": "SD_JWT_VC",
+        "algorithm": "ES256",
     }
 
 
@@ -150,6 +167,62 @@ def test_public_issuer_identity_contains_no_custody_coordinates() -> None:
             validate_instance(ISSUER_IDENTITY, private)
 
 
+def test_public_issuer_identity_lifecycle_is_did_first_and_provider_neutral() -> None:
+    operation = _identity_operation()
+    identity = _identity()
+    validate_instance(ISSUER_IDENTITY_CREATE, operation)
+    validate_instance(ISSUER_IDENTITY_OPERATION, operation)
+    validate_instance(
+        ISSUER_IDENTITY_CERTIFICATE,
+        {**operation, "cert_pem": "-----BEGIN CERTIFICATE-----\nAA==\n-----END CERTIFICATE-----"},
+    )
+    validate_instance(
+        ISSUER_IDENTITY_CREATE_RESPONSE,
+        {"identity": identity, "created": True},
+    )
+    validate_instance(ISSUER_IDENTITY_DELETE_RESPONSE, {"deleted": identity})
+    validate_instance(
+        ISSUER_IDENTITY_RESOLUTION_RESPONSE,
+        {"identity": identity, "public_jwk": {"kty": "EC", "crv": "P-256"}},
+    )
+
+    validate_instance(
+        ISSUER_IDENTITY_CREATE,
+        {
+            **operation,
+            "key_attestation_policy": {
+                "mode": "required",
+                "trusted_root_certificates_pem": ["public test root"],
+                "allowed_algorithms": ["ES256"],
+                "status_validation": "disabled",
+            },
+        },
+    )
+
+
+@pytest.mark.parametrize("field", sorted(FORBIDDEN_CUSTODY_FIELDS))
+def test_public_issuer_identity_lifecycle_rejects_custody_selectors(field: str) -> None:
+    for schema in (ISSUER_IDENTITY_CREATE, ISSUER_IDENTITY_OPERATION):
+        request = _identity_operation()
+        request[field] = "private"
+        with pytest.raises(ValidationError):
+            validate_instance(schema, request)
+
+
+def test_public_issuer_identity_lifecycle_requires_complete_resolution_tuple() -> None:
+    for field in (
+        "organization_id",
+        "issuer_did",
+        "key_purpose",
+        "credential_format",
+        "algorithm",
+    ):
+        request = _identity_operation()
+        request.pop(field)
+        with pytest.raises(ValidationError):
+            validate_instance(ISSUER_IDENTITY_OPERATION, request)
+
+
 def test_issuer_identity_rejects_non_did_inactive_and_unknown_purpose() -> None:
     for updates in (
         {"issuer_did": "https://issuer.example"},
@@ -175,14 +248,20 @@ def test_generated_bindings_keep_trust_entities_and_did_identities_distinct() ->
     assert "class IssuerEntityCreateRequest(BaseModel):" in python
     assert "class IssuerEntityUpdateRequest(BaseModel):" in python
     assert "class IssuerIdentity(BaseModel):" in python
+    assert "class IssuerIdentityCreateRequest(BaseModel):" in python
+    assert "class IssuerIdentityOperationRequest(BaseModel):" in python
     assert 'status: Literal["active"]' in python
 
     assert "pub struct IssuerEntityCreateRequest {" in rust
     assert "pub struct IssuerEntityUpdateRequest {" in rust
     assert "pub struct IssuerIdentity {" in rust
+    assert "pub struct IssuerIdentityCreateRequest {" in rust
+    assert "pub struct IssuerIdentityOperationRequest {" in rust
     assert "pub status: String," in rust
 
     assert "export interface IssuerEntityCreateRequest {" in typescript
     assert "export interface IssuerEntityUpdateRequest {" in typescript
     assert "export interface IssuerIdentity {" in typescript
+    assert "export interface IssuerIdentityCreateRequest {" in typescript
+    assert "export interface IssuerIdentityOperationRequest {" in typescript
     assert "status: 'active';" in typescript

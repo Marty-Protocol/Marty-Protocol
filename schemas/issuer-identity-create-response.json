@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/issuer-identity-create-response.json",
+  "title": "IssuerIdentityCreateResponse",
+  "description": "Provider-neutral result of ensuring a DID issuer identity.",
+  "type": "object",
+  "required": ["identity", "created"],
+  "additionalProperties": false,
+  "properties": {
+    "identity": {"$ref": "issuer-identity.json"},
+    "created": {"type": "boolean"}
+  }
+}
