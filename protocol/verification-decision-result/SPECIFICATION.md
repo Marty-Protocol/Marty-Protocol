@@ -33,11 +33,11 @@ The version 1.0.0 reducer is pure and deterministic:
    set cannot pass.
 6. The compatibility field `valid` is true if and only if the decision is
    `PASS`.
-7. Check IDs, component IDs, and category-summary categories are unique within
-   one result. Duplicate identifiers are invalid even when the remaining fields
-   differ.
+7. Check IDs are unique within one result. Duplicate identifiers are invalid
+   even when the remaining fields differ.
 8. Category summaries are reducer outputs. Their counts and outcome MUST match
-   the canonical check set; callers cannot submit independent summaries.
+   the canonical check set, with exactly one summary per represented category;
+   callers cannot submit independent summaries.
 
 Optional checks remain in the record but do not override the required-check
 decision. A policy that wants an unavailable condition to deny access must
@@ -70,6 +70,13 @@ Every result identifies exact policy and trust-profile versions and canonical
 digests, the reducer version, and all software/adapter artifact digests.
 `input_digest` and `evidence_digest` bind the result to transient inputs and
 normalized evidence without retaining those inputs.
+
+Component IDs are unique within the `components` list. Every check's
+`component_id` MUST resolve to exactly one entry in that list; dangling or
+ambiguous component references invalidate the result. This cross-array
+referential-integrity rule is enforced by the canonical-result
+builder/validator because JSON Schema cannot express it. Multiple checks MAY
+reference the same declared component.
 
 Check messages are bounded operator-safe text. Evidence references are opaque
 URNs. They MUST NOT encode claim values, credential/presentation bytes, device

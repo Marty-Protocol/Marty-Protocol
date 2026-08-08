@@ -42,12 +42,14 @@
       "minItems": 1,
       "maxItems": 32,
       "uniqueItems": true,
+      "description": "Exact evidence-producing components; component_id values are unique and resolve every check component_id",
       "items": {"$ref": "verification-component-version.json"}
     },
     "checks": {
       "type": "array",
       "minItems": 1,
       "maxItems": 1024,
+      "description": "Canonical checks whose component_id values each resolve to exactly one declared component",
       "items": {"$ref": "verification-check-result.json"},
       "contains": {"type": "object", "properties": {"required": {"const": true}}, "required": ["required"]},
       "minContains": 1

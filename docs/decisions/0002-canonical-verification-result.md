@@ -30,10 +30,13 @@ Policy, trust, transaction, software, adapter, input-digest, and evidence-digest
 provenance are mandatory. Raw credentials, presentations, claim values, tokens,
 keys, and unbounded exception text are prohibited from the result.
 
-The reducer also rejects duplicate check/component/category identifiers and
-derives category summaries from the check set. JSON Schema enforces the core
-decision/outcome invariants; the pure reducer enforces cross-item uniqueness and
-summary arithmetic that JSON Schema cannot express.
+The pure reducer rejects duplicate check identifiers and derives category
+summaries from the check set. The canonical-result builder/validator rejects
+duplicate component identifiers and requires every check's `component_id` to
+resolve to exactly one declared component. JSON Schema enforces the core
+decision/outcome invariants; framework-neutral code enforces cross-array
+referential integrity, cross-item uniqueness, and summary arithmetic that JSON
+Schema cannot express.
 
 ## Consequences
 
