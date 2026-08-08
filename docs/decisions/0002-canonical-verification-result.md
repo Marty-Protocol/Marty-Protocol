@@ -30,6 +30,10 @@ Policy, trust, transaction, software, adapter, input-digest, and evidence-digest
 provenance are mandatory. Raw credentials, presentations, claim values, tokens,
 keys, and unbounded exception text are prohibited from the result.
 
+Online and offline authorization contexts are disjoint. Online decisions bind
+organization, transaction, and audience; offline decisions bind one governed
+offline profile without retaining online-only scope fields.
+
 The pure reducer rejects duplicate check identifiers and derives category
 summaries from the check set. The canonical-result builder/validator rejects
 duplicate component identifiers and requires every check's `component_id` to

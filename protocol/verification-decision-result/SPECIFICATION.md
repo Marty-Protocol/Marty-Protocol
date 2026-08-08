@@ -62,7 +62,11 @@ or status evidence.
 
 Online decisions require an organization, transaction identifier, and audience.
 Offline decisions require a named offline authorization profile. Empty-string
-transaction matching and ambient tenant selection are not valid contexts.
+transaction matching and ambient tenant selection are not valid contexts. The
+two shapes are mutually exclusive: online results cannot carry an offline
+profile, and offline results cannot carry online organization, transaction, or
+audience fields. A caller cannot make authorization scope ambiguous by filling
+both shapes.
 
 ## Provenance and privacy
 

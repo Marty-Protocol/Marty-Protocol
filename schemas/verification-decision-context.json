@@ -17,11 +17,23 @@
   "allOf": [
     {
       "if": {"properties": {"mode": {"const": "ONLINE"}}, "required": ["mode"]},
-      "then": {"required": ["organization_id", "transaction_id", "audience"]}
+      "then": {
+        "required": ["organization_id", "transaction_id", "audience"],
+        "not": {"required": ["offline_profile_id"]}
+      }
     },
     {
       "if": {"properties": {"mode": {"const": "OFFLINE"}}, "required": ["mode"]},
-      "then": {"required": ["offline_profile_id"]}
+      "then": {
+        "required": ["offline_profile_id"],
+        "not": {
+          "anyOf": [
+            {"required": ["organization_id"]},
+            {"required": ["transaction_id"]},
+            {"required": ["audience"]}
+          ]
+        }
+      }
     }
   ]
 }
