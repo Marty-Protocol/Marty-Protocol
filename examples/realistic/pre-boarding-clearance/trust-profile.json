@@ -7,13 +7,21 @@
   "trust_sources": [
     {
       "source_type": "PKD_URL",
-      "url": "https://pkddownloadsg.icao.int/download",
-      "description": "ICAO Public Key Directory — CSCA certificates"
+      "url": "https://registry.example-icao-adapter.com/pkd/marty/v1/sync",
+      "registry_sync": {
+        "protocol": "MARTY_TRUST_REGISTRY_SYNC_V1",
+        "refresh_interval_hours": 24
+      },
+      "description": "Marty Sync v1 adapter for ICAO PKD CSCA certificates"
     },
     {
       "source_type": "TRUST_LIST",
-      "url": "https://trust-list.example-airline.com/document-signers",
-      "description": "Airline-augmented document signer trust list"
+      "url": "https://trust-list.example-airline.com/document-signers/marty/v1/sync",
+      "registry_sync": {
+        "protocol": "MARTY_TRUST_REGISTRY_SYNC_V1",
+        "refresh_interval_hours": 24
+      },
+      "description": "Marty Sync v1 airline document signer trust list"
     }
   ],
   "allowed_algorithms": ["ES256", "ES384", "PS256"],

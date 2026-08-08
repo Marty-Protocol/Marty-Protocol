@@ -6,7 +6,11 @@
   "trust_sources": [
     {
       "source_type": "TRUST_LIST",
-      "url": "https://trust.example.com/list.json"
+      "url": "https://trust.example.com/v1/trust-registry/sync",
+      "registry_sync": {
+        "protocol": "MARTY_TRUST_REGISTRY_SYNC_V1",
+        "refresh_interval_hours": 24
+      }
     },
     {
       "source_type": "PINNED_ISSUER",

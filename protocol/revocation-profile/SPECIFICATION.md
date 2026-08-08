@@ -1,7 +1,7 @@
 # Revocation Profile — Entity Specification
 
 **Entity:** Revocation Profile
-**Version:** 0.3.1
+**Version:** 0.4.0
 **Stability:** Stable
 **Section in root spec:** §12
 

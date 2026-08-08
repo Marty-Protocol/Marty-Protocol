@@ -29,6 +29,11 @@
             "type": "string",
             "format": "uri",
             "pattern": "^https://",
+            "allOf": [
+              {"not": {"pattern": "^https://[^/?#]*@"}},
+              {"not": {"pattern": "[?#]"}},
+              {"not": {"pattern": "^https://(?:\\[[^]]+\\]|[^/:?#]+):(?!443(?:/|$))[0-9]+(?:/|$)"}}
+            ],
             "description": "HTTPS URI for a trust list or a pinned issuer URL. Pinned issuer URLs are useful for web-native badge ecosystems such as Canvas Credentials or Open Badges."
           },
           "certificate_pem": {"type": "string", "pattern": "^-----BEGIN CERTIFICATE-----"},
@@ -57,12 +62,50 @@
             },
             "description": "DID resolution policy for DID-backed trust sources. The default is fail-closed org-scoped resolution."
           },
-          "description": {"type": "string", "maxLength": 256}
+          "description": {"type": "string", "maxLength": 256},
+          "registry_sync": {
+            "type": "object",
+            "description": "Optional pull configuration for an external registry that implements the Marty Trust Registry Sync v1 contract. This does not imply support for a registry's native/raw distribution format.",
+            "required": ["protocol", "refresh_interval_hours"],
+            "additionalProperties": false,
+            "properties": {
+              "protocol": {
+                "type": "string",
+                "const": "MARTY_TRUST_REGISTRY_SYNC_V1"
+              },
+              "refresh_interval_hours": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 720,
+                "default": 24
+              }
+            }
+          }
         },
         "oneOf": [
           {"required": ["url"]},
           {"required": ["certificate_pem"]},
           {"required": ["issuer_did"]}
+        ],
+        "allOf": [
+          {
+            "if": {"required": ["registry_sync"]},
+            "then": {
+              "required": ["url"],
+              "properties": {
+                "source_type": {"enum": ["TRUST_LIST", "PKD_URL"]}
+              }
+            }
+          },
+          {
+            "if": {
+              "required": ["url"],
+              "properties": {
+                "source_type": {"enum": ["TRUST_LIST", "PKD_URL"]}
+              }
+            },
+            "then": {"required": ["registry_sync"]}
+          }
         ]
       }
     },

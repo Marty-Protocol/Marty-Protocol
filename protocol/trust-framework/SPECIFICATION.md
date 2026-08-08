@@ -1,7 +1,7 @@
 # Trust Framework — Entity Specification
 
 **Entity:** TrustFramework
-**Version:** 0.3.1
+**Version:** 0.4.0
 **Stability:** Stable
 **Section in root spec:** §5.1
 

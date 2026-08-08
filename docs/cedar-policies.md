@@ -263,7 +263,7 @@ Cedar evaluation follows these rules:
 | `ComplianceProfile` | `verification_policy_set_id` |
 | `TrustProfile` | `verification_policy_set_id` |
 
-MIP 0.3.1 does not accept the removed opaque Application Template or Compliance
+MIP 0.4.0 does not accept the removed opaque Application Template or Compliance
 Profile rule objects. Policy decisions are represented by active PolicySets.
 
 ## SDK Integration

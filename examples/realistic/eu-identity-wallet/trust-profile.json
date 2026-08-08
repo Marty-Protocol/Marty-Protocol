@@ -7,8 +7,12 @@
   "trust_sources": [
     {
       "source_type": "TRUST_LIST",
-      "url": "https://ec.europa.eu/tools/lotl/eu-lotl.xml",
-      "description": "EU List of Trusted Lists — eIDAS 2.0 trust framework"
+      "url": "https://registry.example-eudi-adapter.com/lotl/marty/v1/sync",
+      "registry_sync": {
+        "protocol": "MARTY_TRUST_REGISTRY_SYNC_V1",
+        "refresh_interval_hours": 24
+      },
+      "description": "Marty Sync v1 adapter for the EU List of Trusted Lists"
     }
   ],
   "allowed_algorithms": ["ES256", "ES384", "PS256"],

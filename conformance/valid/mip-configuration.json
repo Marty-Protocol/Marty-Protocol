@@ -1,5 +1,5 @@
 {
-  "mip_version": "0.3.1",
+  "mip_version": "0.4.0",
   "issuer": "https://issuer.example.com",
   "mip_configuration_endpoint": "https://issuer.example.com/.well-known/mip-configuration",
   "issuance_endpoint": "https://issuer.example.com/issuance",
@@ -32,7 +32,7 @@
   ],
   "supported_credential_formats": ["SD_JWT_VC", "MDOC"],
   "supported_flow_types": ["oid4vci_pre_authorized", "oid4vci_authorization_code"],
-  "supported_versions": ["0.3.1"],
+  "supported_versions": ["0.4.0"],
   "proximity_supported": true,
   "proximity_engagement_methods": ["QR_CODE", "NFC"],
   "org_endpoints": [

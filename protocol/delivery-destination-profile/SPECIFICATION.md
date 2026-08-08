@@ -1,7 +1,7 @@
 # Delivery Destination Profile - Entity Specification
 
 **Entity:** Delivery Destination Profile  
-**Version:** 0.3.1
+**Version:** 0.4.0
 **Stability:** Draft  
 **Schema:** `schemas/delivery-destination-profile.json`
 

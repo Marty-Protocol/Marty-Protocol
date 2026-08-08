@@ -1,5 +1,5 @@
 // MIP Protocol Models — generated from marty-protocol/schemas/*.json
-// Protocol version: 0.3.1
+// Protocol version: 0.4.0
 // DO NOT EDIT — regenerate with: python scripts/codegen.py typescript
 
 import {
@@ -1036,6 +1036,13 @@ export interface TrustProfileIssuer {
   metadata?: Record<string, unknown>;
   created_at: string;
   updated_at?: string;
+}
+
+/** Atomic result of refreshing every configured Marty Trust Registry Sync v1 source for one organization-owned Trust Profile. */
+export interface TrustProfileRegistrySyncResult {
+  trust_profile_id: string;
+  sources: Record<string, unknown>[];
+  synchronized_at: string;
 }
 
 /** Cryptographic trust configuration for credential issuance and verification. Used by both issuance flows (which issuer keys are trusted) and verification flows (which credential issuers/roots are accepted). For org-specific framework overrides, see OrganizationTrustProfile. */

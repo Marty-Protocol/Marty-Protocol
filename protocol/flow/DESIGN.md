@@ -1,6 +1,6 @@
 # Flow - Design Notes
 
-**Version:** 0.3.1
+**Version:** 0.4.0
 
 ## Standard And Custom Boundaries
 

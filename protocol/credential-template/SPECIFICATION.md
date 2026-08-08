@@ -1,7 +1,7 @@
 # Credential Template — Entity Specification
 
 **Entity:** Credential Template
-**Version:** 0.3.1
+**Version:** 0.4.0
 **Stability:** Moderate
 **Section in root spec:** §6
 

@@ -6,7 +6,11 @@
   "trust_sources": [
     {
       "source_type": "TRUST_LIST",
-      "url": "https://trust.example.com/list.json"
+      "url": "https://registry.example.com/marty/v1/sync",
+      "registry_sync": {
+        "protocol": "MARTY_TRUST_REGISTRY_SYNC_V1",
+        "refresh_interval_hours": 24
+      }
     }
   ],
   "allowed_algorithms": ["ES256"],

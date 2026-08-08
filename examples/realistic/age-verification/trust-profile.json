@@ -7,11 +7,19 @@
   "trust_sources": [
     {
       "source_type": "TRUST_LIST",
-      "url": "https://trust.aamva.org/iaca-trust-list.json"
+      "url": "https://registry.example-aamva-adapter.com/production/marty/v1/sync",
+      "registry_sync": {
+        "protocol": "MARTY_TRUST_REGISTRY_SYNC_V1",
+        "refresh_interval_hours": 24
+      }
     },
     {
       "source_type": "TRUST_LIST",
-      "url": "https://trust.aamva.org/iaca-trust-list-staging.json"
+      "url": "https://registry.example-aamva-adapter.com/staging/marty/v1/sync",
+      "registry_sync": {
+        "protocol": "MARTY_TRUST_REGISTRY_SYNC_V1",
+        "refresh_interval_hours": 24
+      }
     }
   ],
   "allowed_algorithms": ["ES256", "ES384"],
