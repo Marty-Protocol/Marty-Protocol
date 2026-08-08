@@ -24,6 +24,8 @@ from .enums import (
     FlowType,
     IssuanceProtocol,
     NetworkMode,
+    NotificationDeliveryEvidenceType,
+    NotificationDeliveryState,
     NotificationPriority,
     PredicateType,
     RevocationCheckMode,
@@ -807,6 +809,23 @@ to OpenID Connect Discovery (RFC 8414) but scoped to MIP-specific capabilities."
     policy_uri: str | None = None
 
 
+class NotificationDeliveryResult(BaseModel):
+    """Immutable, privacy-bounded evidence for one notification delivery attempt"""
+
+    notification_id: str
+    channel: ChannelType
+    delivery_state: NotificationDeliveryState
+    evidence_type: NotificationDeliveryEvidenceType
+    success: bool
+    attempted_at: datetime
+    accepted_at: datetime | None = None
+    delivered_at: datetime | None = None
+    provider_message_id: str | None = None
+    error_code: str | None = None
+    should_retry: bool | None = None
+    retry_after: int | None = None
+
+
 class NotificationPayload(BaseModel):
     """Message content and routing metadata for multi-channel identity event notification"""
 
@@ -1506,6 +1525,7 @@ IssuerIdentity.model_rebuild()
 KeyAttestationPolicy.model_rebuild()
 Lane.model_rebuild()
 MipConfigurationDiscoveryDocument.model_rebuild()
+NotificationDeliveryResult.model_rebuild()
 NotificationPayload.model_rebuild()
 NotificationTarget.model_rebuild()
 OID4VCINonceResponse.model_rebuild()

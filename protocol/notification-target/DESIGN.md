@@ -37,3 +37,17 @@ Webhook delivery includes an HMAC-SHA256 signature so receiving servers can veri
 ### Delivery Results Are Immutable
 
 `DeliveryResult` records are append-only. Each delivery attempt creates a new record. This gives operators a full audit trail of delivery attempts, failures, and retries for compliance and debugging.
+
+### Acceptance Is Not Delivery
+
+Many asynchronous transports return an intermediary receipt before recipient
+delivery. SMTP server acceptance, push-provider acceptance, and SMS gateway
+submission are represented as `ACCEPTED` with the corresponding evidence type;
+they never set the compatibility `success` flag or `delivered_at`. If a later
+DSN or provider callback confirms delivery, it appends a `DELIVERED` result
+linked by the notification and privacy-bounded provider message identifier.
+
+This distinction prevents operational dashboards and downstream policy from
+turning queue admission into a claim that a person or device received a
+message. Webhook `2xx` is different only because the registered HTTP endpoint
+is itself the protocol's final destination boundary.

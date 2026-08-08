@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/notification-delivery-result.json",
+  "title": "NotificationDeliveryResult",
+  "description": "Immutable, privacy-bounded evidence for one notification delivery attempt",
+  "type": "object",
+  "required": [
+    "notification_id",
+    "channel",
+    "delivery_state",
+    "evidence_type",
+    "success",
+    "attempted_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "notification_id": {"type": "string", "format": "uuid"},
+    "channel": {"$ref": "../enums/channel-types.json"},
+    "delivery_state": {"$ref": "../enums/notification-delivery-states.json"},
+    "evidence_type": {"$ref": "../enums/notification-delivery-evidence-types.json"},
+    "success": {
+      "type": "boolean",
+      "description": "Compatibility projection; true only for delivery_state DELIVERED"
+    },
+    "attempted_at": {"type": "string", "format": "date-time"},
+    "accepted_at": {"type": "string", "format": "date-time"},
+    "delivered_at": {"type": "string", "format": "date-time"},
+    "provider_message_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/+\\-]{0,127}$",
+      "description": "Opaque provider correlation identifier; never an address, token, credential, or message body"
+    },
+    "error_code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Z][A-Z0-9_]{0,63}$"
+    },
+    "should_retry": {"type": "boolean"},
+    "retry_after": {"type": "integer", "minimum": 0, "maximum": 86400}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"delivery_state": {"const": "DELIVERED"}}, "required": ["delivery_state"]},
+      "then": {
+        "required": ["delivered_at"],
+        "properties": {
+          "success": {"const": true},
+          "evidence_type": {"enum": ["DESTINATION_ACCEPTED", "RECIPIENT_DELIVERED"]},
+          "should_retry": {"const": false}
+        },
+        "not": {"required": ["error_code"]}
+      },
+      "else": {
+        "properties": {"success": {"const": false}},
+        "not": {"required": ["delivered_at"]}
+      }
+    },
+    {
+      "if": {"properties": {"delivery_state": {"const": "ACCEPTED"}}, "required": ["delivery_state"]},
+      "then": {
+        "required": ["accepted_at"],
+        "properties": {
+          "evidence_type": {"enum": ["TRANSPORT_ACCEPTED", "PROVIDER_ACCEPTED"]},
+          "should_retry": {"const": false}
+        },
+        "not": {"required": ["error_code"]}
+      }
+    },
+    {
+      "if": {"properties": {"delivery_state": {"const": "FAILED"}}, "required": ["delivery_state"]},
+      "then": {
+        "required": ["error_code"],
+        "properties": {"evidence_type": {"const": "NONE"}},
+        "not": {"required": ["accepted_at"]}
+      }
+    },
+    {
+      "if": {"properties": {"delivery_state": {"enum": ["ATTEMPTED", "UNKNOWN"]}}, "required": ["delivery_state"]},
+      "then": {
+        "properties": {"evidence_type": {"const": "NONE"}},
+        "not": {"anyOf": [{"required": ["accepted_at"]}, {"required": ["error_code"]}]}
+      }
+    },
+    {
+      "if": {"required": ["retry_after"]},
+      "then": {"required": ["should_retry"], "properties": {"should_retry": {"const": true}}}
+    }
+  ]
+}

@@ -55,12 +55,29 @@ At least one of `organization_id`, `user_id`, `device_tokens`, `webhook_endpoint
 |----------|------|----------|-------------|
 | `notification_id` | UUID | Yes | Reference to payload |
 | `channel` | ChannelType | Yes | Delivery channel |
-| `success` | boolean | Yes | True if delivered |
+| `delivery_state` | NotificationDeliveryState | Yes | `ATTEMPTED`, `ACCEPTED`, `DELIVERED`, `FAILED`, or `UNKNOWN` |
+| `evidence_type` | NotificationDeliveryEvidenceType | Yes | Strongest receipt actually established |
+| `success` | boolean | Yes | Compatibility projection; true only for `DELIVERED` |
 | `attempted_at` | datetime | Yes | Attempt timestamp |
+| `accepted_at` | datetime | No | Intermediary/provider acceptance timestamp |
 | `delivered_at` | datetime | No | Delivery confirmation timestamp |
+| `provider_message_id` | string | No | Bounded opaque provider correlation identifier |
 | `error_code` | string | No | Channel-specific error code |
 | `should_retry` | boolean | No | Whether retry is appropriate |
 | `retry_after` | integer | No | Seconds to wait before retry |
+
+`ACCEPTED` means an intermediary or provider accepted responsibility; it does
+not mean recipient or device delivery. SMTP `DATA` acceptance, an FCM provider
+message ID, and an SMS gateway submission receipt MUST NOT set `success=true`
+or `delivered_at`. A later channel-specific delivery receipt creates a new
+immutable `DELIVERED` result. A successful webhook response may use
+`DESTINATION_ACCEPTED` as the final delivery boundary because the registered
+endpoint itself is the protocol destination.
+
+`provider_message_id` is correlation metadata only. It MUST NOT contain a
+destination address, device token, credential, authorization value, or message
+body. See `schemas/notification-delivery-result.json` for the state/evidence
+invariants.
 
 ## ChannelType Values
 

@@ -1,0 +1,11 @@
+{
+  "notification_id": "123e4567-e89b-12d3-a456-426614174000",
+  "channel": "EMAIL",
+  "delivery_state": "ACCEPTED",
+  "evidence_type": "TRANSPORT_ACCEPTED",
+  "success": false,
+  "attempted_at": "2026-08-08T23:00:00Z",
+  "accepted_at": "2026-08-08T23:00:01Z",
+  "provider_message_id": "smtp-01J5EXAMPLE",
+  "should_retry": false
+}

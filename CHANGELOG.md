@@ -25,6 +25,10 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
   before rotation; clients cannot select or renew grace, and deactivation or
   revocation overrides it. Device responses now expose an optional monotonic
   `key_version` compatibility field for current-key concurrency control.
+- Distinguished notification transport/provider acceptance from confirmed
+  delivery. The new delivery-result schema carries explicit state and evidence
+  type, keeps the legacy `success` projection true only for `DELIVERED`, and
+  privacy-bounds provider correlation identifiers.
 
 ## [0.4.1] - 2026-08-07
 

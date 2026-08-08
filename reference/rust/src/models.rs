@@ -1054,6 +1054,29 @@ pub struct MipConfigurationDiscoveryDocument {
     pub policy_uri: Option<String>,
 }
 
+/// Immutable, privacy-bounded evidence for one notification delivery attempt
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NotificationDeliveryResult {
+    pub notification_id: String,
+    pub channel: ChannelType,
+    pub delivery_state: NotificationDeliveryState,
+    pub evidence_type: NotificationDeliveryEvidenceType,
+    pub success: bool,
+    pub attempted_at: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub accepted_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delivered_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider_message_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub should_retry: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub retry_after: Option<i64>,
+}
+
 /// Message content and routing metadata for multi-channel identity event notification
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NotificationPayload {
