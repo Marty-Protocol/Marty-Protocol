@@ -1,5 +1,5 @@
 // MIP Protocol Enums — generated from marty-protocol/enums/*.json
-// Protocol version: 0.3.1
+// Protocol version: 0.4.0
 // DO NOT EDIT — regenerate with: python scripts/codegen.py typescript
 
 /** Formal permission scope strings for MIP API keys. Scopes follow the pattern '{resource}:{action}'. Organization-scoped keys may hold any of these scopes. Deployment-scoped keys are restricted to a subset appropriate for a single deployment profile. */

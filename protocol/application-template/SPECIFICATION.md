@@ -1,7 +1,7 @@
 # Application Template — Entity Specification
 
 **Entity:** Application Template
-**Version:** 0.3.1
+**Version:** 0.4.0
 **Stability:** Dynamic
 **Section in root spec:** §11
 

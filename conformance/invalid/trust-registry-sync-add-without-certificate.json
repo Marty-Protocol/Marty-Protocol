@@ -1,0 +1,15 @@
+{
+  "sync_token": "1",
+  "sequence": 1,
+  "entries": [
+    {
+      "entry_id": "c6d7e8f9-a0b1-4234-9678-901234abcdef",
+      "anchor_type": "CSCA",
+      "operation": "ADD",
+      "country_code": "US",
+      "source": "MANUAL"
+    }
+  ],
+  "has_more": false,
+  "generated_at": "2026-08-07T12:00:00Z"
+}

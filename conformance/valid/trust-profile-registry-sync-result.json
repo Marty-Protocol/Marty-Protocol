@@ -1,0 +1,14 @@
+{
+  "trust_profile_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "sources": [
+    {
+      "url": "https://registry.example.org/v1/trust-registry/sync",
+      "protocol": "MARTY_TRUST_REGISTRY_SYNC_V1",
+      "sequence": 42,
+      "csca_entries": 3,
+      "dsc_entries": 7,
+      "synchronized_at": "2026-08-07T12:00:00Z"
+    }
+  ],
+  "synchronized_at": "2026-08-07T12:00:00Z"
+}

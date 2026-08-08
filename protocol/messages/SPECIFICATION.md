@@ -1,7 +1,7 @@
 # Protocol Messages — Specification
 
 **Entity:** Protocol Messages
-**Version:** 0.3.1
+**Version:** 0.4.0
 **Stability:** Draft
 **Section in root spec:** §4 (Message Layer)
 
@@ -23,7 +23,7 @@ All MIP messages MUST be wrapped in the following envelope when transmitted betw
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `mip_version` | string | Yes | Protocol version. MUST be `"0.3.1"` for this spec revision. |
+| `mip_version` | string | Yes | Protocol version. MUST be `"0.4.0"` for this spec revision. |
 | `message_type` | MessageType | Yes | Identifies the message (see §2). |
 | `message_id` | UUID | Yes | Unique identifier for this message instance. |
 | `correlation_id` | UUID | No | Links messages belonging to the same flow instance. Set to `FlowInstance.id`. |

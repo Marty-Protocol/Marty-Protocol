@@ -1,7 +1,7 @@
 # Trust Profile — Entity Specification
 
 **Entity:** Trust Profile
-**Version:** 0.3.1
+**Version:** 0.4.0
 **Stability:** Stable
 **Section in root spec:** §5
 
@@ -56,12 +56,25 @@ A Trust Profile defines **who is trusted** and **how cryptographic validation oc
 | `verification_method_ids` | DID URL[] | No | Pinned DID verification methods accepted for this issuer |
 | `did_resolution` | DidResolutionPolicy | No | Resolver strategy and cache/fallback policy |
 | `description` | string | No | Human-readable label |
+| `registry_sync` | object | No | Explicit pull configuration for a source implementing Marty Trust Registry Sync v1 |
 
 Exactly one of `url`, `certificate_pem`, or `issuer_did` MUST be present per TrustSource.
 
 Entries in `allowed_issuers` and `denied_issuers` MAY be issuer DIDs, HTTPS issuer URLs, or issuer domains. Verifiers SHOULD match exact issuer identifiers and normalized aliases (for example, matching an issuer URL by its domain, or deriving the host domain from a `did:web` issuer) so badges encountered in public ecosystems such as Canvas Credentials remain trustable without requiring a second trust model.
 
 For `PINNED_ISSUER` entries with `issuer_did`, verifiers SHOULD set `organization_id` when the issuer is managed by the relying party's tenant or platform. When `organization_id` is present, verification MUST resolve the DID through the organization's issuer identity registry before using public DID resolution. Public fallback is allowed only when `did_resolution.allow_public_fallback` is true or `resolver_type` is `PUBLIC_DID` / `ORGANIZATION_REGISTRY_WITH_PUBLIC_FALLBACK`.
+
+`registry_sync`, when present, requires an HTTPS `url`, a `source_type` of
+`TRUST_LIST` or `PKD_URL`, the protocol identifier
+`MARTY_TRUST_REGISTRY_SYNC_V1`, and a refresh interval from 1 through 720
+hours. The field identifies the wire contract served by the URL; it MUST NOT
+be used to claim that a native ICAO PKD, EU LoTL, AAMVA, or other raw registry
+format has been implemented.
+
+In protocol version 0.4.0, URL-based `TRUST_LIST` and `PKD_URL` sources MUST
+declare `registry_sync`. A URL without a supported, explicit wire adapter is
+not an effective trust source and implementations MUST reject it rather than
+silently treating the profile as unrestricted.
 
 ### DidResolutionPolicy Fields
 
@@ -89,6 +102,7 @@ For `PINNED_ISSUER` entries with `issuer_did`, verifiers SHOULD set `organizatio
 5. If `revocation_profile_id` is set, the referenced RevocationProfile MUST exist in the same organization.
 6. When `time_policy.require_freshness` is `true`, `time_policy.freshness_window_seconds` MUST be a positive integer.
 7. DID-backed `PINNED_ISSUER` sources MUST match the credential issuer DID and, when `verification_method_ids` are present, the credential signing method/kid MUST be one of those DID URLs.
+8. URL-based `TRUST_LIST` and `PKD_URL` sources MUST identify the supported wire contract through `registry_sync`.
 
 ## Validation Configuration — Normative Field Placement
 

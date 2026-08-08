@@ -1,5 +1,5 @@
 """MIP Protocol Models — generated from marty-protocol/schemas/*.json
-Protocol version: 0.3.1
+Protocol version: 0.4.0
 DO NOT EDIT — regenerate with: python scripts/codegen.py python
 """
 from __future__ import annotations
@@ -1186,6 +1186,15 @@ on issuer history (failed validations, revocation events, compliance lapses)."""
     updated_at: datetime | None = None
 
 
+class TrustProfileRegistrySyncResult(BaseModel):
+    """Atomic result of refreshing every configured Marty Trust Registry Sync v1 source for one
+organization-owned Trust Profile."""
+
+    trust_profile_id: str
+    sources: list[dict[str, Any]]
+    synchronized_at: datetime
+
+
 class TrustProfile(BaseModel):
     """Cryptographic trust configuration for credential issuance and verification. Used by both
 issuance flows (which issuer keys are trusted) and verification flows (which credential
@@ -1431,6 +1440,7 @@ TrustFramework.model_rebuild()
 TrustProfileIssuerCreateRequest.model_rebuild()
 TrustProfileIssuerUpdateRequest.model_rebuild()
 TrustProfileIssuer.model_rebuild()
+TrustProfileRegistrySyncResult.model_rebuild()
 TrustProfile.model_rebuild()
 TrustRegistrySync.model_rebuild()
 VerificationFlowStartRequest.model_rebuild()

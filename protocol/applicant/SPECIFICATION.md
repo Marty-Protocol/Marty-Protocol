@@ -1,7 +1,7 @@
 # Applicant Application Specification
 
 **Entity:** ApplicantApplication
-**Version:** 0.3.1
+**Version:** 0.4.0
 **Stability:** Draft
 
 ## Purpose

@@ -9,6 +9,8 @@
   "properties": {
     "sync_token": {
       "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
       "description": "Opaque cursor representing the current sync position. Pass as 'since' on the next request to receive only changes since this point."
     },
     "sequence": {
@@ -18,10 +20,11 @@
     },
     "entries": {
       "type": "array",
+      "maxItems": 10000,
       "description": "CSCA/DSC trust anchor entries added or removed since the last sync",
       "items": {
         "type": "object",
-        "required": ["entry_id", "anchor_type", "operation", "country_code"],
+        "required": ["entry_id", "anchor_type", "operation", "country_code", "source"],
         "additionalProperties": false,
         "properties": {
           "entry_id": {"type": "string", "format": "uuid"},
@@ -42,9 +45,10 @@
           },
           "certificate_pem": {
             "type": ["string", "null"],
+            "maxLength": 65536,
             "description": "PEM-encoded certificate; null for REMOVE operations"
           },
-          "subject_key_id": {"type": "string"},
+          "subject_key_id": {"type": "string", "maxLength": 512},
           "not_before": {"type": "string", "format": "date-time"},
           "not_after": {"type": "string", "format": "date-time"},
           "source": {
@@ -52,7 +56,22 @@
             "enum": ["ICAO_PKD", "AAMVA", "EUDI_LOTL", "MANUAL"],
             "description": "Where this entry was sourced from"
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {"operation": {"const": "ADD"}},
+              "required": ["operation"]
+            },
+            "then": {
+              "required": ["certificate_pem"],
+              "properties": {"certificate_pem": {"type": "string"}}
+            },
+            "else": {
+              "properties": {"certificate_pem": {"type": "null"}}
+            }
+          }
+        ]
       }
     },
     "has_more": {

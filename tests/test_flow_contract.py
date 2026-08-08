@@ -1,4 +1,4 @@
-"""Cross-file invariants for the MIP 0.3.1 Flow contract."""
+"""Cross-file invariants for the MIP 0.4.0 Flow contract."""
 
 import json
 

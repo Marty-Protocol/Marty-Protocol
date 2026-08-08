@@ -1,5 +1,5 @@
 //! MIP Protocol Models — generated from marty-protocol/schemas/*.json
-//! Protocol version: 0.3.1
+//! Protocol version: 0.4.0
 //! DO NOT EDIT — regenerate with: python scripts/codegen.py rust
 
 use serde::{Deserialize, Serialize};
@@ -1582,6 +1582,15 @@ pub struct TrustProfileIssuer {
     pub created_at: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<String>,
+}
+
+/// Atomic result of refreshing every configured Marty Trust Registry Sync v1 source for one
+/// organization-owned Trust Profile.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TrustProfileRegistrySyncResult {
+    pub trust_profile_id: String,
+    pub sources: Vec<serde_json::Value>,
+    pub synchronized_at: String,
 }
 
 /// Cryptographic trust configuration for credential issuance and verification. Used by both

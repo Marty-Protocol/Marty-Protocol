@@ -1,7 +1,7 @@
 # Flow Execution — Entity Specification
 
 **Entity:** FlowExecution
-**Version:** 0.3.1
+**Version:** 0.4.0
 **Stability:** Stable
 **Section in root spec:** §9.2
 

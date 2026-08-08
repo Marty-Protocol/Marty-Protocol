@@ -1,7 +1,7 @@
 # Compliance Profile — Entity Specification
 
 **Entity:** Compliance Profile
-**Version:** 0.3.1
+**Version:** 0.4.0
 **Stability:** Stable (system profiles), Moderate (custom)
 **Section in root spec:** §10
 
@@ -140,7 +140,7 @@ A MIP-compliant deployment MUST expose a `GET /.well-known/mip-configuration` en
 
 ```json
 {
-  "mip_version": "0.3.1",
+  "mip_version": "0.4.0",
   "issuer": "https://issuer.example.com",
   "mip_configuration_endpoint": "https://issuer.example.com/.well-known/mip-configuration",
   "active_compliance_profiles": [{

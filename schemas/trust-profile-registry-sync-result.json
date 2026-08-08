@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/trust-profile-registry-sync-result.json",
+  "title": "TrustProfileRegistrySyncResult",
+  "description": "Atomic result of refreshing every configured Marty Trust Registry Sync v1 source for one organization-owned Trust Profile.",
+  "type": "object",
+  "required": ["trust_profile_id", "sources", "synchronized_at"],
+  "additionalProperties": false,
+  "properties": {
+    "trust_profile_id": {"type": "string", "format": "uuid"},
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "url",
+          "protocol",
+          "sequence",
+          "csca_entries",
+          "dsc_entries",
+          "synchronized_at"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://",
+            "allOf": [
+              {"not": {"pattern": "^https://[^/?#]*@"}},
+              {"not": {"pattern": "[?#]"}},
+              {"not": {"pattern": "^https://(?:\\[[^]]+\\]|[^/:?#]+):(?!443(?:/|$))[0-9]+(?:/|$)"}}
+            ]
+          },
+          "protocol": {"type": "string", "const": "MARTY_TRUST_REGISTRY_SYNC_V1"},
+          "sequence": {"type": "integer", "minimum": 0},
+          "csca_entries": {"type": "integer", "minimum": 0},
+          "dsc_entries": {"type": "integer", "minimum": 0},
+          "synchronized_at": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "synchronized_at": {"type": "string", "format": "date-time"}
+  }
+}

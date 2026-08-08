@@ -1,7 +1,7 @@
 # Trust Registry — Entity Specification
 
 **Entity:** TrustRegistrySync
-**Version:** 0.3.1
+**Version:** 0.4.0
 **Stability:** Stable
 **Section in root spec:** §5.4
 
@@ -60,6 +60,28 @@ GET /v1/trust-registry/sync
 
 See `schemas/trust-registry-sync.json` for the full JSON Schema.
 
+## Organization-Scoped Upstream Import
+
+A Trust Profile MAY consume another deployment's delta feed by configuring a
+URL TrustSource with `registry_sync.protocol` set to
+`MARTY_TRUST_REGISTRY_SYNC_V1`. The consuming implementation MUST:
+
+1. authorize the operation against the Trust Profile's owning organization;
+2. require CA-validated HTTPS and reject redirects, credentials in URLs, and
+   non-public network destinations;
+3. validate the response against `trust-registry-sync.json` without extensions;
+4. reject sequence rollback, repeated pagination tokens, malformed or expired
+   certificates, and removals for an unknown source entry;
+5. apply every page atomically so a partial refresh never changes effective
+   trust; and
+6. stop using imported anchors when the configured refresh window expires.
+
+The operation result conforms to
+`schemas/trust-profile-registry-sync-result.json`. This adapter consumes the
+Marty delta protocol only. Native/raw ICAO PKD, EU LoTL, and AAMVA formats need
+separate reviewed adapters and MUST NOT be represented as supported merely by
+using their public website URL.
+
 ## Constraints
 
 1. Trust Registry endpoints are **read-only** for API consumers; trust anchors are populated by internal sync jobs.
@@ -67,3 +89,4 @@ See `schemas/trust-registry-sync.json` for the full JSON Schema.
 3. A `sequence` number monotonically increases; gaps indicate deleted entries in intermediate batches.
 4. Wallets MUST process `REMOVE` operations to maintain a consistent trust store.
 5. Certificates MUST be validated (chain, expiry) by the wallet before trusting them.
+6. Importing deployments MUST keep entries isolated by both owning Trust Profile and source URL.

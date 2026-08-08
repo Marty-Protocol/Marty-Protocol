@@ -9,7 +9,19 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-07
+
 ### Changed
+- Added the organization-scoped Marty Trust Registry Sync v1 import contract.
+  URL trust sources now declare their wire adapter explicitly; registry URLs
+  require HTTPS without credentials, query strings, fragments, or non-default
+  ports, and sync results expose only public source counts and sequence state.
+  Native ICAO PKD, EU LoTL, and AAMVA formats remain separately scoped and are
+  not implied by configuring a raw distribution URL.
+- Hardened delta feeds with bounded cursors, entries, certificates, and key
+  identifiers; required source attribution; and operation-aware certificate
+  rules. Importing implementations must reject rollback and malformed deltas
+  and apply complete feeds atomically.
 - Made issuer accreditation evidence first-class. `IssuerEntity` responses now
   carry an explicit `accreditations` set; create defaults it to empty and update
   replaces the complete set. `accreditation_body` remains the certifying
