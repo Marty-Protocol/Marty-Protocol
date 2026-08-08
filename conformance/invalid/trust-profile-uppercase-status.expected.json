@@ -1,0 +1,5 @@
+{
+  "pointer": "/status",
+  "error_code": "ENUM_MISMATCH",
+  "message": "status must use a canonical lowercase Trust Profile lifecycle value"
+}

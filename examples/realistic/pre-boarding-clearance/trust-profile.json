@@ -3,6 +3,7 @@
   "organization_id": "b4000001-0000-4000-8000-000000000000",
   "name": "ICAO DTC Trust — Pre-Boarding Clearance Example",
   "description": "Trust profile for ICAO Digital Travel Credential verification at airport boarding gates",
+  "status": "active",
   "profile_type": "ICAO",
   "trust_sources": [
     {

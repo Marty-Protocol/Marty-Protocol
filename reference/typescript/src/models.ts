@@ -1,5 +1,5 @@
 // MIP Protocol Models — generated from marty-protocol/schemas/*.json
-// Protocol version: 0.4.0
+// Protocol version: 0.4.1
 // DO NOT EDIT — regenerate with: python scripts/codegen.py typescript
 
 import {
@@ -23,6 +23,7 @@ import {
   RevocationMechanism,
   RevocationReason,
   RevocationTimingMode,
+  TrustProfileStatus,
   TrustSourceType,
   ValidationAlgorithm,
   ZkCircuitSystem,
@@ -1051,6 +1052,7 @@ export interface TrustProfile {
   organization_id: string;
   name: string;
   description?: string;
+  status: TrustProfileStatus;
   profile_type: 'ICAO' | 'AAMVA' | 'EUDI' | 'CUSTOM';
   trust_sources: Record<string, unknown>[];
   allowed_algorithms: string[];

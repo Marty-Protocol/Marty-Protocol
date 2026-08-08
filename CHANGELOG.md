@@ -9,6 +9,14 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-08-07
+
+### Fixed
+- Defined the previously omitted Trust Profile lifecycle `status` field and
+  its canonical lowercase wire values: `draft`, `active`, `suspended`, and
+  `archived`. This makes the published schema match the existing public
+  runtime response and removes casing ambiguity for conformance clients.
+
 ## [0.4.0] - 2026-08-07
 
 ### Changed

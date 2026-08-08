@@ -1,7 +1,7 @@
 # Trust Profile — Entity Specification
 
 **Entity:** Trust Profile
-**Version:** 0.4.0
+**Version:** 0.4.1
 **Stability:** Stable
 **Section in root spec:** §5
 
@@ -31,6 +31,7 @@ A Trust Profile defines **who is trusted** and **how cryptographic validation oc
 | `organization_id` | UUID | Yes | Must reference existing organization |
 | `name` | string | Yes | 1–128 characters |
 | `description` | string | No | Max 1024 characters |
+| `status` | string | Yes | `draft`, `active`, `suspended`, or `archived`; canonical lowercase |
 | `profile_type` | TrustProfileType | Yes | See enum |
 | `trust_sources` | TrustSource[] | Yes | At least one entry required |
 | `allowed_issuers` | string[] | No | Explicit allowlist of issuer DID, HTTPS issuer URL, or issuer domain |
@@ -71,7 +72,7 @@ hours. The field identifies the wire contract served by the URL; it MUST NOT
 be used to claim that a native ICAO PKD, EU LoTL, AAMVA, or other raw registry
 format has been implemented.
 
-In protocol version 0.4.0, URL-based `TRUST_LIST` and `PKD_URL` sources MUST
+In protocol version 0.4.1, URL-based `TRUST_LIST` and `PKD_URL` sources MUST
 declare `registry_sync`. A URL without a supported, explicit wire adapter is
 not an effective trust source and implementations MUST reject it rather than
 silently treating the profile as unrestricted.
@@ -123,6 +124,17 @@ The `profile_type` field (`ICAO` | `AAMVA` | `EUDI` | `CUSTOM`) determines the d
 
 ## Lifecycle
 
+Lifecycle state and compliance state are separate. Implementations MUST emit
+the lifecycle `status` exactly as a lowercase value from the schema. A newly
+created profile is `draft`; successful activation changes it to `active`.
+
+```text
+draft -> active -> suspended -> active
+  +-------------------------------> archived
+```
+
+Compliance state is evaluated independently:
+
 ```
 SETUP_REQUIRED → (configure trust_sources + algorithms) → COMPLIANT
 COMPLIANT      → (trust source expires)                 → NEEDS_ATTENTION
@@ -138,6 +150,7 @@ NEEDS_ATTENTION → (updated)                             → COMPLIANT
   "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "organization_id": "org-001",
   "name": "AAMVA mDL Trust",
+  "status": "active",
   "profile_type": "AAMVA",
   "trust_sources": [
     {

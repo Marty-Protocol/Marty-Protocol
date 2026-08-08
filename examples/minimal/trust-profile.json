@@ -2,6 +2,7 @@
   "id": "a1b2c3d4-0003-4000-8000-000000000003",
   "organization_id": "a1b2c3d4-0000-4000-8000-000000000000",
   "name": "Minimal Trust Profile",
+  "status": "active",
   "profile_type": "CUSTOM",
   "trust_sources": [
     {

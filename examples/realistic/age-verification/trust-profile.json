@@ -3,6 +3,7 @@
   "organization_id": "b1000001-0000-4000-8000-000000000000",
   "name": "AAMVA mDL Trust Profile",
   "description": "Trust profile for verifying AAMVA-compliant mobile Driver's Licenses. Anchors to state DMV IACA trust lists for US-issued mDLs.",
+  "status": "active",
   "profile_type": "AAMVA",
   "trust_sources": [
     {

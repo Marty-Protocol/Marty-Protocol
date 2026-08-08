@@ -1,6 +1,6 @@
 [package]
 name = "mip-protocol-types"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 description = "Generated Rust types for the Marty Identity Protocol"
 license = "Apache-2.0"

@@ -4,13 +4,14 @@
   "title": "TrustProfile",
   "description": "Cryptographic trust configuration for credential issuance and verification. Used by both issuance flows (which issuer keys are trusted) and verification flows (which credential issuers/roots are accepted). For org-specific framework overrides, see OrganizationTrustProfile.",
   "type": "object",
-  "required": ["id", "organization_id", "name", "profile_type", "trust_sources", "allowed_algorithms", "supported_formats", "compliance_status", "created_at"],
+  "required": ["id", "organization_id", "name", "status", "profile_type", "trust_sources", "allowed_algorithms", "supported_formats", "compliance_status", "created_at"],
   "additionalProperties": false,
   "properties": {
     "id": {"type": "string", "format": "uuid"},
     "organization_id": {"type": "string", "format": "uuid"},
     "name": {"type": "string", "minLength": 1, "maxLength": 128},
     "description": {"type": "string", "maxLength": 1024},
+    "status": {"$ref": "../enums/trust-profile-statuses.json"},
     "profile_type": {
       "type": "string",
       "enum": ["ICAO", "AAMVA", "EUDI", "CUSTOM"],
