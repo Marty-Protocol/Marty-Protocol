@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/verification-check-categories.json",
+  "title": "VerificationCheckCategory",
+  "description": "Stable verification evidence category",
+  "type": "string",
+  "enum": [
+    "STRUCTURE",
+    "CREDENTIAL_PROOF",
+    "PRESENTATION_PROOF",
+    "DOCUMENT_INTEGRITY",
+    "ISSUER_TRUST",
+    "VALIDITY",
+    "STATUS",
+    "HOLDER_BINDING",
+    "TRANSACTION_BINDING",
+    "CLAIM_CONSTRAINTS",
+    "BIOMETRIC",
+    "POLICY"
+  ]
+}

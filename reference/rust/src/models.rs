@@ -1648,6 +1648,80 @@ pub struct TrustRegistrySync {
     pub generated_at: String,
 }
 
+/// Reducer-derived summary for one verification check category
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VerificationCategorySummary {
+    pub category: VerificationCheckCategory,
+    pub outcome: String,
+    pub required_check_count: i64,
+    pub passed_required_count: i64,
+    pub failed_required_count: i64,
+    pub unresolved_required_count: i64,
+}
+
+/// Privacy-minimized evidence outcome for one verification check
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VerificationCheckResult {
+    pub check_id: String,
+    pub category: VerificationCheckCategory,
+    pub required: bool,
+    pub outcome: VerificationCheckOutcome,
+    pub code: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub safe_message: Option<String>,
+    pub component_id: String,
+    pub evaluated_at: String,
+    pub evidence_refs: Vec<String>,
+}
+
+/// Exact software or adapter artifact that produced verification evidence
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VerificationComponentVersion {
+    pub component_id: String,
+    pub version: String,
+    pub artifact_digest: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub adapter_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub adapter_version: Option<String>,
+}
+
+/// Tenant and transaction scope in which verification was authorized
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VerificationDecisionContext {
+    pub mode: String,
+    pub verifier_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub transaction_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub audience: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub offline_profile_id: Option<String>,
+}
+
+/// Canonical, privacy-minimized verification decision and complete required-check evidence
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VerificationDecisionResult {
+    pub schema_version: String,
+    pub verification_id: String,
+    pub context: VerificationDecisionContext,
+    pub processing_status: VerificationProcessingStatus,
+    pub decision: VerificationDecision,
+    pub decision_code: String,
+    pub valid: bool,
+    pub evaluated_at: String,
+    pub input_digest: String,
+    pub evidence_digest: String,
+    pub policy: VerificationProfileReference,
+    pub trust_profile: VerificationProfileReference,
+    pub reducer: VerificationReducerReference,
+    pub components: Vec<VerificationComponentVersion>,
+    pub checks: Vec<VerificationCheckResult>,
+    pub category_summaries: Vec<VerificationCategorySummary>,
+}
+
 /// Public request to start an OID4VP or SIOPv2 flow using a DID-resolved verifier profile.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VerificationFlowStartRequest {
@@ -1686,6 +1760,21 @@ pub struct VerificationFlowStartResponse {
     pub nonce: String,
     pub expires_at: String,
     pub status: String,
+}
+
+/// Versioned policy or trust profile used by a verification decision
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VerificationProfileReference {
+    pub id: String,
+    pub version: String,
+    pub content_digest: String,
+}
+
+/// Pure reducer contract that derived the verification decision
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VerificationReducerReference {
+    pub reducer_id: String,
+    pub version: String,
 }
 
 /// Public result projection for an authorized verification Flow execution.

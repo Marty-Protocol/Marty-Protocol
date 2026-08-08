@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/verification-check-result.json",
+  "title": "VerificationCheckResult",
+  "description": "Privacy-minimized evidence outcome for one verification check",
+  "type": "object",
+  "required": ["check_id", "category", "required", "outcome", "code", "component_id", "evaluated_at", "evidence_refs"],
+  "additionalProperties": false,
+  "properties": {
+    "check_id": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+    },
+    "category": {"$ref": "../enums/verification-check-categories.json"},
+    "required": {"type": "boolean"},
+    "outcome": {"$ref": "../enums/verification-check-outcomes.json"},
+    "code": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 96,
+      "pattern": "^[A-Z][A-Z0-9_]{2,95}$"
+    },
+    "safe_message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\r\\n]+$",
+      "description": "Bounded operator-safe text without claim values or adapter exception content"
+    },
+    "component_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "evaluated_at": {"type": "string", "format": "date-time"},
+    "evidence_refs": {
+      "type": "array",
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 20,
+        "maxLength": 224,
+        "pattern": "^urn:marty:evidence:[A-Za-z0-9][A-Za-z0-9._:/-]+$"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"outcome": {"enum": ["PASSED", "FAILED"]}}, "required": ["outcome"]},
+      "then": {"properties": {"evidence_refs": {"minItems": 1}}}
+    }
+  ]
+}

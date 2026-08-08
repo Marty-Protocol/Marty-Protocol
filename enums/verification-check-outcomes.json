@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/verification-check-outcomes.json",
+  "title": "VerificationCheckOutcome",
+  "description": "Explicit outcome of one verification check",
+  "type": "string",
+  "enum": ["PASSED", "FAILED", "NOT_PERFORMED", "UNSUPPORTED", "ERROR", "NOT_APPLICABLE"],
+  "$defs": {
+    "values": {
+      "PASSED": {"description": "The check ran and established its required fact"},
+      "FAILED": {"description": "The check ran and rejected its required fact"},
+      "NOT_PERFORMED": {"description": "The check was required or selected but did not run"},
+      "UNSUPPORTED": {"description": "The implementation cannot perform the selected check"},
+      "ERROR": {"description": "The check could not produce a fact because processing errored"},
+      "NOT_APPLICABLE": {"description": "The selected profile determined that the check does not apply"}
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0.0",
+  "verification_id": "verification-example-001",
+  "context": {
+    "mode": "ONLINE",
+    "verifier_id": "verifier:example",
+    "organization_id": "123e4567-e89b-12d3-a456-426614174000",
+    "transaction_id": "transaction-example-001",
+    "audience": "https://verifier.example"
+  },
+  "processing_status": "COMPLETED",
+  "decision": "PASS",
+  "decision_code": "ALL_REQUIRED_CHECKS_PASSED",
+  "valid": true,
+  "evaluated_at": "2026-08-08T23:30:00Z",
+  "input_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "evidence_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "policy": {
+    "id": "policy:employee-access",
+    "version": "7",
+    "content_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+  },
+  "trust_profile": {
+    "id": "trust:employee-issuers",
+    "version": "4",
+    "content_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+  },
+  "reducer": {"reducer_id": "mip.required-check-reducer", "version": "1.0.0"},
+  "components": [
+    {
+      "component_id": "marty-core",
+      "version": "0.1.35",
+      "artifact_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+      "adapter_id": "oid4vp",
+      "adapter_version": "1.0.0"
+    }
+  ],
+  "checks": [
+    {
+      "check_id": "credential.signature",
+      "category": "CREDENTIAL_PROOF",
+      "required": true,
+      "outcome": "PASSED",
+      "code": "CREDENTIAL_SIGNATURE_VALID",
+      "component_id": "marty-core",
+      "evaluated_at": "2026-08-08T23:30:00Z",
+      "evidence_refs": ["urn:marty:evidence:credential-signature:example-001"]
+    },
+    {
+      "check_id": "transaction.nonce",
+      "category": "TRANSACTION_BINDING",
+      "required": true,
+      "outcome": "PASSED",
+      "code": "TRANSACTION_NONCE_VALID",
+      "component_id": "marty-core",
+      "evaluated_at": "2026-08-08T23:30:00Z",
+      "evidence_refs": ["urn:marty:evidence:transaction-binding:example-001"]
+    }
+  ],
+  "category_summaries": [
+    {
+      "category": "CREDENTIAL_PROOF",
+      "outcome": "PASSED",
+      "required_check_count": 1,
+      "passed_required_count": 1,
+      "failed_required_count": 0,
+      "unresolved_required_count": 0
+    },
+    {
+      "category": "TRANSACTION_BINDING",
+      "outcome": "PASSED",
+      "required_check_count": 1,
+      "passed_required_count": 1,
+      "failed_required_count": 0,
+      "unresolved_required_count": 0
+    }
+  ]
+}

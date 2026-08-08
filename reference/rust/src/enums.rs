@@ -437,6 +437,76 @@ pub enum ValidationAlgorithm {
     BbsBls12381Shake256,
 }
 
+/// Stable verification evidence category
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum VerificationCheckCategory {
+    #[serde(rename = "STRUCTURE")]
+    Structure,
+    #[serde(rename = "CREDENTIAL_PROOF")]
+    CredentialProof,
+    #[serde(rename = "PRESENTATION_PROOF")]
+    PresentationProof,
+    #[serde(rename = "DOCUMENT_INTEGRITY")]
+    DocumentIntegrity,
+    #[serde(rename = "ISSUER_TRUST")]
+    IssuerTrust,
+    #[serde(rename = "VALIDITY")]
+    Validity,
+    #[serde(rename = "STATUS")]
+    Status,
+    #[serde(rename = "HOLDER_BINDING")]
+    HolderBinding,
+    #[serde(rename = "TRANSACTION_BINDING")]
+    TransactionBinding,
+    #[serde(rename = "CLAIM_CONSTRAINTS")]
+    ClaimConstraints,
+    #[serde(rename = "BIOMETRIC")]
+    Biometric,
+    #[serde(rename = "POLICY")]
+    Policy,
+}
+
+/// Explicit outcome of one verification check
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum VerificationCheckOutcome {
+    #[serde(rename = "PASSED")]
+    Passed,
+    #[serde(rename = "FAILED")]
+    Failed,
+    #[serde(rename = "NOT_PERFORMED")]
+    NotPerformed,
+    #[serde(rename = "UNSUPPORTED")]
+    Unsupported,
+    #[serde(rename = "ERROR")]
+    Error,
+    #[serde(rename = "NOT_APPLICABLE")]
+    NotApplicable,
+}
+
+/// Policy-aware final verification decision
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum VerificationDecision {
+    #[serde(rename = "PASS")]
+    Pass,
+    #[serde(rename = "FAIL")]
+    Fail,
+    #[serde(rename = "INDETERMINATE")]
+    Indeterminate,
+}
+
+/// Whether verification processing reached a complete decision input set
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum VerificationProcessingStatus {
+    #[serde(rename = "COMPLETED")]
+    Completed,
+    #[serde(rename = "UNSUPPORTED")]
+    Unsupported,
+    #[serde(rename = "UNAVAILABLE")]
+    Unavailable,
+    #[serde(rename = "ERROR")]
+    Error,
+}
+
 /// Registry of zero-knowledge circuit systems and their circuit identifiers accepted in PredicateSpec.supported_circuits. Each system defines a proof scheme, a circuit identification method, and the set of supported credential formats and predicate types.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ZkCircuitSystem {

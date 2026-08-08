@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/verification-decisions.json",
+  "title": "VerificationDecision",
+  "description": "Policy-aware final verification decision",
+  "type": "string",
+  "enum": ["PASS", "FAIL", "INDETERMINATE"],
+  "$defs": {
+    "values": {
+      "PASS": {"description": "Processing completed and every required check passed"},
+      "FAIL": {"description": "Processing completed and at least one required check failed"},
+      "INDETERMINATE": {"description": "A required check was unresolved or processing did not complete"}
+    }
+  }
+}

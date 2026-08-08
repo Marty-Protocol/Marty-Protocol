@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/verification-decision-result.json",
+  "title": "VerificationDecisionResult",
+  "description": "Canonical, privacy-minimized verification decision and complete required-check evidence",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "verification_id",
+    "context",
+    "processing_status",
+    "decision",
+    "decision_code",
+    "valid",
+    "evaluated_at",
+    "input_digest",
+    "evidence_digest",
+    "policy",
+    "trust_profile",
+    "reducer",
+    "components",
+    "checks",
+    "category_summaries"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0.0"},
+    "verification_id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"},
+    "context": {"$ref": "verification-decision-context.json"},
+    "processing_status": {"$ref": "../enums/verification-processing-statuses.json"},
+    "decision": {"$ref": "../enums/verification-decisions.json"},
+    "decision_code": {"type": "string", "enum": ["ALL_REQUIRED_CHECKS_PASSED", "REQUIRED_CHECK_FAILED", "REQUIRED_CHECK_UNRESOLVED", "PROCESSING_NOT_COMPLETED"]},
+    "valid": {"type": "boolean", "description": "Legacy compatibility projection; true if and only if decision is PASS"},
+    "evaluated_at": {"type": "string", "format": "date-time"},
+    "input_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "evidence_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "policy": {"$ref": "verification-profile-reference.json"},
+    "trust_profile": {"$ref": "verification-profile-reference.json"},
+    "reducer": {"$ref": "verification-reducer-reference.json"},
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {"$ref": "verification-component-version.json"}
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1024,
+      "items": {"$ref": "verification-check-result.json"},
+      "contains": {"type": "object", "properties": {"required": {"const": true}}, "required": ["required"]},
+      "minContains": 1
+    },
+    "category_summaries": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {"$ref": "verification-category-summary.json"}
+    }
+  },
+  "$defs": {
+    "required_failed": {
+      "type": "object",
+      "properties": {"required": {"const": true}, "outcome": {"const": "FAILED"}},
+      "required": ["required", "outcome"]
+    },
+    "required_unresolved": {
+      "type": "object",
+      "properties": {"required": {"const": true}, "outcome": {"enum": ["NOT_PERFORMED", "UNSUPPORTED", "ERROR", "NOT_APPLICABLE"]}},
+      "required": ["required", "outcome"]
+    },
+    "required_not_passed": {
+      "type": "object",
+      "properties": {"required": {"const": true}, "outcome": {"not": {"const": "PASSED"}}},
+      "required": ["required", "outcome"]
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"decision": {"const": "PASS"}}, "required": ["decision"]},
+      "then": {
+        "properties": {"valid": {"const": true}, "processing_status": {"const": "COMPLETED"}, "decision_code": {"const": "ALL_REQUIRED_CHECKS_PASSED"}},
+        "not": {"properties": {"checks": {"contains": {"$ref": "#/$defs/required_not_passed"}}}, "required": ["checks"]}
+      },
+      "else": {"properties": {"valid": {"const": false}}}
+    },
+    {
+      "if": {"properties": {"processing_status": {"not": {"const": "COMPLETED"}}}, "required": ["processing_status"]},
+      "then": {"properties": {"decision": {"const": "INDETERMINATE"}, "decision_code": {"const": "PROCESSING_NOT_COMPLETED"}}}
+    },
+    {
+      "if": {
+        "properties": {
+          "processing_status": {"const": "COMPLETED"},
+          "checks": {"contains": {"$ref": "#/$defs/required_failed"}}
+        },
+        "required": ["processing_status", "checks"]
+      },
+      "then": {"properties": {"decision": {"const": "FAIL"}, "decision_code": {"const": "REQUIRED_CHECK_FAILED"}}}
+    },
+    {
+      "if": {
+        "allOf": [
+          {"properties": {"processing_status": {"const": "COMPLETED"}}, "required": ["processing_status"]},
+          {"properties": {"checks": {"contains": {"$ref": "#/$defs/required_unresolved"}}}, "required": ["checks"]},
+          {"not": {"properties": {"checks": {"contains": {"$ref": "#/$defs/required_failed"}}}, "required": ["checks"]}}
+        ]
+      },
+      "then": {"properties": {"decision": {"const": "INDETERMINATE"}, "decision_code": {"const": "REQUIRED_CHECK_UNRESOLVED"}}}
+    },
+    {
+      "if": {
+        "allOf": [
+          {"properties": {"processing_status": {"const": "COMPLETED"}}, "required": ["processing_status"]},
+          {"not": {"properties": {"checks": {"contains": {"$ref": "#/$defs/required_not_passed"}}}, "required": ["checks"]}}
+        ]
+      },
+      "then": {"properties": {"decision": {"const": "PASS"}, "decision_code": {"const": "ALL_REQUIRED_CHECKS_PASSED"}, "valid": {"const": true}}}
+    },
+    {
+      "if": {"properties": {"decision": {"const": "FAIL"}}, "required": ["decision"]},
+      "then": {
+        "required": ["checks"],
+        "properties": {
+          "processing_status": {"const": "COMPLETED"},
+          "decision_code": {"const": "REQUIRED_CHECK_FAILED"},
+          "checks": {"contains": {"$ref": "#/$defs/required_failed"}}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {"decision": {"const": "INDETERMINATE"}, "processing_status": {"const": "COMPLETED"}},
+        "required": ["decision", "processing_status"]
+      },
+      "then": {
+        "properties": {"checks": {"contains": {"$ref": "#/$defs/required_unresolved"}}, "decision_code": {"const": "REQUIRED_CHECK_UNRESOLVED"}},
+        "not": {"properties": {"checks": {"contains": {"$ref": "#/$defs/required_failed"}}}, "required": ["checks"]}
+      }
+    }
+  ]
+}

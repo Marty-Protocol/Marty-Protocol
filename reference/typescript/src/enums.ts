@@ -253,6 +253,47 @@ export enum ValidationAlgorithm {
   BBS_BLS12381_SHAKE256 = 'BBS_BLS12381_SHAKE256',
 }
 
+/** Stable verification evidence category */
+export enum VerificationCheckCategory {
+  STRUCTURE = 'STRUCTURE',
+  CREDENTIAL_PROOF = 'CREDENTIAL_PROOF',
+  PRESENTATION_PROOF = 'PRESENTATION_PROOF',
+  DOCUMENT_INTEGRITY = 'DOCUMENT_INTEGRITY',
+  ISSUER_TRUST = 'ISSUER_TRUST',
+  VALIDITY = 'VALIDITY',
+  STATUS = 'STATUS',
+  HOLDER_BINDING = 'HOLDER_BINDING',
+  TRANSACTION_BINDING = 'TRANSACTION_BINDING',
+  CLAIM_CONSTRAINTS = 'CLAIM_CONSTRAINTS',
+  BIOMETRIC = 'BIOMETRIC',
+  POLICY = 'POLICY',
+}
+
+/** Explicit outcome of one verification check */
+export enum VerificationCheckOutcome {
+  PASSED = 'PASSED',
+  FAILED = 'FAILED',
+  NOT_PERFORMED = 'NOT_PERFORMED',
+  UNSUPPORTED = 'UNSUPPORTED',
+  ERROR = 'ERROR',
+  NOT_APPLICABLE = 'NOT_APPLICABLE',
+}
+
+/** Policy-aware final verification decision */
+export enum VerificationDecision {
+  PASS = 'PASS',
+  FAIL = 'FAIL',
+  INDETERMINATE = 'INDETERMINATE',
+}
+
+/** Whether verification processing reached a complete decision input set */
+export enum VerificationProcessingStatus {
+  COMPLETED = 'COMPLETED',
+  UNSUPPORTED = 'UNSUPPORTED',
+  UNAVAILABLE = 'UNAVAILABLE',
+  ERROR = 'ERROR',
+}
+
 /** Registry of zero-knowledge circuit systems and their circuit identifiers accepted in PredicateSpec.supported_circuits. Each system defines a proof scheme, a circuit identification method, and the set of supported credential formats and predicate types. */
 export enum ZkCircuitSystem {
   LONGFELLOW_LIBZK_V1 = 'longfellow-libzk-v1',

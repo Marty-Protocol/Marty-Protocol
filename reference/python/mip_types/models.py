@@ -33,6 +33,10 @@ from .enums import (
     TrustProfileStatus,
     TrustSourceType,
     ValidationAlgorithm,
+    VerificationCheckCategory,
+    VerificationCheckOutcome,
+    VerificationDecision,
+    VerificationProcessingStatus,
     ZkCircuitSystem,
 )
 
@@ -1238,6 +1242,73 @@ downloading the full trust store on every launch."""
     generated_at: datetime
 
 
+class VerificationCategorySummary(BaseModel):
+    """Reducer-derived summary for one verification check category"""
+
+    category: VerificationCheckCategory
+    outcome: Literal["PASSED", "FAILED", "INDETERMINATE", "NOT_APPLICABLE"]
+    required_check_count: int
+    passed_required_count: int
+    failed_required_count: int
+    unresolved_required_count: int
+
+
+class VerificationCheckResult(BaseModel):
+    """Privacy-minimized evidence outcome for one verification check"""
+
+    check_id: str
+    category: VerificationCheckCategory
+    required: bool
+    outcome: VerificationCheckOutcome
+    code: str
+    safe_message: str | None = None
+    component_id: str
+    evaluated_at: datetime
+    evidence_refs: list[str]
+
+
+class VerificationComponentVersion(BaseModel):
+    """Exact software or adapter artifact that produced verification evidence"""
+
+    component_id: str
+    version: str
+    artifact_digest: str
+    adapter_id: str | None = None
+    adapter_version: str | None = None
+
+
+class VerificationDecisionContext(BaseModel):
+    """Tenant and transaction scope in which verification was authorized"""
+
+    mode: Literal["ONLINE", "OFFLINE"]
+    verifier_id: str
+    organization_id: str | None = None
+    transaction_id: str | None = None
+    audience: str | None = None
+    offline_profile_id: str | None = None
+
+
+class VerificationDecisionResult(BaseModel):
+    """Canonical, privacy-minimized verification decision and complete required-check evidence"""
+
+    schema_version: str
+    verification_id: str
+    context: VerificationDecisionContext
+    processing_status: VerificationProcessingStatus
+    decision: VerificationDecision
+    decision_code: Literal["ALL_REQUIRED_CHECKS_PASSED", "REQUIRED_CHECK_FAILED", "REQUIRED_CHECK_UNRESOLVED", "PROCESSING_NOT_COMPLETED"]
+    valid: bool
+    evaluated_at: datetime
+    input_digest: str
+    evidence_digest: str
+    policy: VerificationProfileReference
+    trust_profile: VerificationProfileReference
+    reducer: VerificationReducerReference
+    components: list[VerificationComponentVersion]
+    checks: list[VerificationCheckResult]
+    category_summaries: list[VerificationCategorySummary]
+
+
 class VerificationFlowStartRequest(BaseModel):
     """Public request to start an OID4VP or SIOPv2 flow using a DID-resolved verifier profile."""
 
@@ -1266,6 +1337,21 @@ is intentionally absent."""
     nonce: str
     expires_at: datetime
     status: str
+
+
+class VerificationProfileReference(BaseModel):
+    """Versioned policy or trust profile used by a verification decision"""
+
+    id: str
+    version: str
+    content_digest: str
+
+
+class VerificationReducerReference(BaseModel):
+    """Pure reducer contract that derived the verification decision"""
+
+    reducer_id: str
+    version: str
 
 
 class VerificationResultResponse(BaseModel):
@@ -1445,8 +1531,15 @@ TrustProfileIssuer.model_rebuild()
 TrustProfileRegistrySyncResult.model_rebuild()
 TrustProfile.model_rebuild()
 TrustRegistrySync.model_rebuild()
+VerificationCategorySummary.model_rebuild()
+VerificationCheckResult.model_rebuild()
+VerificationComponentVersion.model_rebuild()
+VerificationDecisionContext.model_rebuild()
+VerificationDecisionResult.model_rebuild()
 VerificationFlowStartRequest.model_rebuild()
 VerificationFlowStartResponse.model_rebuild()
+VerificationProfileReference.model_rebuild()
+VerificationReducerReference.model_rebuild()
 VerificationResultResponse.model_rebuild()
 VerificationSession.model_rebuild()
 VettingCheck.model_rebuild()

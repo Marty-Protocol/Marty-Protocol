@@ -26,6 +26,10 @@ import {
   TrustProfileStatus,
   TrustSourceType,
   ValidationAlgorithm,
+  VerificationCheckCategory,
+  VerificationCheckOutcome,
+  VerificationDecision,
+  VerificationProcessingStatus,
   ZkCircuitSystem,
 } from './enums';
 
@@ -1081,6 +1085,68 @@ export interface TrustRegistrySync {
   generated_at: string;
 }
 
+/** Reducer-derived summary for one verification check category */
+export interface VerificationCategorySummary {
+  category: VerificationCheckCategory;
+  outcome: 'PASSED' | 'FAILED' | 'INDETERMINATE' | 'NOT_APPLICABLE';
+  required_check_count: number;
+  passed_required_count: number;
+  failed_required_count: number;
+  unresolved_required_count: number;
+}
+
+/** Privacy-minimized evidence outcome for one verification check */
+export interface VerificationCheckResult {
+  check_id: string;
+  category: VerificationCheckCategory;
+  required: boolean;
+  outcome: VerificationCheckOutcome;
+  code: string;
+  safe_message?: string;
+  component_id: string;
+  evaluated_at: string;
+  evidence_refs: string[];
+}
+
+/** Exact software or adapter artifact that produced verification evidence */
+export interface VerificationComponentVersion {
+  component_id: string;
+  version: string;
+  artifact_digest: string;
+  adapter_id?: string;
+  adapter_version?: string;
+}
+
+/** Tenant and transaction scope in which verification was authorized */
+export interface VerificationDecisionContext {
+  mode: 'ONLINE' | 'OFFLINE';
+  verifier_id: string;
+  organization_id?: string;
+  transaction_id?: string;
+  audience?: string;
+  offline_profile_id?: string;
+}
+
+/** Canonical, privacy-minimized verification decision and complete required-check evidence */
+export interface VerificationDecisionResult {
+  schema_version: string;
+  verification_id: string;
+  context: VerificationDecisionContext;
+  processing_status: VerificationProcessingStatus;
+  decision: VerificationDecision;
+  decision_code: 'ALL_REQUIRED_CHECKS_PASSED' | 'REQUIRED_CHECK_FAILED' | 'REQUIRED_CHECK_UNRESOLVED' | 'PROCESSING_NOT_COMPLETED';
+  valid: boolean;
+  evaluated_at: string;
+  input_digest: string;
+  evidence_digest: string;
+  policy: VerificationProfileReference;
+  trust_profile: VerificationProfileReference;
+  reducer: VerificationReducerReference;
+  components: VerificationComponentVersion[];
+  checks: VerificationCheckResult[];
+  category_summaries: VerificationCategorySummary[];
+}
+
 /** Public request to start an OID4VP or SIOPv2 flow using a DID-resolved verifier profile. */
 export interface VerificationFlowStartRequest {
   presentation_policy_id?: string | null;
@@ -1106,6 +1172,19 @@ export interface VerificationFlowStartResponse {
   nonce: string;
   expires_at: string;
   status: string;
+}
+
+/** Versioned policy or trust profile used by a verification decision */
+export interface VerificationProfileReference {
+  id: string;
+  version: string;
+  content_digest: string;
+}
+
+/** Pure reducer contract that derived the verification decision */
+export interface VerificationReducerReference {
+  reducer_id: string;
+  version: string;
 }
 
 /** Public result projection for an authorized verification Flow execution. */
