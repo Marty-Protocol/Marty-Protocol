@@ -1,5 +1,5 @@
 //! MIP Protocol Models — generated from marty-protocol/schemas/*.json
-//! Protocol version: 0.4.0
+//! Protocol version: 0.4.1
 //! DO NOT EDIT — regenerate with: python scripts/codegen.py rust
 
 use serde::{Deserialize, Serialize};
@@ -1604,6 +1604,7 @@ pub struct TrustProfile {
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+    pub status: TrustProfileStatus,
     pub profile_type: String,
     pub trust_sources: Vec<serde_json::Value>,
     pub allowed_algorithms: Vec<String>,

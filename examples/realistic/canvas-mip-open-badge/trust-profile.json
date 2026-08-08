@@ -3,6 +3,7 @@
   "organization_id": "00000000-0000-0000-0000-000000000001",
   "name": "Marty Canvas Open Badge Issuer Trust",
   "description": "Pins the ElevenID DID used to issue portable badges that may also be mirrored to Canvas Credentials.",
+  "status": "active",
   "profile_type": "CUSTOM",
   "trust_sources": [
     {

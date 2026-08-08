@@ -1,5 +1,5 @@
 """MIP Protocol Enums — generated from marty-protocol/enums/*.json
-Protocol version: 0.4.0
+Protocol version: 0.4.1
 DO NOT EDIT — regenerate with: python scripts/codegen.py python
 """
 from enum import Enum
@@ -242,6 +242,15 @@ class RevocationTimingMode(str, Enum):
     CACHED = "CACHED"
     OFFLINE_GRACE = "OFFLINE_GRACE"
     DISABLED = "DISABLED"
+
+
+class TrustProfileStatus(str, Enum):
+    """Canonical lowercase lifecycle states for a Trust Profile"""
+
+    DRAFT = "draft"
+    ACTIVE = "active"
+    SUSPENDED = "suspended"
+    ARCHIVED = "archived"
 
 
 class TrustSourceType(str, Enum):

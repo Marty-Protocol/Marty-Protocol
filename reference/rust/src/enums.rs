@@ -1,5 +1,5 @@
 //! MIP Protocol Enums — generated from marty-protocol/enums/*.json
-//! Protocol version: 0.4.0
+//! Protocol version: 0.4.1
 //! DO NOT EDIT — regenerate with: python scripts/codegen.py rust
 
 use serde::{Deserialize, Serialize};
@@ -380,6 +380,19 @@ pub enum RevocationTimingMode {
     OfflineGrace,
     #[serde(rename = "DISABLED")]
     Disabled,
+}
+
+/// Canonical lowercase lifecycle states for a Trust Profile
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum TrustProfileStatus {
+    #[serde(rename = "draft")]
+    Draft,
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "suspended")]
+    Suspended,
+    #[serde(rename = "archived")]
+    Archived,
 }
 
 /// Types of cryptographic trust material sources

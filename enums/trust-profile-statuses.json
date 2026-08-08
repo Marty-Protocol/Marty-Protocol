@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/trust-profile-statuses.json",
+  "title": "TrustProfileStatus",
+  "description": "Canonical lowercase lifecycle states for a Trust Profile",
+  "type": "string",
+  "enum": ["draft", "active", "suspended", "archived"]
+}

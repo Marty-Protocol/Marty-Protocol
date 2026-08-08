@@ -1,5 +1,5 @@
 """MIP Protocol Models — generated from marty-protocol/schemas/*.json
-Protocol version: 0.4.0
+Protocol version: 0.4.1
 DO NOT EDIT — regenerate with: python scripts/codegen.py python
 """
 from __future__ import annotations
@@ -30,6 +30,7 @@ from .enums import (
     RevocationMechanism,
     RevocationReason,
     RevocationTimingMode,
+    TrustProfileStatus,
     TrustSourceType,
     ValidationAlgorithm,
     ZkCircuitSystem,
@@ -1205,6 +1206,7 @@ OrganizationTrustProfile."""
     organization_id: str
     name: str
     description: str | None = None
+    status: TrustProfileStatus
     profile_type: Literal["ICAO", "AAMVA", "EUDI", "CUSTOM"]
     trust_sources: list[dict[str, Any]]
     allowed_algorithms: list[str]

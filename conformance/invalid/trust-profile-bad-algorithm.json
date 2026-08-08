@@ -2,6 +2,7 @@
   "id": "d1e2f3a4-0000-4000-8000-000000000001",
   "organization_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
   "name": "Invalid Trust Profile — unknown algorithm",
+  "status": "active",
   "profile_type": "CUSTOM",
   "trust_sources": [
     {

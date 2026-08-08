@@ -3,6 +3,7 @@
   "organization_id": "b3000001-0000-4000-8000-000000000000",
   "name": "Enterprise SD-JWT-VC Trust Profile",
   "description": "Trust profile for internally-issued SD-JWT-VC employee credentials. Pins the organization's own issuer DID for verification.",
+  "status": "active",
   "profile_type": "CUSTOM",
   "trust_sources": [
     {

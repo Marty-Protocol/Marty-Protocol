@@ -1,5 +1,5 @@
 // MIP Protocol Enums — generated from marty-protocol/enums/*.json
-// Protocol version: 0.4.0
+// Protocol version: 0.4.1
 // DO NOT EDIT — regenerate with: python scripts/codegen.py typescript
 
 /** Formal permission scope strings for MIP API keys. Scopes follow the pattern '{resource}:{action}'. Organization-scoped keys may hold any of these scopes. Deployment-scoped keys are restricted to a subset appropriate for a single deployment profile. */
@@ -219,6 +219,14 @@ export enum RevocationTimingMode {
   CACHED = 'CACHED',
   OFFLINE_GRACE = 'OFFLINE_GRACE',
   DISABLED = 'DISABLED',
+}
+
+/** Canonical lowercase lifecycle states for a Trust Profile */
+export enum TrustProfileStatus {
+  DRAFT = 'draft',
+  ACTIVE = 'active',
+  SUSPENDED = 'suspended',
+  ARCHIVED = 'archived',
 }
 
 /** Types of cryptographic trust material sources */

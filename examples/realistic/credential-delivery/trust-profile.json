@@ -3,6 +3,7 @@
   "organization_id": "b2000001-0000-4000-8000-000000000000",
   "name": "OID4VCI Pre-Authorized Code Issuer Trust Profile",
   "description": "Trust profile for the issuing party's own credential service. Used by the credential delivery flow to validate that issued SD-JWT-VCs are anchored to the correct DID.",
+  "status": "active",
   "profile_type": "CUSTOM",
   "trust_sources": [
     {

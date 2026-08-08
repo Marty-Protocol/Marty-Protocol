@@ -1,6 +1,6 @@
 # Marty Identity Protocol — Normative Specification
 
-**Version:** 0.4.0
+**Version:** 0.4.1
 **Status:** Draft
 **Date:** 2026-07-11
 **Organization:** The MIP Authors
@@ -364,6 +364,7 @@ A Trust Profile defines **who is trusted** and **how cryptographic validation oc
 | `organization_id` | UUID | Yes | Owning organization |
 | `name` | string | Yes | Human-readable name |
 | `description` | string | No | Optional description |
+| `status` | string | Yes | `draft`, `active`, `suspended`, or `archived`; canonical lowercase |
 | `profile_type` | TrustProfileType | Yes | `ICAO`, `AAMVA`, `EUDI`, `CUSTOM` |
 | `trust_sources` | TrustSource[] | Yes | One or more trust anchors |
 | `allowed_algorithms` | Algorithm[] | Yes | Accepted cryptographic algorithms |
@@ -419,6 +420,7 @@ Org-scoped DID resolution is fail-closed by default. A verifier MUST NOT accept 
 - `allowed_algorithms` MUST contain at least one value from `validation-algorithms` enum.
 - `supported_formats` MUST contain at least one value from `credential-formats` enum.
 - A Trust Profile with `compliance_status: SETUP_REQUIRED` MUST NOT be used in an active Flow.
+- A Trust Profile lifecycle status MUST be emitted as one of the canonical lowercase values defined by `schemas/trust-profile.json`.
 - `revocation_profile_id` MUST reference an existing RevocationProfile if present.
 
 ### 5.6 API
@@ -1870,7 +1872,7 @@ Cedar PolicySets augment — rather than replace — existing enum-based fields:
 - **Application Template**: `approval_policy_set_id` is required for Cedar approval policies. The `approval_strategy` MUST be `RULES_BASED` or `EXTERNAL`.
 - **SCIM Role**: `policy_set_id` provides ABAC rules beyond the static `permissions[]` array. When present, Cedar policies are evaluated in addition to permission checks.
 
-Opaque approval and verification rule objects are not valid MIP 0.4.0 fields.
+Opaque approval and verification rule objects are not valid MIP 0.4.1 fields.
 
 ### 16.7 Validation Rules
 
@@ -2497,15 +2499,15 @@ A conformant PEX implementation MUST:
 
 See [VERSIONING.md](VERSIONING.md) for the full versioning policy.
 
-This specification is at version **0.4.0 (Draft)**. Breaking changes may occur before 1.0.0.
+This specification is at version **0.4.1 (Draft)**. Breaking changes may occur before 1.0.0.
 
 ### 23.1 Strict Version Support
 
 All MIP messages MUST carry a `mip_version` field in the message envelope (see §26). Implementations that receive a message with an unsupported version MUST respond with `error_code: UNSUPPORTED_VERSION` and SHOULD include a `supported_versions` array in the error body.
 
-The `/.well-known/mip-configuration` document MUST include `supported_versions: ["0.4.0"]`. Clients SHOULD inspect the discovery document before initiating a flow.
+The `/.well-known/mip-configuration` document MUST include `supported_versions: ["0.4.1"]`. Clients SHOULD inspect the discovery document before initiating a flow.
 
-MIP 0.4.0 has no compatibility negotiation or fallback. A message declaring any other version MUST fail with `UNSUPPORTED_VERSION`; implementations MUST NOT reinterpret it as 0.4.0.
+MIP 0.4.1 has no compatibility negotiation or fallback. A message declaring any other version MUST fail with `UNSUPPORTED_VERSION`; implementations MUST NOT reinterpret it as 0.4.1.
 
 ---
 
@@ -2645,7 +2647,7 @@ All MIP cross-party messages MUST conform to the message envelope defined in `pr
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `mip_version` | Yes | Protocol version string (e.g., `"0.4.0"`) |
+| `mip_version` | Yes | Protocol version string (e.g., `"0.4.1"`) |
 | `message_type` | Yes | One of the message type identifiers in §26.2 |
 | `message_id` | Yes | UUID unique within the deployment |
 | `correlation_id` | No | `FlowInstance.id` linking messages in one flow |
