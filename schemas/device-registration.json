@@ -32,24 +32,59 @@
     },
     "public_key_der": {
       "type": "string",
+      "minLength": 1,
+      "maxLength": 8192,
       "contentEncoding": "base64url",
-      "description": "Base64url-encoded RSA public key in PKCS#1 DER format"
+      "description": "Base64url-encoded current RSA public key in PKCS#1 DER format"
     },
     "public_key_kid": {
       "type": "string",
-      "description": "SHA-256 thumbprint of the public key per RFC 7638"
+      "minLength": 43,
+      "maxLength": 43,
+      "pattern": "^[A-Za-z0-9_-]{43}$",
+      "description": "SHA-256 JWK Thumbprint of the current public key per RFC 7638"
     },
-    "key_valid_from": {"type": "string", "format": "date-time"},
-    "key_valid_until": {"type": "string", "format": "date-time"},
+    "key_version": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991,
+      "description": "Monotonic server-assigned current-key version, bounded to the cross-language exact-integer range"
+    },
+    "key_valid_from": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Server-assigned activation time of the current key"
+    },
+    "key_valid_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Server-assigned absolute expiry of the current key; never an old-key rotation grace deadline"
+    },
     "is_active": {"type": "boolean"},
     "created_at": {"type": "string", "format": "date-time"},
     "updated_at": {"type": "string", "format": "date-time"},
     "last_seen_at": {"type": "string", "format": "date-time"}
   },
-  "if": {
-    "required": ["public_key_der"]
-  },
-  "then": {
-    "required": ["public_key_kid"]
-  }
+  "allOf": [
+    {
+      "if": {
+        "required": ["public_key_der"]
+      },
+      "then": {
+        "required": ["public_key_kid"]
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {"required": ["key_version"]},
+          {"required": ["key_valid_from"]},
+          {"required": ["key_valid_until"]}
+        ]
+      },
+      "then": {
+        "required": ["public_key_der", "public_key_kid"]
+      }
+    }
+  ]
 }

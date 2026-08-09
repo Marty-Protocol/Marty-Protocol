@@ -16,6 +16,14 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
   checks yield INDETERMINATE, vacuous success is forbidden, and legacy `valid`
   is a derived compatibility projection.
 
+### Changed
+
+- Defined Device Registration key rotation as an atomic, versioned lifecycle.
+  Old keys are retained as bounded retiring history only for challenges issued
+  before rotation; clients cannot select or renew grace, and deactivation or
+  revocation overrides it. Device responses now expose an optional monotonic
+  `key_version` compatibility field for current-key concurrency control.
+
 ## [0.4.1] - 2026-08-07
 
 ### Fixed

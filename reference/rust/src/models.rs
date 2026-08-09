@@ -437,6 +437,8 @@ pub struct DeviceRegistration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub public_key_kid: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub key_version: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub key_valid_from: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub key_valid_until: Option<String>,

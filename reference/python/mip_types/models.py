@@ -340,6 +340,7 @@ class DeviceRegistration(BaseModel):
     preferences: dict[str, Any] | None = None
     public_key_der: str | None = None
     public_key_kid: str | None = None
+    key_version: int | None = None
     key_valid_from: datetime | None = None
     key_valid_until: datetime | None = None
     is_active: bool
