@@ -492,6 +492,30 @@ A verifier MUST execute the following steps before accepting a credential presen
 
 Steps 3–9 are normative. An implementation that skips any of these steps for a `VERIFICATION` flow type MUST emit a compliance warning to the audit log and MUST NOT mark the flow instance as `COMPLETED`.
 
+##### 5.7.3.1 Canonical Verification Decision Result
+
+Every decisional verification flow MUST produce a versioned
+`VerificationDecisionResult` conforming to
+`schemas/verification-decision-result.json`. Format adapters emit explicit
+check outcomes and evidence references; the `mip.required-check-reducer`
+derives the final `PASS`, `FAIL`, or `INDETERMINATE` decision.
+
+`PASS` requires completed processing and every policy-required check to be
+`PASSED`. A required failed check yields `FAIL`. A required unperformed,
+unsupported, errored, or not-applicable check yields `INDETERMINATE` unless the
+selected policy explicitly materializes the condition as a failed policy check.
+At least one required check is mandatory, and the compatibility `valid` field
+is true if and only if the canonical decision is `PASS`.
+
+The result MUST identify transaction/tenant context, policy and trust-profile
+versions and digests, reducer version, and exact software/adapter artifact
+digests. It MUST NOT contain raw credentials, presentations, claim values,
+tokens, keys, or free-form adapter exceptions. Existing service-specific result
+objects are compatibility projections and MUST NOT act as independent reducers.
+Check identifiers, component identifiers, and category-summary categories MUST
+be unique in one result. Category summaries MUST be computed from the canonical
+check set rather than accepted as independent caller assertions.
+
 #### 5.7.4 Trust Failure Handling
 
 - If no trust source can verify the credential's issuer identity, the verifier MUST reject the credential with `error_code: ISSUER_UNTRUSTED`.

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/verification-category-summary.json",
+  "title": "VerificationCategorySummary",
+  "description": "Reducer-derived summary for one verification check category",
+  "type": "object",
+  "required": ["category", "outcome", "required_check_count", "passed_required_count", "failed_required_count", "unresolved_required_count"],
+  "additionalProperties": false,
+  "properties": {
+    "category": {"$ref": "../enums/verification-check-categories.json"},
+    "outcome": {"type": "string", "enum": ["PASSED", "FAILED", "INDETERMINATE", "NOT_APPLICABLE"]},
+    "required_check_count": {"type": "integer", "minimum": 0, "maximum": 1024},
+    "passed_required_count": {"type": "integer", "minimum": 0, "maximum": 1024},
+    "failed_required_count": {"type": "integer", "minimum": 0, "maximum": 1024},
+    "unresolved_required_count": {"type": "integer", "minimum": 0, "maximum": 1024}
+  }
+}

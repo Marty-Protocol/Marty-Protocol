@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/verification-decision-context.json",
+  "title": "VerificationDecisionContext",
+  "description": "Tenant and transaction scope in which verification was authorized",
+  "type": "object",
+  "required": ["mode", "verifier_id"],
+  "additionalProperties": false,
+  "properties": {
+    "mode": {"type": "string", "enum": ["ONLINE", "OFFLINE"]},
+    "verifier_id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "transaction_id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"},
+    "audience": {"type": "string", "minLength": 1, "maxLength": 255},
+    "offline_profile_id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "ONLINE"}}, "required": ["mode"]},
+      "then": {
+        "required": ["organization_id", "transaction_id", "audience"],
+        "not": {"required": ["offline_profile_id"]}
+      }
+    },
+    {
+      "if": {"properties": {"mode": {"const": "OFFLINE"}}, "required": ["mode"]},
+      "then": {
+        "required": ["offline_profile_id"],
+        "not": {
+          "anyOf": [
+            {"required": ["organization_id"]},
+            {"required": ["transaction_id"]},
+            {"required": ["audience"]}
+          ]
+        }
+      }
+    }
+  ]
+}

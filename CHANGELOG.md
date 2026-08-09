@@ -9,6 +9,13 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 
 ## [Unreleased]
 
+### Added
+- Defined the canonical, privacy-minimized Verification Decision Result and
+  deterministic required-check reducer. PASS now requires completed processing
+  and every required check passed; required failures yield FAIL, unresolved
+  checks yield INDETERMINATE, vacuous success is forbidden, and legacy `valid`
+  is a derived compatibility projection.
+
 ## [0.4.1] - 2026-08-07
 
 ### Fixed

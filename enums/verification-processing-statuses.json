@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/verification-processing-statuses.json",
+  "title": "VerificationProcessingStatus",
+  "description": "Whether verification processing reached a complete decision input set",
+  "type": "string",
+  "enum": ["COMPLETED", "UNSUPPORTED", "UNAVAILABLE", "ERROR"],
+  "$defs": {
+    "values": {
+      "COMPLETED": {"description": "The verifier completed processing and reduced every required check"},
+      "UNSUPPORTED": {"description": "A required format, algorithm, proof, or policy capability is not implemented"},
+      "UNAVAILABLE": {"description": "A required dependency or trust/status source is temporarily unavailable"},
+      "ERROR": {"description": "Processing terminated because of a bounded system or adapter error"}
+    }
+  }
+}

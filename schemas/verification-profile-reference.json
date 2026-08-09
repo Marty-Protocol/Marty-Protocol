@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/verification-profile-reference.json",
+  "title": "VerificationProfileReference",
+  "description": "Versioned policy or trust profile used by a verification decision",
+  "type": "object",
+  "required": ["id", "version", "content_digest"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"},
+    "version": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$"},
+    "content_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

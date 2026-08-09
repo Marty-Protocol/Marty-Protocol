@@ -279,6 +279,51 @@ class ValidationAlgorithm(str, Enum):
     BBS_BLS12381_SHAKE256 = "BBS_BLS12381_SHAKE256"
 
 
+class VerificationCheckCategory(str, Enum):
+    """Stable verification evidence category"""
+
+    STRUCTURE = "STRUCTURE"
+    CREDENTIAL_PROOF = "CREDENTIAL_PROOF"
+    PRESENTATION_PROOF = "PRESENTATION_PROOF"
+    DOCUMENT_INTEGRITY = "DOCUMENT_INTEGRITY"
+    ISSUER_TRUST = "ISSUER_TRUST"
+    VALIDITY = "VALIDITY"
+    STATUS = "STATUS"
+    HOLDER_BINDING = "HOLDER_BINDING"
+    TRANSACTION_BINDING = "TRANSACTION_BINDING"
+    CLAIM_CONSTRAINTS = "CLAIM_CONSTRAINTS"
+    BIOMETRIC = "BIOMETRIC"
+    POLICY = "POLICY"
+
+
+class VerificationCheckOutcome(str, Enum):
+    """Explicit outcome of one verification check"""
+
+    PASSED = "PASSED"
+    FAILED = "FAILED"
+    NOT_PERFORMED = "NOT_PERFORMED"
+    UNSUPPORTED = "UNSUPPORTED"
+    ERROR = "ERROR"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+
+
+class VerificationDecision(str, Enum):
+    """Policy-aware final verification decision"""
+
+    PASS = "PASS"
+    FAIL = "FAIL"
+    INDETERMINATE = "INDETERMINATE"
+
+
+class VerificationProcessingStatus(str, Enum):
+    """Whether verification processing reached a complete decision input set"""
+
+    COMPLETED = "COMPLETED"
+    UNSUPPORTED = "UNSUPPORTED"
+    UNAVAILABLE = "UNAVAILABLE"
+    ERROR = "ERROR"
+
+
 class ZkCircuitSystem(str, Enum):
     """Registry of zero-knowledge circuit systems and their circuit identifiers accepted in PredicateSpec.supported_circuits. Each system defines a proof scheme, a circuit identification method, and the set of supported credential formats and predicate types."""
 

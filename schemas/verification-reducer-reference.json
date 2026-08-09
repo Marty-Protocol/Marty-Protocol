@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/verification-reducer-reference.json",
+  "title": "VerificationReducerReference",
+  "description": "Pure reducer contract that derived the verification decision",
+  "type": "object",
+  "required": ["reducer_id", "version"],
+  "additionalProperties": false,
+  "properties": {
+    "reducer_id": {"type": "string", "const": "mip.required-check-reducer"},
+    "version": {"type": "string", "const": "1.0.0"}
+  }
+}

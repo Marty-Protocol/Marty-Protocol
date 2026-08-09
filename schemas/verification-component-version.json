@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/verification-component-version.json",
+  "title": "VerificationComponentVersion",
+  "description": "Exact software or adapter artifact that produced verification evidence",
+  "type": "object",
+  "required": ["component_id", "version", "artifact_digest"],
+  "additionalProperties": false,
+  "properties": {
+    "component_id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z][a-z0-9._-]*$"},
+    "version": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$"},
+    "artifact_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "adapter_id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z][a-z0-9._-]*$"},
+    "adapter_version": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]*$"}
+  },
+  "dependentRequired": {"adapter_id": ["adapter_version"], "adapter_version": ["adapter_id"]}
+}

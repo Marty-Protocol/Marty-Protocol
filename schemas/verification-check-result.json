@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/verification-check-result.json",
+  "title": "VerificationCheckResult",
+  "description": "Privacy-minimized evidence outcome for one verification check",
+  "type": "object",
+  "required": ["check_id", "category", "required", "outcome", "code", "component_id", "evaluated_at", "evidence_refs"],
+  "additionalProperties": false,
+  "properties": {
+    "check_id": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+    },
+    "category": {"$ref": "../enums/verification-check-categories.json"},
+    "required": {"type": "boolean"},
+    "outcome": {"$ref": "../enums/verification-check-outcomes.json"},
+    "code": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 96,
+      "pattern": "^[A-Z][A-Z0-9_]{2,95}$"
+    },
+    "component_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9._-]*$",
+      "description": "Identifier of exactly one component declared by the enclosing canonical result; multiple checks may reference that component"
+    },
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$",
+      "description": "Canonical RFC 3339 UTC timestamp no later than the enclosing result evaluated_at"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 55,
+        "maxLength": 55,
+        "pattern": "^urn:marty:evidence:[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+        "description": "Opaque canonical UUID URN; evidence content is stored outside the decision result"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"outcome": {"enum": ["PASSED", "FAILED"]}}, "required": ["outcome"]},
+      "then": {"properties": {"evidence_refs": {"minItems": 1}}}
+    }
+  ]
+}
