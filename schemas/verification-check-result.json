@@ -22,13 +22,6 @@
       "maxLength": 96,
       "pattern": "^[A-Z][A-Z0-9_]{2,95}$"
     },
-    "safe_message": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 256,
-      "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
-      "description": "Bounded operator-safe text without control characters, claim values, or adapter exception content"
-    },
     "component_id": {
       "type": "string",
       "minLength": 1,
@@ -48,9 +41,10 @@
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "minLength": 20,
-        "maxLength": 224,
-        "pattern": "^urn:marty:evidence:[A-Za-z0-9][A-Za-z0-9._:/-]+$"
+        "minLength": 55,
+        "maxLength": 55,
+        "pattern": "^urn:marty:evidence:[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+        "description": "Opaque canonical UUID URN; evidence content is stored outside the decision result"
       }
     }
   },

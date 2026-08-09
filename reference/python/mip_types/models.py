@@ -1261,7 +1261,6 @@ class VerificationCheckResult(BaseModel):
     required: bool
     outcome: VerificationCheckOutcome
     code: str
-    safe_message: str | None = None
     component_id: str
     evaluated_at: datetime
     evidence_refs: list[str]

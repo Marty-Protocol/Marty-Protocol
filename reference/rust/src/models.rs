@@ -1667,8 +1667,6 @@ pub struct VerificationCheckResult {
     pub required: bool,
     pub outcome: VerificationCheckOutcome,
     pub code: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub safe_message: Option<String>,
     pub component_id: String,
     pub evaluated_at: String,
     pub evidence_refs: Vec<String>,

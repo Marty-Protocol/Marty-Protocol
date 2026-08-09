@@ -44,7 +44,7 @@
       "code": "CREDENTIAL_SIGNATURE_VALID",
       "component_id": "marty-core",
       "evaluated_at": "2026-08-08T23:30:00Z",
-      "evidence_refs": ["urn:marty:evidence:credential-signature:example-001"]
+      "evidence_refs": ["urn:marty:evidence:123e4567-e89b-42d3-a456-426614174001"]
     },
     {
       "check_id": "transaction.nonce",
@@ -54,7 +54,7 @@
       "code": "TRANSACTION_NONCE_VALID",
       "component_id": "marty-core",
       "evaluated_at": "2026-08-08T23:30:00Z",
-      "evidence_refs": ["urn:marty:evidence:transaction-binding:example-001"]
+      "evidence_refs": ["urn:marty:evidence:123e4567-e89b-42d3-a456-426614174002"]
     }
   ],
   "category_summaries": [

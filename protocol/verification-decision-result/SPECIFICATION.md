@@ -82,15 +82,16 @@ referential-integrity rule is enforced by the canonical-result
 builder/validator because JSON Schema cannot express it. Multiple checks MAY
 reference the same declared component.
 
-Check messages are bounded operator-safe text. Evidence references are opaque
-URNs. They MUST NOT encode claim values, credential/presentation bytes, device
-tokens, authorization values, keys, or free-form adapter exceptions.
+Checks expose bounded machine-readable codes, not caller-supplied messages.
+Evidence references are opaque canonical UUID URNs. Claim values,
+credential/presentation bytes, device tokens, authorization values, keys, and
+free-form adapter exceptions therefore have no text-bearing field in this
+result and remain outside its retention boundary.
 
 Result and check timestamps use canonical RFC 3339 UTC `Z` serialization. A
 check timestamp MUST NOT be later than the enclosing result's `evaluated_at`;
 the canonical-result builder enforces this cross-field ordering because JSON
-Schema cannot compare date-time values. Operator-safe check messages contain no
-C0 or DEL control characters, preventing multiline and terminal/log injection.
+Schema cannot compare date-time values.
 
 ## Compatibility and migration
 

@@ -1102,7 +1102,6 @@ export interface VerificationCheckResult {
   required: boolean;
   outcome: VerificationCheckOutcome;
   code: string;
-  safe_message?: string;
   component_id: string;
   evaluated_at: string;
   evidence_refs: string[];
