@@ -86,6 +86,12 @@ Check messages are bounded operator-safe text. Evidence references are opaque
 URNs. They MUST NOT encode claim values, credential/presentation bytes, device
 tokens, authorization values, keys, or free-form adapter exceptions.
 
+Result and check timestamps use canonical RFC 3339 UTC `Z` serialization. A
+check timestamp MUST NOT be later than the enclosing result's `evaluated_at`;
+the canonical-result builder enforces this cross-field ordering because JSON
+Schema cannot compare date-time values. Operator-safe check messages contain no
+C0 or DEL control characters, preventing multiline and terminal/log injection.
+
 ## Compatibility and migration
 
 Existing `VerificationSession.result`, `VerificationResultResponse`, format

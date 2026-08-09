@@ -26,8 +26,8 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 256,
-      "pattern": "^[^\\r\\n]+$",
-      "description": "Bounded operator-safe text without claim values or adapter exception content"
+      "pattern": "^[^\\u0000-\\u001F\\u007F]+$",
+      "description": "Bounded operator-safe text without control characters, claim values, or adapter exception content"
     },
     "component_id": {
       "type": "string",
@@ -36,7 +36,12 @@
       "pattern": "^[a-z][a-z0-9._-]*$",
       "description": "Identifier of exactly one component declared by the enclosing canonical result; multiple checks may reference that component"
     },
-    "evaluated_at": {"type": "string", "format": "date-time"},
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$",
+      "description": "Canonical RFC 3339 UTC timestamp no later than the enclosing result evaluated_at"
+    },
     "evidence_refs": {
       "type": "array",
       "maxItems": 16,

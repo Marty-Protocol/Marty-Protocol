@@ -31,7 +31,12 @@
     "decision": {"$ref": "../enums/verification-decisions.json"},
     "decision_code": {"type": "string", "enum": ["ALL_REQUIRED_CHECKS_PASSED", "REQUIRED_CHECK_FAILED", "REQUIRED_CHECK_UNRESOLVED", "PROCESSING_NOT_COMPLETED"]},
     "valid": {"type": "boolean", "description": "Legacy compatibility projection; true if and only if decision is PASS"},
-    "evaluated_at": {"type": "string", "format": "date-time"},
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$",
+      "description": "Canonical RFC 3339 UTC timestamp; every check timestamp is less than or equal to this value"
+    },
     "input_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
     "evidence_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
     "policy": {"$ref": "verification-profile-reference.json"},
