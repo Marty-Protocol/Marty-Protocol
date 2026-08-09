@@ -1656,10 +1656,11 @@ A Device Registration records a **user's device** for push notification delivery
 | `os_version` | string | No | Operating system version |
 | `device_model` | string | No | Device model name |
 | `preferences` | object | No | Notification preferences |
-| `public_key_der` | bytes | No | RSA public key for challenge signatures (base64 DER, PKCS#1) |
-| `public_key_kid` | string | No | Key ID (SHA-256 thumbprint, RFC 7638) |
-| `key_valid_from` | datetime | No | Key validity start |
-| `key_valid_until` | datetime | No | Key validity end (for rotation grace) |
+| `public_key_der` | bytes | No | Current RSA public key for challenge signatures (base64url DER, PKCS#1) |
+| `public_key_kid` | string | No | Current key ID (SHA-256 JWK Thumbprint, RFC 7638) |
+| `key_version` | integer | No | Monotonic, server-assigned current-key version; required in key-bearing responses |
+| `key_valid_from` | datetime | No | Server-assigned current-key activation time |
+| `key_valid_until` | datetime | No | Server-assigned absolute expiry of the current key; not an old-key grace deadline |
 | `is_active` | boolean | Yes | Active status |
 | `created_at` | datetime | Yes | ISO 8601 |
 | `updated_at` | datetime | No | ISO 8601 |
@@ -1679,10 +1680,61 @@ The combination of (`user_id`, `device_id`) MUST be unique. Registering the same
 
 ### 14.5 Key Rotation
 
-When a device rotates its signing key:
-1. Submit a new registration with a new `public_key_der`
-2. The existing `key_valid_until` provides a grace period for in-flight challenges
-3. After the grace period, the old key is rejected
+Device key rotation is an atomic, versioned state transition. Implementations
+MUST retain key history separately from the current-key compatibility projection
+shown in §14.2. A second overwrite field on the Device Registration is not a
+conforming key-history model.
+
+Each stored key has an immutable registration ID, key version, public key, key
+ID, activation time, and one of these lifecycle states:
+
+| State | Meaning |
+|-------|---------|
+| `CURRENT` | The only key eligible for newly issued challenges |
+| `RETIRING` | A prior key eligible only for an already-issued challenge during bounded grace |
+| `RETIRED` | A prior key retained for audit and never accepted |
+| `REVOKED` | A key explicitly invalidated and never accepted |
+
+An active registration with a key MUST have exactly one `CURRENT` key. Initial
+registration creates version 1. A proved rotation from version *n* MUST, in one
+transaction:
+
+1. verify possession of the replacement key using a live, single-use challenge
+   bound to the authenticated user, registration/device, replacement key ID and
+   digest, `device_key_rotation` purpose, service audience, and expiry;
+2. compare the caller's expected current key version with the stored current
+   version and reject a stale or concurrent rotation with a conflict;
+3. change the old `CURRENT` key to `RETIRING` with an immutable retirement
+   deadline derived from bounded server policy;
+4. insert version *n + 1* as the sole `CURRENT` key; and
+5. append a privacy-minimized audit transition without private key material.
+
+The client MUST NOT select or extend the rotation grace period. The rotation
+commit time and retirement deadline MUST come from the authoritative storage
+clock. Repeating a rotation or retry MUST NOT renew a retiring key's deadline.
+
+### 14.5.1 In-flight challenge rule
+
+A `RETIRING` key MAY verify a challenge only when all of the following hold:
+
+- the challenge was issued before the rotation commit;
+- the challenge names the exact registration, key version and key ID;
+- the challenge purpose and audience match the attempted operation;
+- the challenge has not expired or been consumed;
+- verification occurs before the immutable retirement deadline and any earlier
+  absolute key expiry; and
+- the registration remains active and the key has not been revoked.
+
+New challenges issued after rotation MUST target the `CURRENT` key. A retiring
+key MUST NOT authorize another rotation, registration change, or newly initiated
+operation. Expired retiring keys are treated as `RETIRED` even if a maintenance
+job has not yet materialized the state change. Registration deactivation or key
+revocation invalidates affected keys immediately and overrides grace.
+
+The Device Registration response exposes only the current key and its
+`key_version`. Prior keys are available only to an explicitly authorized audit
+or key-resolution component. `key_valid_until` describes the current key's
+absolute validity and MUST NOT be accepted from a caller as rotation grace.
 
 ### 14.6 Validation Rules
 
@@ -1690,12 +1742,20 @@ When a device rotates its signing key:
 - `platform` MUST be a value from the `device-platforms` enum.
 - If `public_key_der` is present, `public_key_kid` MUST also be present.
 - `public_key_kid` MUST be the SHA-256 thumbprint of `public_key_der`.
+- Key-bearing responses MUST include a positive `key_version`.
+- Key activation, expiry, rotation commit, and retirement timestamps MUST be
+  server-assigned and chronologically consistent.
+- Public-key changes MUST use the proof and atomic transition in §14.5; a generic
+  upsert MUST NOT overwrite key history.
+- Deactivating a registration MUST make every associated key unavailable for
+  authentication or authorization, regardless of a remaining grace period.
 - Implementations MUST invalidate registrations when FCM reports an invalid token (set `is_active: false`).
 
 ### 14.7 API
 
 ```
 GET    /v1/devices
+POST   /v1/devices/challenge
 POST   /v1/devices
 GET    /v1/devices/{device_id}
 PATCH  /v1/devices/{device_id}
@@ -2209,6 +2269,12 @@ All UUID references MUST resolve to existing records within the same organizatio
 ### 20.3 Device Registration
 
 - Device public keys MUST be verified with a challenge-response before being stored.
+- Device-key rotation MUST use the versioned atomic transition and bounded
+  in-flight challenge rule in §14.5.
+- Callers MUST NOT choose or renew an old-key grace deadline, and a retiring key
+  MUST NOT authorize newly initiated work.
+- Device deactivation and key revocation MUST override every unexpired challenge
+  or grace period.
 - Notification payloads MUST NOT contain credential material — only offer URIs and metadata.
 - FCM tokens MUST be treated as sensitive and not logged in plaintext.
 
@@ -2235,6 +2301,7 @@ All UUID references MUST resolve to existing records within the same organizatio
 | Man-in-the-Middle | Attacker intercepts and modifies messages between parties during session establishment | Transport, Session |
 | Metadata Injection | Attacker modifies or replaces the OID4VCI issuer metadata endpoint response | Capability Discovery |
 | Offline Grace Abuse | Attacker exploits an excessively long offline grace period to present revoked credentials | Revocation Profile |
+| Device Key Rotation Abuse | Attacker races rotation, renews old-key grace, or uses a retiring key for newly initiated work | Device Registration |
 
 #### 20.5.2 Normative Mitigations
 
@@ -2250,6 +2317,7 @@ All UUID references MUST resolve to existing records within the same organizatio
 | Man-in-the-Middle | All REST endpoints MUST use TLS 1.3+. Proximity sessions MUST use session encryption per ISO 18013-5:2021 §9. |
 | Metadata Injection | Issuer metadata endpoints MUST be served over HTTPS. Implementations SHOULD validate metadata document integrity via sub-resource integrity or signed metadata JWT. |
 | Offline Grace Abuse | `offline_grace_seconds` values MUST be logged in audit events when applied. A configurable alert threshold SHOULD be set for grace period usage frequency. |
+| Device Key Rotation Abuse | Rotation MUST compare the expected current key version, commit one new current key atomically, derive immutable grace from server policy, and accept a retiring key only for an exact pre-rotation challenge per §14.5. |
 
 ### 20.6 Holder Binding Requirements
 

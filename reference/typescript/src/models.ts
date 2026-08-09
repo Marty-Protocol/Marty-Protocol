@@ -296,6 +296,7 @@ export interface DeviceRegistration {
   preferences?: Record<string, unknown>;
   public_key_der?: string;
   public_key_kid?: string;
+  key_version?: number;
   key_valid_from?: string;
   key_valid_until?: string;
   is_active: boolean;
