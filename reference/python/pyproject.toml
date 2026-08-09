@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mip-protocol-types"
-version = "0.4.1"
+version = "0.5.0"
 description = "Generated Python types for the Marty Identity Protocol"
 requires-python = ">=3.10"
 license = {text = "Apache-2.0"}

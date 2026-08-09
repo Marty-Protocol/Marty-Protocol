@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-09
+
 ### Added
 - Defined the canonical, privacy-minimized Verification Decision Result and
   deterministic required-check reducer. PASS now requires completed processing

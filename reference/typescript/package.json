@@ -1,6 +1,6 @@
 {
   "name": "@elevenid/marty-protocol-types",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Generated TypeScript types for the Marty Identity Protocol",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

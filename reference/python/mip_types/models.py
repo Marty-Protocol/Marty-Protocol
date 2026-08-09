@@ -1,5 +1,5 @@
 """MIP Protocol Models — generated from marty-protocol/schemas/*.json
-Protocol version: 0.4.1
+Protocol version: 0.5.0
 DO NOT EDIT — regenerate with: python scripts/codegen.py python
 """
 from __future__ import annotations
