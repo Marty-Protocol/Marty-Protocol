@@ -1,5 +1,5 @@
 //! MIP Protocol Enums — generated from marty-protocol/enums/*.json
-//! Protocol version: 0.4.1
+//! Protocol version: 0.5.0
 //! DO NOT EDIT — regenerate with: python scripts/codegen.py rust
 
 use serde::{Deserialize, Serialize};

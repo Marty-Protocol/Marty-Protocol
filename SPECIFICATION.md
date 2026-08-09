@@ -1,6 +1,6 @@
 # Marty Identity Protocol — Normative Specification
 
-**Version:** 0.4.1
+**Version:** 0.5.0
 **Status:** Draft
 **Date:** 2026-07-11
 **Organization:** The MIP Authors
@@ -1956,7 +1956,7 @@ Cedar PolicySets augment — rather than replace — existing enum-based fields:
 - **Application Template**: `approval_policy_set_id` is required for Cedar approval policies. The `approval_strategy` MUST be `RULES_BASED` or `EXTERNAL`.
 - **SCIM Role**: `policy_set_id` provides ABAC rules beyond the static `permissions[]` array. When present, Cedar policies are evaluated in addition to permission checks.
 
-Opaque approval and verification rule objects are not valid MIP 0.4.1 fields.
+Opaque approval and verification rule objects are not valid MIP 0.5.0 fields.
 
 ### 16.7 Validation Rules
 
@@ -2591,15 +2591,15 @@ A conformant PEX implementation MUST:
 
 See [VERSIONING.md](VERSIONING.md) for the full versioning policy.
 
-This specification is at version **0.4.1 (Draft)**. Breaking changes may occur before 1.0.0.
+This specification is at version **0.5.0 (Draft)**. Breaking changes may occur before 1.0.0.
 
 ### 23.1 Strict Version Support
 
 All MIP messages MUST carry a `mip_version` field in the message envelope (see §26). Implementations that receive a message with an unsupported version MUST respond with `error_code: UNSUPPORTED_VERSION` and SHOULD include a `supported_versions` array in the error body.
 
-The `/.well-known/mip-configuration` document MUST include `supported_versions: ["0.4.1"]`. Clients SHOULD inspect the discovery document before initiating a flow.
+The `/.well-known/mip-configuration` document MUST include `supported_versions: ["0.5.0"]`. Clients SHOULD inspect the discovery document before initiating a flow.
 
-MIP 0.4.1 has no compatibility negotiation or fallback. A message declaring any other version MUST fail with `UNSUPPORTED_VERSION`; implementations MUST NOT reinterpret it as 0.4.1.
+MIP 0.5.0 has no compatibility negotiation or fallback. A message declaring any other version MUST fail with `UNSUPPORTED_VERSION`; implementations MUST NOT reinterpret it as 0.5.0.
 
 ---
 
@@ -2739,7 +2739,7 @@ All MIP cross-party messages MUST conform to the message envelope defined in `pr
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `mip_version` | Yes | Protocol version string (e.g., `"0.4.1"`) |
+| `mip_version` | Yes | Protocol version string (e.g., `"0.5.0"`) |
 | `message_type` | Yes | One of the message type identifiers in §26.2 |
 | `message_id` | Yes | UUID unique within the deployment |
 | `correlation_id` | No | `FlowInstance.id` linking messages in one flow |

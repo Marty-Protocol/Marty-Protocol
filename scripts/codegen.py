@@ -24,7 +24,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_ROOT = REPO_ROOT
-PROTOCOL_VERSION = "0.4.1"
+PROTOCOL_VERSION = "0.5.0"
 SCHEMAS_DIR = REPO_ROOT / "schemas"
 ENUMS_DIR = REPO_ROOT / "enums"
 
@@ -563,7 +563,7 @@ def generate_rust(enums: list[dict], schemas: list[dict]) -> None:
     cargo = textwrap.dedent("""\
         [package]
         name = "mip-protocol-types"
-        version = "0.4.1"
+        version = "0.5.0"
         edition = "2021"
         description = "Generated Rust types for the Marty Identity Protocol"
         license = "Apache-2.0"

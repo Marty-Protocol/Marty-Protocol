@@ -2,7 +2,7 @@
 
 ![Status: Draft](https://img.shields.io/badge/status-draft-yellow) ![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue) ![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
 
-**MIP Version:** 0.4.1 | **Status:** Draft
+**MIP Version:** 0.5.0 | **Status:** Draft
 
 The **Marty Identity Protocol (MIP)** is a formal specification for representing, issuing, and verifying digital identity credentials. MIP defines the minimum set of automatable primitives required to make digital identity management repeatable, secure, and deployable across real-world environments.
 

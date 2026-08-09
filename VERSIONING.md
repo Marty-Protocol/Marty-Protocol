@@ -3,7 +3,7 @@
 The Marty Identity Protocol uses semantic version identifiers for coordinated
 specification and implementation releases.
 
-**Current and only supported version:** `0.4.1`
+**Current and only supported version:** `0.5.0`
 
 ## Pre-1.0 Releases
 
@@ -12,7 +12,7 @@ routes, fields, enum values, generated types, and conformance fixtures. A
 release supports only its exact declared version unless its specification says
 otherwise.
 
-MIP 0.4.1 does not negotiate a highest common version, retain deprecated
+MIP 0.5.0 does not negotiate a highest common version, retain deprecated
 request aliases, or support mixed-version deployments. Implementations must:
 
 1. Build protocol, generated bindings, services, clients, and fixtures from one
@@ -38,8 +38,8 @@ fixtures, regenerate all bindings, and publish release-gate evidence.
 Tag the exact release and publish generated artifacts from that tag:
 
 ```sh
-git tag v0.4.1
-git push origin v0.4.1
+git tag v0.5.0
+git push origin v0.5.0
 ```
 
 Code generation drift and conformance failures block publication.
