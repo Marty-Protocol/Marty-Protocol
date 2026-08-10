@@ -17,6 +17,8 @@ import {
   FlowType,
   IssuanceProtocol,
   NetworkMode,
+  NotificationDeliveryEvidenceType,
+  NotificationDeliveryState,
   NotificationPriority,
   PredicateType,
   RevocationCheckMode,
@@ -705,6 +707,22 @@ export interface MipConfigurationDiscoveryDocument {
   org_endpoints?: Record<string, unknown>[];
   service_documentation?: string;
   policy_uri?: string;
+}
+
+/** Immutable, privacy-bounded evidence for one notification delivery attempt */
+export interface NotificationDeliveryResult {
+  notification_id: string;
+  channel: ChannelType;
+  delivery_state: NotificationDeliveryState;
+  evidence_type: NotificationDeliveryEvidenceType;
+  success: boolean;
+  attempted_at: string;
+  accepted_at?: string;
+  delivered_at?: string;
+  provider_message_id?: string;
+  error_code?: string;
+  should_retry?: boolean;
+  retry_after?: number;
 }
 
 /** Message content and routing metadata for multi-channel identity event notification */

@@ -168,6 +168,24 @@ export enum NetworkMode {
   HYBRID = 'HYBRID',
 }
 
+/** Strongest receipt actually established for one notification delivery attempt */
+export enum NotificationDeliveryEvidenceType {
+  NONE = 'NONE',
+  TRANSPORT_ACCEPTED = 'TRANSPORT_ACCEPTED',
+  PROVIDER_ACCEPTED = 'PROVIDER_ACCEPTED',
+  DESTINATION_ACCEPTED = 'DESTINATION_ACCEPTED',
+  RECIPIENT_DELIVERED = 'RECIPIENT_DELIVERED',
+}
+
+/** Truthful lifecycle state for one notification delivery attempt */
+export enum NotificationDeliveryState {
+  ATTEMPTED = 'ATTEMPTED',
+  ACCEPTED = 'ACCEPTED',
+  DELIVERED = 'DELIVERED',
+  FAILED = 'FAILED',
+  UNKNOWN = 'UNKNOWN',
+}
+
 /** Priority levels for notification delivery routing and FCM/APNs configuration */
 export enum NotificationPriority {
   LOW = 'LOW',

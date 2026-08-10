@@ -294,6 +294,36 @@ pub enum NetworkMode {
     Hybrid,
 }
 
+/// Strongest receipt actually established for one notification delivery attempt
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum NotificationDeliveryEvidenceType {
+    #[serde(rename = "NONE")]
+    None,
+    #[serde(rename = "TRANSPORT_ACCEPTED")]
+    TransportAccepted,
+    #[serde(rename = "PROVIDER_ACCEPTED")]
+    ProviderAccepted,
+    #[serde(rename = "DESTINATION_ACCEPTED")]
+    DestinationAccepted,
+    #[serde(rename = "RECIPIENT_DELIVERED")]
+    RecipientDelivered,
+}
+
+/// Truthful lifecycle state for one notification delivery attempt
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum NotificationDeliveryState {
+    #[serde(rename = "ATTEMPTED")]
+    Attempted,
+    #[serde(rename = "ACCEPTED")]
+    Accepted,
+    #[serde(rename = "DELIVERED")]
+    Delivered,
+    #[serde(rename = "FAILED")]
+    Failed,
+    #[serde(rename = "UNKNOWN")]
+    Unknown,
+}
+
 /// Priority levels for notification delivery routing and FCM/APNs configuration
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum NotificationPriority {

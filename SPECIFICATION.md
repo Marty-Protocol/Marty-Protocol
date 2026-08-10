@@ -1832,12 +1832,22 @@ At least one of `organization_id`, `user_id`, `device_tokens`, `webhook_endpoint
 |----------|------|-------------|
 | `notification_id` | UUID | Reference to payload |
 | `channel` | ChannelType | Delivery channel |
-| `success` | boolean | Delivery success |
+| `delivery_state` | NotificationDeliveryState | Attempted, accepted, delivered, failed, or unknown |
+| `evidence_type` | NotificationDeliveryEvidenceType | Strongest receipt actually established |
+| `success` | boolean | True only for confirmed delivery |
 | `attempted_at` | datetime | Attempt timestamp |
+| `accepted_at` | datetime | Intermediary/provider acceptance timestamp (if accepted) |
 | `delivered_at` | datetime | Delivery timestamp (if successful) |
+| `provider_message_id` | string | Bounded opaque provider correlation identifier |
 | `error_code` | string | Error code (if failed) |
 | `should_retry` | boolean | Whether retry is appropriate |
 | `retry_after` | integer | Retry delay in seconds |
+
+Provider or transport acceptance is not recipient delivery. SMTP, push, and
+SMS acceptance receipts use `delivery_state=ACCEPTED`, keep `success=false`,
+and omit `delivered_at`. Only channel-specific final delivery evidence may use
+`DELIVERED`; later confirmations append an immutable result rather than
+rewriting the original attempt.
 
 ### 15.5 Standard Event Types
 

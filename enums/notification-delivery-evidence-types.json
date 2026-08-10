@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/notification-delivery-evidence-types.json",
+  "title": "NotificationDeliveryEvidenceType",
+  "description": "Strongest receipt actually established for one notification delivery attempt",
+  "type": "string",
+  "enum": ["NONE", "TRANSPORT_ACCEPTED", "PROVIDER_ACCEPTED", "DESTINATION_ACCEPTED", "RECIPIENT_DELIVERED"],
+  "$defs": {
+    "values": {
+      "NONE": {"description": "No acceptance or delivery receipt was established"},
+      "TRANSPORT_ACCEPTED": {"description": "A transport relay accepted responsibility, such as SMTP DATA acceptance"},
+      "PROVIDER_ACCEPTED": {"description": "A push or messaging provider accepted the message"},
+      "DESTINATION_ACCEPTED": {"description": "The protocol-defined final destination accepted the message, such as a successful webhook endpoint"},
+      "RECIPIENT_DELIVERED": {"description": "A channel-specific delivery receipt confirmed recipient or device delivery"}
+    }
+  }
+}

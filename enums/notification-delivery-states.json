@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/notification-delivery-states.json",
+  "title": "NotificationDeliveryState",
+  "description": "Truthful lifecycle state for one notification delivery attempt",
+  "type": "string",
+  "enum": ["ATTEMPTED", "ACCEPTED", "DELIVERED", "FAILED", "UNKNOWN"],
+  "$defs": {
+    "values": {
+      "ATTEMPTED": {"description": "The transport attempt started but produced no stronger receipt"},
+      "ACCEPTED": {"description": "An intermediary or destination accepted the message without confirmed recipient delivery"},
+      "DELIVERED": {"description": "The channel-specific final delivery boundary confirmed delivery"},
+      "FAILED": {"description": "The attempt produced a classified failure"},
+      "UNKNOWN": {"description": "The attempt outcome is ambiguous, for example after loss of acknowledgement"}
+    }
+  }
+}

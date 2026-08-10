@@ -185,6 +185,26 @@ class NetworkMode(str, Enum):
     HYBRID = "HYBRID"
 
 
+class NotificationDeliveryEvidenceType(str, Enum):
+    """Strongest receipt actually established for one notification delivery attempt"""
+
+    NONE = "NONE"
+    TRANSPORT_ACCEPTED = "TRANSPORT_ACCEPTED"
+    PROVIDER_ACCEPTED = "PROVIDER_ACCEPTED"
+    DESTINATION_ACCEPTED = "DESTINATION_ACCEPTED"
+    RECIPIENT_DELIVERED = "RECIPIENT_DELIVERED"
+
+
+class NotificationDeliveryState(str, Enum):
+    """Truthful lifecycle state for one notification delivery attempt"""
+
+    ATTEMPTED = "ATTEMPTED"
+    ACCEPTED = "ACCEPTED"
+    DELIVERED = "DELIVERED"
+    FAILED = "FAILED"
+    UNKNOWN = "UNKNOWN"
+
+
 class NotificationPriority(str, Enum):
     """Priority levels for notification delivery routing and FCM/APNs configuration"""
 
