@@ -11,6 +11,8 @@ The MIP protocol defines **canonical format identifiers** (`CredentialFormat` en
 | `VC_JWT` | W3C VC Data Model + JWT |
 | `JSON_LD` | W3C VC with Linked Data Proof |
 | `ZK_MDOC` | Zero-knowledge mDoc (experimental) |
+| `ICAO_EMRTD` | ICAO eMRTD Logical Data Structure with signed EF.SOD |
+| `VDS_NC` | ICAO Visible Digital Seal for Non-Constrained Environments |
 
 ## Wire Format Mapping
 
@@ -23,6 +25,8 @@ Implementations MUST use the canonical protocol identifiers in all MIP API reque
 | `VC_JWT` | `jwt_vc_json` | `jwt_vc`, `jwt_vc_json-ld` |
 | `JSON_LD` | `ldp_vc` | — |
 | `ZK_MDOC` | `zk_mdoc` | `zk-mdoc`, `zkp_mdoc` |
+| `ICAO_EMRTD` | `icao_emrtd` | — |
+| `VDS_NC` | `vds_nc` | `vds-nc`, `VDS-NC` |
 
 ## Normalisation Rules
 
@@ -47,6 +51,9 @@ WIRE_TO_PROTOCOL = {
     "jwt_vc": CredentialFormat.VC_JWT,
     "ldp_vc": CredentialFormat.JSON_LD,
     "zk_mdoc": CredentialFormat.ZK_MDOC,
+    "icao_emrtd": CredentialFormat.ICAO_EMRTD,
+    "vds_nc": CredentialFormat.VDS_NC,
+    "vds-nc": CredentialFormat.VDS_NC,
 }
 
 def normalise_format(wire: str) -> CredentialFormat:
