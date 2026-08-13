@@ -101,6 +101,7 @@ export enum CredentialFormat {
   JSON_LD = 'JSON_LD',
   ZK_MDOC = 'ZK_MDOC',
   ICAO_EMRTD = 'ICAO_EMRTD',
+  VDS_NC = 'VDS_NC',
 }
 
 /** When a wallet holds multiple credentials that satisfy a PresentationPolicy, this strategy determines which is preferred. Used in PresentationPolicy.credential_ranking_strategy. */

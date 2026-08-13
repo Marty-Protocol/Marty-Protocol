@@ -111,6 +111,7 @@ class CredentialFormat(str, Enum):
     JSON_LD = "JSON_LD"
     ZK_MDOC = "ZK_MDOC"
     ICAO_EMRTD = "ICAO_EMRTD"
+    VDS_NC = "VDS_NC"
 
 
 class CredentialRankingStrategy(str, Enum):

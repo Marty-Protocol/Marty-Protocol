@@ -183,6 +183,8 @@ pub enum CredentialFormat {
     ZkMdoc,
     #[serde(rename = "ICAO_EMRTD")]
     IcaoEmrtd,
+    #[serde(rename = "VDS_NC")]
+    VdsNc,
 }
 
 /// When a wallet holds multiple credentials that satisfy a PresentationPolicy, this strategy determines which is preferred. Used in PresentationPolicy.credential_ranking_strategy.
