@@ -5,5 +5,31 @@
   "decision": "APPROVED",
   "decision_reason": null,
   "verified_claims": {"age_over_21": true},
+  "credential_results": [
+    {
+      "credential_template_id": "age-credential",
+      "satisfied": true,
+      "issuer_did": "did:web:issuer.example",
+      "claim_results": [
+        {
+          "claim_name": "age_over_21",
+          "satisfied": true,
+          "presented_value": true,
+          "error": null
+        }
+      ],
+      "trust_check_passed": true,
+      "freshness_check_passed": true,
+      "signature_valid": true,
+      "revocation_checked": true,
+      "not_revoked": true,
+      "revocation_status": "valid",
+      "error_codes": [],
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "error_codes": [],
+  "warnings": [],
   "evaluation_timestamp": "2026-07-31T12:00:00Z"
 }
