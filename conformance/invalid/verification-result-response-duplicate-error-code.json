@@ -1,0 +1,11 @@
+{
+  "instance_id": "instance-1",
+  "status": "FAILED",
+  "result": "failed",
+  "decision": "deny",
+  "decision_reason": "Credential is revoked",
+  "verified_claims": {},
+  "credential_results": [],
+  "error_codes": ["credential_revoked", "credential_revoked"],
+  "warnings": []
+}

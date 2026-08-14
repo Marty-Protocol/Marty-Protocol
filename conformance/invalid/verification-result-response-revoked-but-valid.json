@@ -1,0 +1,21 @@
+{
+  "instance_id": "instance-1",
+  "status": "FAILED",
+  "result": "failed",
+  "decision": "deny",
+  "decision_reason": "Credential is revoked",
+  "verified_claims": {},
+  "credential_results": [
+    {
+      "credential_template_id": "age-credential",
+      "satisfied": false,
+      "revocation_checked": true,
+      "not_revoked": true,
+      "revocation_status": "revoked",
+      "error_codes": ["credential_revoked"],
+      "errors": ["Credential is revoked"]
+    }
+  ],
+  "error_codes": ["credential_revoked"],
+  "warnings": []
+}
