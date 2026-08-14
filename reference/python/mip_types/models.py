@@ -1278,6 +1278,9 @@ class VerificationResultResponse(BaseModel):
     decision: str | None = None
     decision_reason: str | None = None
     verified_claims: dict[str, Any]
+    credential_results: list[dict[str, Any]] | None = None
+    error_codes: list[str] | None = None
+    warnings: list[str] | None = None
     evaluation_timestamp: datetime | None = None
 
 
