@@ -1213,6 +1213,9 @@ export interface VerificationResultResponse {
   decision?: string | null;
   decision_reason?: string | null;
   verified_claims: Record<string, unknown>;
+  credential_results?: Record<string, unknown>[];
+  error_codes?: string[];
+  warnings?: string[];
   evaluation_timestamp?: string | null;
 }
 

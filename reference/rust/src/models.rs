@@ -1813,6 +1813,12 @@ pub struct VerificationResultResponse {
     pub decision_reason: Option<String>,
     pub verified_claims: serde_json::Value,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_results: Option<Vec<serde_json::Value>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error_codes: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub warnings: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub evaluation_timestamp: Option<String>,
 }
 
