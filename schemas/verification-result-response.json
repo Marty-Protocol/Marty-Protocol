@@ -13,6 +13,18 @@
     "decision": {"type": ["string", "null"], "maxLength": 255},
     "decision_reason": {"type": ["string", "null"], "maxLength": 2000},
     "verified_claims": {"$ref": "flow-execution.json#/$defs/publicObject"},
+    "credential_results": {
+      "type": "array",
+      "items": {"$ref": "flow-execution.json#/$defs/publicObject"}
+    },
+    "error_codes": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "warnings": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
     "evaluation_timestamp": {"type": ["string", "null"], "format": "date-time"}
   }
 }
