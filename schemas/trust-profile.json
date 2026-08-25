@@ -4,7 +4,7 @@
   "title": "TrustProfile",
   "description": "Cryptographic trust configuration for credential issuance and verification. Used by both issuance flows (which issuer keys are trusted) and verification flows (which credential issuers/roots are accepted). For org-specific framework overrides, see OrganizationTrustProfile.",
   "type": "object",
-  "required": ["id", "organization_id", "name", "status", "profile_type", "trust_sources", "allowed_algorithms", "supported_formats", "compliance_status", "created_at"],
+  "required": ["id", "organization_id", "name", "status", "profile_type", "trust_sources", "allowed_algorithms", "compliance_status", "created_at"],
   "additionalProperties": false,
   "properties": {
     "id": {"type": "string", "format": "uuid"},
@@ -16,6 +16,23 @@
       "type": "string",
       "enum": ["ICAO", "AAMVA", "EUDI", "CUSTOM"],
       "description": "Top-level framework classification. Determines default trust anchors, certificate chain validation rules, and which PKD endpoints to consult."
+    },
+    "trust_purposes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "CREDENTIAL_ISSUER",
+          "MACHINE_IDENTITY_CA",
+          "MANUFACTURER_ENDORSER",
+          "ATTESTATION_VERIFIER",
+          "DEPLOYMENT_AUTHORITY",
+          "EVIDENCE_SIGNER"
+        ]
+      },
+      "uniqueItems": true,
+      "description": "Roles for which this trust profile may be used. Absent means the legacy CREDENTIAL_ISSUER purpose only."
     },
     "trust_sources": {
       "type": "array",
@@ -62,6 +79,23 @@
               "cache_ttl_seconds": {"type": "integer", "minimum": 0, "default": 300}
             },
             "description": "DID resolution policy for DID-backed trust sources. The default is fail-closed org-scoped resolution."
+          },
+          "purposes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "CREDENTIAL_ISSUER",
+                "MACHINE_IDENTITY_CA",
+                "MANUFACTURER_ENDORSER",
+                "ATTESTATION_VERIFIER",
+                "DEPLOYMENT_AUTHORITY",
+                "EVIDENCE_SIGNER"
+              ]
+            },
+            "uniqueItems": true,
+            "description": "Optional narrowing of the profile-level trust purposes for this source."
           },
           "description": {"type": "string", "maxLength": 256},
           "registry_sync": {
@@ -173,8 +207,18 @@
     "supported_formats": {
       "type": "array",
       "minItems": 1,
-      "items": {"type": "string", "enum": ["MDOC", "SD_JWT_VC", "VC_JWT", "JSON_LD"]},
+      "items": {"$ref": "../enums/credential-formats.json"},
       "uniqueItems": true
+    },
+    "trusted_assertion_formats": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": ["X509_CERTIFICATE", "EAT", "TPM_QUOTE", "JWT", "CWT", "CUSTOM"]
+      },
+      "uniqueItems": true,
+      "description": "Non-credential assertion formats accepted for machine identity, manufacturer endorsement, attestation, deployment authority, or evidence signing."
     },
     "allowed_issuers": {
       "type": ["array", "null"],
@@ -230,7 +274,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "enum": ["ICAO_DTC", "ICAO_MRZ", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
+        "enum": ["ICAO_DTC", "ICAO_MRZ", "ICAO_PASSPORT", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
       },
       "uniqueItems": true,
       "description": "Compliance codes whose trust requirements this profile satisfies. Enables multiple compliance profiles (e.g., EUDI_PID and EUDI_MDL) to share a single EUDI trust registry. When null or absent, compatibility is inferred from profile_type alone."
@@ -238,5 +282,40 @@
     "auto_generated": {"type": "boolean", "default": false},
     "created_at": {"type": "string", "format": "date-time"},
     "updated_at": {"type": "string", "format": "date-time"}
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "anyOf": [
+          {"not": {"required": ["trust_purposes"]}},
+          {
+            "properties": {
+              "trust_purposes": {"contains": {"const": "CREDENTIAL_ISSUER"}}
+            },
+            "required": ["trust_purposes"]
+          }
+        ]
+      },
+      "then": {"required": ["supported_formats"]}
+    },
+    {
+      "if": {
+        "properties": {
+          "trust_purposes": {
+            "contains": {
+              "enum": [
+                "MACHINE_IDENTITY_CA",
+                "MANUFACTURER_ENDORSER",
+                "ATTESTATION_VERIFIER",
+                "DEPLOYMENT_AUTHORITY",
+                "EVIDENCE_SIGNER"
+              ]
+            }
+          }
+        },
+        "required": ["trust_purposes"]
+      },
+      "then": {"required": ["trusted_assertion_formats"]}
+    }
+  ]
 }

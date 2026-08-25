@@ -18,6 +18,9 @@ A MIP protocol entity that defines the user-facing workflow for applying for a c
 **Approval Strategy**
 The method by which a credential issuance request is reviewed. One of `AUTO` (immediate), `MANUAL` (human reviewer), `RULES_BASED` (Cedar PolicySet evaluation), or `EXTERNAL` (delegated to an external system).
 
+**Authorization Decision Receipt**
+A signed immutable record binding an authenticated principal and proof to an exact action, opaque external resource identifier, audience, challenge, policy version, decision, and validity interval.
+
 ---
 
 ## C
@@ -123,8 +126,17 @@ An operational subdivision of a Deployment Profile representing a physical or lo
 
 ## M
 
+**Machine Authentication Policy**
+A MIP policy defining the machine credentials, proof-of-control, freshness, optional attestation, and Cedar authorization requirements for a managed non-human runtime.
+
+**Machine Binding**
+Cryptographic proof that a managed Machine Identity controls an active registered key. It is distinct from holder binding and transaction freshness.
+
+**Machine Identity**
+A managed non-human runtime identity with registered keys, credentials, deployment assignments, and an auditable lifecycle. It is not required for ordinary holder wallets.
+
 **mDoc**
-The ISO 18013-5 mobile Document format. A CBOR-encoded credential used for mDL, DTC, and other standards-based physical-identity credentials.
+The ISO 18013-5 mobile Document format. A CBOR-encoded credential used for mobile driving licences and related mobile identity documents. ICAO Digital Travel Credentials use their own ASN.1 `DTCContentInfo` structure and are not mDocs.
 
 **MIP (Marty Identity Protocol)**
 This protocol — the full set of entity definitions, API surface, validation rules, and governance rules defined in this repository.
@@ -157,10 +169,10 @@ An OID4VCI deep link URI (`openid-credential-offer://...`) that a wallet opens t
 ## P
 
 **Policy Set**
-A MIP protocol entity that stores one or more Cedar authorization policies. PolicySets are typed (`ACCESS_CONTROL`, `CREDENTIAL_VERIFICATION`, `APPROVAL_RULES`, `CUSTOM`) and referenced by Trust Profiles, Compliance Profiles, Application Templates, and SCIM Roles. Cedar policies within a PolicySet are evaluated with deny-by-default semantics.
+A MIP protocol entity that stores one or more Cedar authorization policies. PolicySets are typed (`ACCESS_CONTROL`, `CREDENTIAL_VERIFICATION`, `APPROVAL_RULES`, `MACHINE_AUTHORIZATION`, `CUSTOM`) and referenced by Trust Profiles, Compliance Profiles, Application Templates, Machine Authentication Policies, and SCIM Roles. Cedar policies within a PolicySet are evaluated with deny-by-default semantics.
 
 **Policy Type**
-The authorization domain of a PolicySet. One of `ACCESS_CONTROL` (API authorization), `CREDENTIAL_VERIFICATION` (trust evaluation rules), `APPROVAL_RULES` (application approval decisions), or `CUSTOM` (organization-defined).
+The authorization domain of a PolicySet. One of `ACCESS_CONTROL` (API authorization), `CREDENTIAL_VERIFICATION` (trust evaluation rules), `APPROVAL_RULES` (application approval decisions), `MACHINE_AUTHORIZATION` (managed-runtime authorization), or `CUSTOM` (organization-defined).
 
 **Predicate**
 A privacy-preserving constraint on a claim value that allows verification of a property (e.g., `age >= 21`) without disclosing the underlying value (e.g., date of birth). MIP predicate types: `RANGE_PROOF`, `EQUALITY`, `INEQUALITY`, `MEMBERSHIP`, `NON_MEMBERSHIP`.

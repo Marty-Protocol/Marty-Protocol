@@ -1,0 +1,17 @@
+{
+  "id": "07777777-7777-4777-8777-777777777777",
+  "organization_id": "b2222222-2222-4222-8222-222222222222",
+  "name": "Managed machine authorization",
+  "policy_type": "MACHINE_AUTHORIZATION",
+  "cedar_policies": [
+    {
+      "policy_id": "permit-active-bound-attested-machine",
+      "effect": "permit",
+      "cedar_text": "@id(\"permit-active-bound-attested-machine\")\npermit (\n    principal is MIP::MachineIdentity,\n    action == MIP::Action::\"authorization_decisions:evaluate\",\n    resource is MIP::DeploymentProfile\n)\nwhen {\n    principal.status == \"ACTIVE\" &&\n    context.binding_method == \"MACHINE_KEY\" &&\n    context.principal_key_thumbprint == principal.primary_key_thumbprint &&\n    context.attestation_valid &&\n    context.identity_key_bound\n};",
+      "enabled": true
+    }
+  ],
+  "cedar_schema_version": "MIP/1.0",
+  "status": "ACTIVE",
+  "created_at": "2026-07-28T00:00:00Z"
+}

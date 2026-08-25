@@ -123,7 +123,9 @@ DEPRECATED → MUST NOT be used for new issuance
 
 ## Examples
 
-### mDL Template (AAMVA)
+### Draft mDL Template (AAMVA)
+
+This example is intentionally `DRAFT`. It MUST NOT be activated while the bundled `AAMVA_MDL` Compliance Profile remains non-discoverable and lacks conformance evidence and an explicitly selected provisioning profile.
 
 ```json
 {

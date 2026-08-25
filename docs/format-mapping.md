@@ -11,7 +11,9 @@ The MIP protocol defines **canonical format identifiers** (`CredentialFormat` en
 | `VC_JWT` | W3C VC Data Model + JWT |
 | `JSON_LD` | W3C VC with Linked Data Proof |
 | `ZK_MDOC` | Zero-knowledge mDoc (experimental) |
-| `ICAO_EMRTD` | ICAO eMRTD Logical Data Structure with signed EF.SOD |
+| `ICAO_MRZ` | ICAO machine-readable-zone text for parsing and check-digit validation |
+| `ICAO_EMRTD` | ICAO eMRTD Logical Data Structure on a physical contactless document |
+| `ICAO_DTC` | ICAO DTC virtual component encoded as ASN.1 DER `DTCContentInfo` |
 | `VDS_NC` | ICAO Visible Digital Seal for Non-Constrained Environments |
 
 ## Wire Format Mapping
@@ -25,8 +27,9 @@ Implementations MUST use the canonical protocol identifiers in all MIP API reque
 | `VC_JWT` | `jwt_vc_json` | `jwt_vc`, `jwt_vc_json-ld` |
 | `JSON_LD` | `ldp_vc` | — |
 | `ZK_MDOC` | `zk_mdoc` | `zk-mdoc`, `zkp_mdoc` |
-| `ICAO_EMRTD` | `icao_emrtd` | — |
 | `VDS_NC` | `vds_nc` | `vds-nc`, `VDS-NC` |
+
+`ICAO_MRZ`, `ICAO_EMRTD`, and `ICAO_DTC` have no default OID4VCI wire-format mapping. A transport adapter for any of these formats is a separate integration contract and does not, by itself, establish ICAO conformance.
 
 ## Normalisation Rules
 

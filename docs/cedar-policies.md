@@ -104,7 +104,7 @@ See: [`cedar/policies/api_access.cedar`](../cedar/policies/api_access.cedar)
 
 Evaluated during the Trust Evaluation Algorithm (§5.7.3) to decide whether a presented credential should be accepted. Replaces the `allowed_issuers`/`denied_issuers` lists and opaque `default_verification_rules` with composable permit/forbid policies.
 
-**Example — enforce MDOC format for ICAO DTC:**
+**Example — prevent an mDoc credential from being mislabeled as ICAO DTC:**
 ```cedar
 @id("icao-dtc-format-requirement")
 forbid (
@@ -114,7 +114,7 @@ forbid (
 )
 when {
     context.compliance_code == "ICAO_DTC" &&
-    context.credential_format != "MDOC"
+    context.credential_format != "ICAO_DTC"
 };
 ```
 
@@ -227,7 +227,7 @@ and evaluated by the fact layer before Cedar runs.
 
 Cedar policies are stored in `PolicySet` entities (schema: [`schemas/policy-set.json`](../schemas/policy-set.json)). Each PolicySet:
 
-- Has a `policy_type` (`ACCESS_CONTROL`, `CREDENTIAL_VERIFICATION`, `APPROVAL_RULES`, `CUSTOM`)
+- Has a `policy_type` (`ACCESS_CONTROL`, `CREDENTIAL_VERIFICATION`, `APPROVAL_RULES`, `MACHINE_AUTHORIZATION`, `CUSTOM`)
 - Contains one or more `cedar_policies[]` with `policy_id`, `effect`, `cedar_text`, and `enabled` flag
 - References `cedar_schema_version` for validation
 - Has a lifecycle status (`DRAFT`, `ACTIVE`, `ARCHIVED`)

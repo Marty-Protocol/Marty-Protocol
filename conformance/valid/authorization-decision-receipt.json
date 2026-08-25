@@ -1,0 +1,37 @@
+{
+  "id": "18888888-8888-4888-8888-888888888888",
+  "organization_id": "b2222222-2222-4222-8222-222222222222",
+  "principal_type": "MACHINE_IDENTITY",
+  "principal_id": "urn:example:machine:secure-runtime-456",
+  "action": "urn:example:action:request-protected-operation",
+  "resource_id": "urn:external:resource:opaque-123",
+  "decision": "PERMIT",
+  "policy_set_id": "07777777-7777-4777-8777-777777777777",
+  "policy_version_digest": "sha256:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef0123456789",
+  "binding": {
+    "binding_method": "MACHINE_KEY",
+    "principal_key_thumbprint": "sha256:abcdefghijklmnopqrstuvwxyzABCDE_1234567890",
+    "challenge": "A-single-use-challenge-value-123456",
+    "audience": "https://external.example/authorization",
+    "replay_checked": true,
+    "attestation_result_digest": "sha256:0123456789abcdefghijklmnopqrstuvwxyzABCDEF",
+    "identity_key_bound": true
+  },
+  "evidence_refs": [
+    "urn:example:evidence:machine-credential-presentation-123",
+    "urn:example:evidence:attestation-result-456"
+  ],
+  "external_context": {
+    "system": "https://external.example",
+    "transaction_id": "external-transaction-789",
+    "result_ref": "https://external.example/results/external-transaction-789"
+  },
+  "issued_at": "2026-07-28T12:00:00Z",
+  "expires_at": "2026-07-28T12:05:00Z",
+  "signature": {
+    "algorithm": "ES256",
+    "key_id": "urn:example:key:mip-decision-signer",
+    "value": "MEUCIQDexampleBase64urlSignatureValue1234567890"
+  },
+  "created_at": "2026-07-28T12:00:00Z"
+}

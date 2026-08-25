@@ -9,6 +9,21 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 
 ## [Unreleased]
 
+### Added
+- Added `MachineIdentity` for managed non-human identity and secure-document runtimes, including active-key binding, deployment assignment, credential references, attestation identity, and lifecycle state.
+- Added `MachineAuthenticationPolicy` for proof-of-control, challenge/audience/replay checks, optional attestation appraisal, and machine-authorization policy selection.
+- Added signed `AuthorizationDecisionReceipt` records that bind an authenticated principal and proof to exact opaque external action and resource identifiers without moving domain resources or execution controls into MIP.
+- Added purpose-scoped Trust Profiles, Cedar machine-authorization entities and actions, separate machine-binding evidence, conformance fixtures, minimal examples, entity specifications, and ADR-0001.
+
+### Changed
+- Deployment Profiles may assign managed Machine Identities and reference a Machine Authentication Policy.
+- Wallet compatibility now distinguishes derived requirements from evidence-backed named-wallet interoperability instead of asserting product compatibility from a format/protocol tuple alone.
+
+### Fixed
+- Corrected the draft `ICAO_DTC` profile to use the ICAO DTC ASN.1 virtual-component format and PKI model instead of falsely mapping DTC to ISO mDoc, OID4VCI, or Doc 9303 Part 13.
+- Corrected the ICAO MRZ and ePassport mappings: MRZ is no longer modeled as mDoc or cryptographic authentication, DG4 carries iris data, DG7 carries the displayed signature or usual mark, and both profiles remain draft until format-native conformance evidence exists.
+- Updated the AAMVA mDL and EUDI mDL profile evidence levels so reserved mappings do not claim certification or interoperability that the repository cannot prove.
+
 ## [0.5.0] - 2026-08-09
 
 ### Added

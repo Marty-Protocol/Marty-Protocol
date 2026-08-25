@@ -26,8 +26,8 @@
     }
   ],
   "allowed_algorithms": ["ES256", "ES384", "PS256"],
-  "supported_formats": ["MDOC"],
-  "compatible_compliance_codes": ["ICAO_DTC", "ICAO_MRZ"],
+  "supported_formats": ["VC_JWT"],
+  "compatible_compliance_codes": ["ENTERPRISE_VC"],
   "compliance_status": "COMPLIANT",
   "time_policy": {
     "clock_skew_seconds": 300,

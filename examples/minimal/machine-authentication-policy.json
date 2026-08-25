@@ -1,0 +1,18 @@
+{
+  "id": "d4444444-4444-4444-8444-444444444444",
+  "organization_id": "b2222222-2222-4222-8222-222222222222",
+  "name": "Document printer authentication",
+  "trust_profile_id": "e5555555-5555-4555-8555-555555555555",
+  "required_credential_types": ["MachineDeploymentCredential"],
+  "machine_binding": {
+    "binding_methods": ["MACHINE_KEY"],
+    "proof_profiles": ["SIGNED_CHALLENGE"],
+    "proof_freshness": {
+      "challenge_required": true,
+      "audience_binding_required": true,
+      "replay_detection_required": true
+    }
+  },
+  "status": "ACTIVE",
+  "created_at": "2026-07-28T00:00:00Z"
+}

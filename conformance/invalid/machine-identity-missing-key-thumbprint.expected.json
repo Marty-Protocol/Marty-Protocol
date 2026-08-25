@@ -1,0 +1,5 @@
+{
+  "pointer": "/identity_keys/0/thumbprint",
+  "error_code": "MISSING_REQUIRED_FIELD",
+  "message": "Every machine identity key requires a SHA-256 thumbprint so credentials, attestation, and authorization decisions can be bound to the same key."
+}

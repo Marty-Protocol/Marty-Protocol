@@ -79,7 +79,7 @@
     },
     "api_surface": {
       "type": "array",
-      "description": "Runtime API endpoints that implementations MUST expose when this compliance profile is active. Allows standards-specific APIs (OID4VCI well-known, mDL device engagement) to be declared by the profile rather than hardcoded.",
+      "description": "Runtime HTTP API endpoints that implementations MUST expose when this compliance profile is active. Non-HTTP exchanges such as ISO/IEC 18013-5 device engagement and session establishment are outside this field.",
       "items": {
         "type": "object",
         "required": ["rel", "path_template", "method", "auth_required"],
@@ -87,7 +87,7 @@
         "properties": {
           "rel": {
             "type": "string",
-            "description": "IANA link relation or MIP-defined endpoint identifier (e.g., openid-credential-issuer, oauth-authorization-server, mdl-device-engagement)"
+            "description": "IANA link relation or MIP-defined HTTP endpoint identifier (e.g., openid-credential-issuer or oauth-authorization-server)"
           },
           "path_template": {
             "type": "string",

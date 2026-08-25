@@ -43,8 +43,50 @@
             "failure_reason": {"type": "string"}
           }
         },
+        "machine_binding_evidence": {
+          "type": "object",
+          "required": ["required", "validated", "machine_identity_id", "binding_method", "proof_profile"],
+          "additionalProperties": false,
+          "properties": {
+            "required": {"type": "boolean"},
+            "validated": {"type": "boolean"},
+            "machine_identity_id": {"type": "string", "format": "uuid"},
+            "binding_method": {"type": "string", "enum": ["MACHINE_KEY", "CREDENTIAL_KEY", "SESSION_BINDING"]},
+            "proof_profile": {
+              "type": "string",
+              "enum": ["X509_MACHINE_AUTHENTICATION", "SIGNED_CHALLENGE", "OID4VP_VERIFIABLE_PRESENTATION", "CUSTOM"]
+            },
+            "principal_key_thumbprint": {"type": "string", "pattern": "^sha256:[A-Za-z0-9_-]{32,}$"},
+            "challenge_validated": {"type": "boolean"},
+            "audience_validated": {"type": "boolean"},
+            "replay_checked": {"type": "boolean"},
+            "proof_age_seconds": {"type": "integer", "minimum": 0},
+            "attestation": {
+              "type": "object",
+              "required": ["required", "validated"],
+              "additionalProperties": false,
+              "properties": {
+                "required": {"type": "boolean"},
+                "validated": {"type": "boolean"},
+                "format": {"type": "string", "enum": ["EAT", "TPM_QUOTE", "PLATFORM_ATTESTATION", "CUSTOM"]},
+                "verifier_id": {"type": "string", "maxLength": 512},
+                "result_digest": {"type": "string", "pattern": "^sha256:[A-Za-z0-9_-]{32,}$"},
+                "identity_key_bound": {"type": "boolean"},
+                "produced_at": {"type": "string", "format": "date-time"},
+                "age_seconds": {"type": "integer", "minimum": 0}
+              }
+            },
+            "failure_reason": {"type": "string"}
+          }
+        },
         "failure_reason": {"type": "string"}
-      }
+      },
+      "allOf": [
+        {
+          "if": {"type": "object"},
+          "then": {"not": {"required": ["holder_binding_evidence", "machine_binding_evidence"]}}
+        }
+      ]
     },
     "expires_at": {"type": "string", "format": "date-time"},
     "created_at": {"type": "string", "format": "date-time"},

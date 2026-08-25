@@ -1,6 +1,6 @@
 {
-  "id": "pp-pre-boarding-example",
-  "organization_id": "org-airline-example",
+  "id": "b4000001-0005-4000-8000-000000000005",
+  "organization_id": "b4000001-0000-4000-8000-000000000000",
   "name": "Pre-Boarding Gate Verification",
   "status": "active",
   "description": "Verifies passenger identity and boarding eligibility. Checks name, flight, and departure date. Allows selective disclosure of seat number.",
@@ -23,7 +23,7 @@
     }
   ],
   "accepted_credential_types": ["PreBoardingClearance"],
-  "trust_profile_id": "tp-icao-dtc-example",
+  "trust_profile_id": "b4000001-0003-4000-8000-000000000003",
   "holder_binding": {
     "required": true,
     "binding_methods": ["CREDENTIAL_KEY"],

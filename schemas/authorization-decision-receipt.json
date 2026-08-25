@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/authorization-decision-receipt.json",
+  "title": "AuthorizationDecisionReceipt",
+  "description": "Signed, privacy-safe receipt for an identity-bound authorization decision. External systems retain ownership of domain resources and execution behavior.",
+  "type": "object",
+  "required": [
+    "id",
+    "organization_id",
+    "principal_type",
+    "principal_id",
+    "action",
+    "resource_id",
+    "decision",
+    "policy_set_id",
+    "policy_version_digest",
+    "binding",
+    "issued_at",
+    "expires_at",
+    "signature"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "principal_type": {
+      "type": "string",
+      "enum": ["MACHINE_IDENTITY", "USER", "SERVICE_ACCOUNT", "API_KEY"]
+    },
+    "principal_id": {"type": "string", "minLength": 1, "maxLength": 512},
+    "action": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI identifying the requested external operation. Defining and enforcing the operation remains the responsibility of the external domain system."
+    },
+    "resource_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "description": "Opaque external resource identifier. MIP does not interpret or manage the resource."
+    },
+    "decision": {"type": "string", "enum": ["PERMIT", "DENY"]},
+    "policy_set_id": {"type": "string", "format": "uuid"},
+    "policy_version_digest": {"type": "string", "pattern": "^sha256:[A-Za-z0-9_-]{32,}$"},
+    "binding": {
+      "type": "object",
+      "required": ["binding_method", "challenge", "audience", "replay_checked"],
+      "additionalProperties": false,
+      "properties": {
+        "binding_method": {
+          "type": "string",
+          "enum": ["CREDENTIAL_KEY", "DEVICE_KEY", "SESSION_BINDING", "MACHINE_KEY"]
+        },
+        "principal_key_thumbprint": {"type": ["string", "null"], "pattern": "^sha256:[A-Za-z0-9_-]{32,}$"},
+        "challenge": {"type": "string", "minLength": 22},
+        "audience": {"type": "string", "minLength": 1, "maxLength": 512},
+        "replay_checked": {"const": true},
+        "attestation_result_digest": {"type": ["string", "null"], "pattern": "^sha256:[A-Za-z0-9_-]{32,}$"},
+        "identity_key_bound": {"type": ["boolean", "null"]}
+      },
+      "if": {
+        "properties": {"binding_method": {"enum": ["CREDENTIAL_KEY", "DEVICE_KEY", "MACHINE_KEY"]}},
+        "required": ["binding_method"]
+      },
+      "then": {
+        "required": ["principal_key_thumbprint"],
+        "properties": {
+          "principal_key_thumbprint": {"type": "string"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"binding_method": {"const": "MACHINE_KEY"}},
+            "required": ["binding_method"]
+          },
+          "then": {
+            "required": ["identity_key_bound"],
+            "properties": {"identity_key_bound": {"const": true}}
+          }
+        }
+      ]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1, "maxLength": 1024},
+      "uniqueItems": true
+    },
+    "external_context": {
+      "type": "object",
+      "description": "Opaque correlation values. Domain payloads, content keys, and execution instructions MUST NOT be embedded.",
+      "additionalProperties": false,
+      "properties": {
+        "system": {"type": "string", "format": "uri"},
+        "transaction_id": {"type": "string", "minLength": 1, "maxLength": 512},
+        "result_ref": {"type": "string", "format": "uri"}
+      }
+    },
+    "issued_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "signature": {
+      "type": "object",
+      "required": ["algorithm", "key_id", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": ["RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512", "EdDSA", "Ed25519", "Ed448"]
+        },
+        "key_id": {"type": "string", "minLength": 1, "maxLength": 512},
+        "value": {"type": "string", "contentEncoding": "base64url", "minLength": 16}
+      }
+    },
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

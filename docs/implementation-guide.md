@@ -27,9 +27,12 @@ MIP entities reference each other and must be created in dependency order:
 7. Application Template     (→ Credential Template, optionally → Policy Set)
 8. Deployment Profile       (→ Trust Profile, Presentation Policy)
 9. Flow                     (→ Credential Template, Presentation Policy, Deployment Profile)
+10. Machine Identity        (→ Deployment Profile; optional managed-runtime feature)
+11. Machine Authentication Policy (→ Trust Profile, optionally → Policy Set)
 ```
 
 Device Registration and Notification Target are operational entities created per user at runtime.
+Machine Identity is an independent managed-infrastructure record and MUST NOT replace Device Registration or ordinary wallet holder binding.
 
 ---
 
@@ -57,9 +60,13 @@ Device Registration and Notification Target are operational entities created per
 }
 ```
 
-### For ICAO DTC or AAMVA mDL
+### For ICAO travel documents
 
-Use `source_type: "TRUST_LIST"` with the relevant PKD or IACA trust list URL. Set `revocation_policy.check_mode: "HARD_FAIL"` — `SKIP` is prohibited for these credential types.
+Use `source_type: "PKD_URL"` for an approved ICAO PKD distribution endpoint or `source_type: "ROOT_CA"` for authenticated CSCA trust anchors. Distribution does not establish acceptance by itself; the verifier still needs an explicit trust policy. The `ICAO_DTC` Compliance Profile remains draft and has no active issuance transport.
+
+### For AAMVA mDL
+
+Use `source_type: "TRUST_LIST"` with the relevant IACA trust-list URL. Set `revocation_policy.check_mode: "HARD_FAIL"` — `SKIP` is prohibited for this credential type.
 
 You can link a Cedar PolicySet for additional conditional trust evaluation:
 
@@ -80,10 +87,12 @@ See [Cedar Policies Documentation](cedar-policies.md) for policy authoring detai
 | Use case | compliance_profile_id | credential_format |
 |----------|----------------------|-------------------|
 | Internal badge/access | `cp-enterprise-vc` | `SD_JWT_VC` |
-| ICAO travel doc | `cp-icao-dtc` | `MDOC` |
-| US mDL | `cp-aamva-mdl` | `MDOC` |
+| ICAO Digital Travel Credential | `cp-icao-dtc` | `ICAO_DTC` (draft; no active issuance transport) |
+| ICAO Machine Readable Zone | `cp-icao-mrz` | `ICAO_MRZ` (draft; parsing/check digits only) |
+| ICAO TD3 ePassport | `cp-icao-passport` | `ICAO_EMRTD` (draft; no conformance claim) |
+| US mDL | `cp-aamva-mdl` | `MDOC` (draft; no active issuance transport or conformance claim) |
 | EU PID | `cp-eudi-pid` | `SD_JWT_VC` |
-| EU mDL | `cp-eudi-mdl` | `MDOC` |
+| EU mDL | `cp-eudi-mdl` | `MDOC` (draft; current rulebook mapping pending) |
 
 ### credential_type naming conventions
 

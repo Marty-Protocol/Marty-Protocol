@@ -106,6 +106,26 @@ export interface ApplicationTemplate {
   updated_at?: string;
 }
 
+/** Signed, privacy-safe receipt for an identity-bound authorization decision. External systems retain ownership of domain resources and execution behavior. */
+export interface AuthorizationDecisionReceipt {
+  id: string;
+  organization_id: string;
+  principal_type: 'MACHINE_IDENTITY' | 'USER' | 'SERVICE_ACCOUNT' | 'API_KEY';
+  principal_id: string;
+  action: string;
+  resource_id: string;
+  decision: 'PERMIT' | 'DENY';
+  policy_set_id: string;
+  policy_version_digest: string;
+  binding: Record<string, unknown>;
+  evidence_refs?: string[];
+  external_context?: Record<string, unknown>;
+  issued_at: string;
+  expires_at: string;
+  signature: Record<string, unknown>;
+  created_at?: string;
+}
+
 /** A record of a biometric enrollment event for an applicant. Stores only the modality, hash of the biometric template, and metadata. Raw biometric data MUST NOT be stored in this record and MUST NOT be transmitted via the MIP API. */
 export interface BiometricEnrollment {
   id: string;
@@ -274,6 +294,8 @@ export interface DeploymentProfile {
   default_policy_id?: string | null;
   site_id?: string | null;
   enabled_flow_ids?: string[];
+  machine_identity_ids?: string[];
+  machine_authentication_policy_id?: string | null;
   network_mode: 'ONLINE' | 'OFFLINE' | 'HYBRID';
   key_access_mode?: 'KEY_VAULT' | 'HSM' | 'DEVICE_KEYSTORE';
   environment_config?: Record<string, unknown>;
@@ -682,6 +704,44 @@ export interface Lane {
   metadata?: Record<string, unknown>;
 }
 
+/** Identity policy for authenticating a managed machine, validating proof of control, and optionally appraising runtime attestation. It does not define domain execution controls. */
+export interface MachineAuthenticationPolicy {
+  id: string;
+  organization_id: string;
+  name: string;
+  description?: string;
+  trust_profile_id: string;
+  required_credential_types: string[];
+  allowed_machine_types?: string[];
+  machine_binding: Record<string, unknown>;
+  attestation_requirement?: Record<string, unknown>;
+  authorization_policy_set_id?: string | null;
+  status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
+  created_at: string;
+  updated_at?: string;
+}
+
+/** Managed identity and lifecycle record for a non-human secure runtime participating in identity or secure-document operations. This entity is not used for ordinary holder wallets and does not describe domain resources or execution controls. */
+export interface MachineIdentity {
+  id: string;
+  organization_id: string;
+  machine_id: string;
+  display_name: string;
+  description?: string;
+  machine_type: 'SECURE_DOCUMENT_PRINTER' | 'DOCUMENT_PERSONALIZATION_SYSTEM' | 'VERIFICATION_APPLIANCE' | 'WALLET_SECURE_ELEMENT' | 'HSM_WORKLOAD' | 'SECURE_PROCESSING_RUNTIME' | 'OTHER';
+  status: 'PROVISIONED' | 'ACTIVE' | 'SUSPENDED' | 'REVOKED' | 'RETIRED';
+  identity_keys: Record<string, unknown>[];
+  assignments?: Record<string, unknown>;
+  credential_ids?: string[];
+  attestation_identity?: Record<string, unknown>;
+  created_at: string;
+  updated_at?: string;
+  suspended_at?: string | null;
+  revoked_at?: string | null;
+  retired_at?: string | null;
+  status_reason?: string | null;
+}
+
 /** Schema for the /.well-known/mip-configuration endpoint response. This document describes the capabilities, endpoints, and supported profiles of a MIP implementation. Analogous to OpenID Connect Discovery (RFC 8414) but scoped to MIP-specific capabilities. */
 export interface MipConfigurationDiscoveryDocument {
   mip_version: string;
@@ -857,7 +917,7 @@ export interface PolicySet {
   organization_id: string;
   name: string;
   description?: string;
-  policy_type: 'ACCESS_CONTROL' | 'CREDENTIAL_VERIFICATION' | 'APPROVAL_RULES' | 'CUSTOM';
+  policy_type: 'ACCESS_CONTROL' | 'CREDENTIAL_VERIFICATION' | 'APPROVAL_RULES' | 'MACHINE_AUTHORIZATION' | 'CUSTOM';
   cedar_policies: Record<string, unknown>[];
   cedar_schema_version?: string;
   status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
@@ -1077,12 +1137,14 @@ export interface TrustProfile {
   description?: string;
   status: TrustProfileStatus;
   profile_type: 'ICAO' | 'AAMVA' | 'EUDI' | 'CUSTOM';
+  trust_purposes?: string[];
   trust_sources: Record<string, unknown>[];
   allowed_algorithms: string[];
   revocation_policy?: Record<string, unknown>;
   revocation_services?: Record<string, unknown>;
   time_policy?: Record<string, unknown>;
-  supported_formats: string[];
+  supported_formats?: CredentialFormat[];
+  trusted_assertion_formats?: string[];
   allowed_issuers?: string[] | null;
   denied_issuers?: string[] | null;
   system_issuer_overrides?: Record<string, unknown>;

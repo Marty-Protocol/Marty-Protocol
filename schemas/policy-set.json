@@ -13,8 +13,8 @@
     "description": {"type": "string", "maxLength": 1024},
     "policy_type": {
       "type": "string",
-      "enum": ["ACCESS_CONTROL", "CREDENTIAL_VERIFICATION", "APPROVAL_RULES", "CUSTOM"],
-      "description": "ACCESS_CONTROL: API authorization (principal → action → resource). CREDENTIAL_VERIFICATION: trust evaluation during credential presentation. APPROVAL_RULES: application auto-approval / denial logic. CUSTOM: organization-defined policy domain."
+      "enum": ["ACCESS_CONTROL", "CREDENTIAL_VERIFICATION", "APPROVAL_RULES", "MACHINE_AUTHORIZATION", "CUSTOM"],
+      "description": "ACCESS_CONTROL: API authorization. CREDENTIAL_VERIFICATION: trust evaluation during credential presentation. APPROVAL_RULES: application approval and denial logic. MACHINE_AUTHORIZATION: identity-bound authorization of a managed machine for an opaque external operation. CUSTOM: organization-defined policy domain."
     },
     "cedar_policies": {
       "type": "array",

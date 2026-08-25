@@ -9,7 +9,7 @@
 
 ## Purpose
 
-A Deployment Profile packages trust configuration, verification policies, and runtime behavior for **physical or logical endpoints**: boarding gates, kiosks, mobile apps, web portals, API clients. It is the bridge between abstract identity policy and real-world operational context.
+A Deployment Profile packages trust configuration, verification policies, and runtime behavior for **physical or logical endpoints**: boarding gates, kiosks, mobile apps, web portals, API clients, and secure document systems. It is the bridge between abstract identity policy and real-world operational context.
 
 ## What It Contains
 
@@ -36,6 +36,8 @@ A Deployment Profile packages trust configuration, verification policies, and ru
 | `presentation_policy_ids` | UUID[] | Yes | At least one; each must reference existing policy |
 | `credential_template_ids` | UUID[] | No | For issuance-capable deployments |
 | `default_policy_id` | UUID | No | Must be in `presentation_policy_ids` |
+| `machine_identity_ids` | UUID[] | No | Managed runtimes assigned to this deployment |
+| `machine_authentication_policy_id` | UUID | No | Policy for managed-runtime authentication |
 | `network_mode` | NetworkMode | Yes | `ONLINE`, `OFFLINE`, `HYBRID` |
 | `key_access_mode` | KeyAccessMode | No | `KEY_VAULT`, `HSM`, `DEVICE_KEYSTORE` |
 | `environment_config` | EnvironmentConfig | No | See below |
@@ -86,6 +88,9 @@ A Deployment Profile packages trust configuration, verification policies, and ru
 7. `credential_template_ids`, if present, each MUST reference an `ACTIVE` Credential Template.
 8. The canonical operator-authentication field and deprecated alias MUST NOT appear together. Readers MUST normalize the alias to `operator_biometric_authentication_required`; writers MUST emit only the canonical field.
 9. Neither deployment field represents biometric holder binding. Presentation-time holder biometrics require a separate, explicitly versioned policy extension.
+10. Machine identities MUST be organization-compatible and `ACTIVE` or `PROVISIONED`.
+11. `machine_authentication_policy_id`, when present, MUST reference an active organization-compatible policy.
+12. Ordinary holder wallets MUST NOT be registered as Machine Identities solely because they use device-bound keys.
 
 ## Hierarchy
 
@@ -117,7 +122,7 @@ Organization
   "id": "dp-gate-12",
   "organization_id": "org-airline",
   "name": "Terminal B Gate 12",
-  "trust_profile_id": "tp-icao-dtc",
+  "trust_profile_id": "tp-airport-passport-trust",
   "presentation_policy_ids": ["pp-pre-boarding", "pp-boarding"],
   "default_policy_id": "pp-pre-boarding",
   "network_mode": "HYBRID",

@@ -13,6 +13,7 @@ This document captures the foundational design principles that guide decisions i
 - **Disclosure policy** (Presentation Policy) is owned by verifier-side product teams and changes when privacy requirements evolve.
 - **Operational configuration** (Deployment Profile) is owned by field operations and changes per deployment.
 - **Orchestration** (Flow) connects these entities and reflects business process changes.
+- **Managed actor identity** (Machine Identity) records who a non-human runtime is; its external domain retains ownership of protected resources and execution behavior.
 
 This separation means a compliance update to a trust anchor does not require redeployment of application-layer configs, and a UX update to a presentation policy does not require cryptographic re-signing.
 
@@ -27,6 +28,7 @@ This separation means a compliance update to a trust anchor does not require red
 - Notifications never carry credential material — only offer URIs.
 - Wallet Profiles are derived, not stored, to avoid accumulating device-to-capability fingerprints.
 - Device Registration performs a soft delete, never purging records, to support audit trails.
+- Stable Machine Identity is limited to managed infrastructure and is never inferred from ordinary wallet `DEVICE_KEY` binding.
 
 Implementors choosing less-private options (e.g., `fallback_policy: ACCEPT_RAW`, `holder_binding: false`) must explicitly set those values.
 
@@ -59,6 +61,8 @@ MIP uses [Cedar](https://www.cedarpolicy.com/) as its authorization policy langu
 
 Authorization rules are stored in PolicySet entities and referenced by Trust Profiles (verification trust), Application Templates (approval rules), Compliance Profiles (verification defaults), and SCIM Roles (API access control). The MIP Cedar schema (`cedar/mip.cedarschema`) defines all entity types, actions, and context types.
 
+Machine authorization may decide whether an authenticated managed runtime is permitted to request an external operation. MIP signs the decision; the external domain interprets the opaque action and resource identifiers and enforces the operation.
+
 ---
 
 ## 5. Compliance as a First-Class Concept
@@ -68,9 +72,9 @@ Authorization rules are stored in PolicySet entities and referenced by Trust Pro
 Compliance Profile objects are:
 - **Immutable** once referenced by an active Credential Template.
 - **Version-locked** — a template references a specific version of a compliance profile.
-- **System profiles are sealed** — ICAO_DTC, AAMVA_MDL, EUDI_PID, EUDI_MDL cannot be copied and modified.
+- **Active system profiles are sealed** — EUDI_PID and other active system profiles cannot be copied and modified. Draft profiles such as AAMVA_MDL, EUDI_MDL, ICAO_DTC, ICAO_MRZ, and ICAO_PASSPORT remain non-discoverable until their version-pinned mappings and conformance evidence are complete.
 
-This ensures that a credential claiming ICAO_DTC compliance actually enforces ICAO_DTC rules, not a user-modified approximation.
+This ensures that an active credential profile enforces the cited standard rather than a user-modified approximation. A draft profile MUST NOT be presented as evidence of external conformance.
 
 ---
 
@@ -89,9 +93,9 @@ This ensures that a credential claiming ICAO_DTC compliance actually enforces IC
 
 **Entities that can be computed SHOULD be derived, not stored.**
 
-Wallet Profile is the canonical example: wallet compatibility is a function of `(credential_format, issuance_protocol, compliance_code)`. Building a static registry of wallet capabilities introduces drift and becomes stale within one release cycle.
+Wallet Profile is the canonical example of a split derivation: `(credential_format, issuance_protocol, compliance_code)` determines wallet requirements, while named product compatibility requires versioned evidence. Treating the tuple itself as proof of commercial-wallet support creates drift and false promises.
 
-The `/v1/wallet-registry` API exists for backward compatibility and developer tooling, but it derives results at query time from the three source-of-truth dimensions.
+The `/v1/wallet-registry` API combines derived requirements with evidence-backed system records and organization overrides. Unknown combinations return no named wallet or platform by default.
 
 ---
 
@@ -122,7 +126,7 @@ MIP prohibits credential data in notification bodies. The offer URI is a short-l
 | **Stable** | Trust Profile, Compliance Profile, Revocation Profile | Months–years |
 | **Moderate** | Credential Template | Weeks–months |
 | **Dynamic** | Presentation Policy, Application Template | Days–weeks |
-| **Operational** | Deployment Profile, Device Registration, Notification Target | Hours–days |
+| **Operational** | Deployment Profile, Device Registration, Machine Identity, Notification Target | Hours–days |
 | **Derived** | Wallet Profile | No storage |
 | **Per use-case** | Flow | Per business process |
 
