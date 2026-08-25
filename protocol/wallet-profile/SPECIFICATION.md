@@ -1,4 +1,4 @@
-# Wallet Profile — Entity Specification
+# Wallet Profile - Entity Specification
 
 **Entity:** Wallet Profile
 **Version:** 0.4.0
@@ -9,246 +9,109 @@
 
 ## Purpose
 
-A Wallet Profile describes **which wallet applications can receive and hold** a specific credential configuration. The canonical set of wallet profiles is **derived** from the combination of credential format, issuance protocol, and compliance profile code. However, organisations with specialised deployment requirements MAY store **override entries** in the wallet registry to extend or customise derived profiles.
+A Wallet Profile describes the requirements a holder wallet must satisfy for a credential configuration and, when supported by evidence, the named wallet applications verified for that exact configuration.
 
-Wallet Profile is intentionally narrow. It does **not** represent every place a credential can be published after issuance. Organization-managed destinations such as Canvas Credentials institutional mirroring are modeled as **Delivery Destination Profiles**, because the holder is not opening an OID4VCI offer in a holder-controlled wallet. A learner-owned Canvas/Parchment backpack may be represented as a delivery destination with `mode = learner_backpack` when OAuth setup is available.
+The derivation key is:
 
----
-
-## Derivation vs. Override
-
-| Aspect | Derived Profile | Override Entry |
-|--------|----------------|----------------|
-| Source | System derivation table | Operator-stored, per-organisation |
-| `is_override` | `false` (implied) | `true` |
-| `id` / `organization_id` | Absent | Required |
-| Persistence | None — computed on read | Stored in `/v1/wallet-registry` |
-| Mutability | Immutable | Full CRUD |
-| Precedence | 0 (lowest) | Configurable (`override_precedence`, default 50) |
-
----
-
-## Derivation Key
-
-```
-(credential_format, issuance_protocol, compliance_profile_code) → DerivedWalletProfile
+```text
+(credential_format, issuance_protocol, compliance_profile_code) -> WalletRequirements
 ```
 
-This key is extracted from a Credential Template's associated Compliance Profile. Multiple Credential Templates that share the same key produce the same derived profile.
+Derivation establishes requirements. It MUST NOT, by itself, assert that a named wallet is compatible. Format support, protocol support, platform availability, issuer enrollment, regional policy, certification, and an end-to-end issuance or presentation test are separate facts.
 
----
+Organization-managed destinations such as Canvas Credentials institutional mirroring are Delivery Destination Profiles, not Wallet Profiles.
+
+## Derived Requirements and Verified Compatibility
+
+| Concern | Derived Requirements | Verified Compatibility Record |
+|---|---|---|
+| Source | Credential format, protocol, and compliance profile | Versioned system catalog evidence or organization override |
+| Meaning | Capabilities a wallet would need | A named wallet demonstrated with the exact configuration |
+| Named `wallet_apps` | Empty unless evidence exists | One or more evidence-backed names |
+| Platforms | Empty unless evidence exists | Platforms covered by evidence |
+| Mutability | Maintained with the protocol mapping | Updated as products and programs change |
+
+An empty `wallet_apps` array means compatibility has not been verified. It does not mean every wallet is incompatible.
+
+Evidence for a named wallet SHOULD identify:
+
+- the exact credential format and document or credential type;
+- the issuance and/or presentation protocol and version;
+- the wallet product and platform version;
+- issuer enrollment, entitlement, regional, or certification prerequisites;
+- the test date, result, and authoritative documentation;
+- whether evidence covers issuance, storage, presentation, or all three.
+
+A documentation link alone is useful provenance but is not a substitute for an interoperability result when the system presents the mapping as verified.
 
 ## Override Registry
 
-Organisations that need to extend the standard wallet compatibility set — for example, to add a proprietary enterprise wallet, adjust deep link patterns, or restrict the default platform list — may POST override entries to `/v1/wallet-registry`.
-
-### Merge Semantics
-
-When `GET /v1/wallet-registry` is called (or when wallet compatibility is resolved for a credential template), the system produces a merged result:
-
-1. Start with the system-derived profile for the matching derivation key.
-2. Find all stored override entries for the organisation that match the same derivation key.
-3. Sort overrides by `override_precedence` descending (highest first).
-4. For each override:
-   - If `merge_strategy = APPEND`: array fields (`wallet_apps`, `specifications`) are unioned; scalar fields from the override replace derived values.
-   - If `merge_strategy = REPLACE`: all fields from the override replace corresponding derived fields entirely.
-5. Return the merged profile.
-
-If no override entries exist for a given derivation key, the derived profile is returned as-is.
-
-### Override Constraints
+Organizations MAY store evidence-backed entries in `/v1/wallet-registry` for proprietary or deployment-specific wallets.
 
 1. An override MUST set `is_override: true`.
-2. An override MUST include `id` and `organization_id`.
-3. An override MUST NOT contradict the `credential_format` of the referenced compliance profile (the derivation key is immutable within an override entry).
-4. Overrides are scoped to the creating organisation; they do not affect other organisations' derived profiles.
-
----
+2. It MUST include `id` and `organization_id`.
+3. Its derivation key MUST match the credential configuration.
+4. `APPEND` unions array fields; `REPLACE` replaces the derived requirement result.
+5. An override that names a wallet MUST carry documentation and SHOULD carry test evidence in the implementation's evidence store.
+6. Overrides are organization-scoped and MUST NOT become global compatibility claims.
 
 ## Properties
 
 | Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `id` | UUID | For overrides | Stored override identifier |
-| `organization_id` | UUID | For overrides | Owning organisation |
-| `is_override` | boolean | No | Default `false`; `true` for stored entries |
-| `override_precedence` | integer | No | Merge priority 0–100; default 50 |
-| `name` | string | Yes | Human-readable profile name |
-| `description` | string | No | Capability description |
-| `credential_format` | CredentialFormat | Yes | Primary key dimension |
-| `issuance_protocol` | IssuanceProtocol | Yes | Primary key dimension |
-| `compliance_profile_code` | string | No | Optional key dimension |
-| `wallet_apps` | string[] | No | Compatible wallet application names |
-| `merge_strategy` | string | No | `APPEND` or `REPLACE`; default `APPEND` |
-| `specifications` | string[] | No | Supported standards |
-| `supported_platforms` | Platform[] | No | `ios`, `android`, `web` |
-| `deep_link_pattern` | string | No | URI template for credential offer delivery |
-| `created_at` | datetime | Yes | ISO 8601 |
-| `updated_at` | datetime | No | ISO 8601 |
+|---|---|---|---|
+| `id` | UUID | Overrides | Stored override identifier |
+| `organization_id` | UUID | Overrides | Owning organization |
+| `is_override` | boolean | No | `true` for stored organization records |
+| `override_precedence` | integer | No | Merge priority from 0 through 100 |
+| `name` | string | Yes | Requirement or verified-compatibility label |
+| `description` | string | No | Scope and evidence limitations |
+| `credential_format` | CredentialFormat | Yes | Derivation key dimension |
+| `issuance_protocol` | IssuanceProtocol | Yes | Derivation key dimension |
+| `compliance_profile_code` | string | No | Optional narrowing dimension |
+| `wallet_apps` | string[] | No | Evidence-backed compatible wallet names; empty when unverified |
+| `merge_strategy` | string | No | `APPEND` or `REPLACE` |
+| `specifications` | string[] | No | Required or tested standards |
+| `supported_platforms` | Platform[] | No | Evidence-backed platforms |
+| `deep_link_pattern` | string | No | Tested credential-offer route, when applicable |
+| `docs_url` | URI | No | Authoritative product or program documentation |
+| `created_at` | datetime | Overrides | Record creation time |
+| `updated_at` | datetime | No | Last review time |
 
----
+## Baseline Derivation Rules
 
-## Compatibility Table (Normative — Derived Profiles)
+| Credential configuration | Derived result |
+|---|---|
+| `MDOC` + `AAMVA_MDL` | ISO/IEC 18013-5 and AAMVA profile requirements; no default issuance protocol or named wallet |
+| `MDOC` + `EUDI_MDL` | Version-pinned EUDI mDL requirements; no named wallet until the exact profile is mapped and tested |
+| OID4VCI credential configuration | OID4VCI offer and proof requirements for the exact wire format; named wallets require evidence |
+| Organization-specific wallet | Organization override scoped to its tested configuration |
 
-| `credential_format` | `issuance_protocol` | `compliance_profile_code` | Compatible Wallets | Platforms |
-|--------------------|--------------------|--------------------------|-------------------|-----------|
-| `MDOC` | `OID4VCI_PRE_AUTH` | `AAMVA_MDL` | Apple Wallet (mDL), Google Wallet (mDL), ISO mDL wallets | ios, android |
-| `MDOC` | `OID4VCI_PRE_AUTH` | `ICAO_DTC` | ICAO DTC-compliant wallets | ios, android |
-| `MDOC` | `OID4VCI_PRE_AUTH` | `EUDI_MDL` | EUDI Wallet, eIDAS wallets | ios, android, web |
-| `SD_JWT_VC` | `OID4VCI_PRE_AUTH` | `EUDI_PID` | EUDI Wallet, eIDAS wallets | ios, android, web |
-| `SD_JWT_VC` | `OID4VCI_PRE_AUTH` | null | EUDI Wallet, OID4VCI-compatible wallets | ios, android, web |
-| `VC_JWT` | `OID4VCI_PRE_AUTH` | `OB3_JWT` | 1EdTech Open Badge Passport, Learning Credential Wallet | ios, android, web |
-| `JSON_LD` | `OID4VCI_PRE_AUTH` | `OB3_JSONLD` | 1EdTech Open Badge Passport, DIF Universal Wallet | ios, android, web |
-| `VC_JWT` | `OID4VCI_PRE_AUTH` | `ENTERPRISE_VC` | Organization-managed wallets | ios, android, web |
+MIP does not define a normative Apple Wallet, Google Wallet, or generic "any wallet" compatibility row. Those products have program-specific contracts and capabilities that can change independently of MIP.
 
----
+## Deep Links
 
-## Deep Link Patterns (Normative)
+The `openid-credential-offer` URI identifies an OID4VCI offer. Its presence does not prove that a particular wallet accepts the credential configuration. A wallet-specific outer link or operating-system routing API MUST be recorded separately and tested without rewriting the signed or referenced inner offer.
 
-| Format | Deep Link Pattern |
-|--------|------------------|
-| `MDOC` + Apple/Google | `openid-credential-offer://?credential_offer_uri={offer_uri}` |
-| `SD_JWT_VC` + EUDI | `openid-credential-offer://?credential_offer_uri={offer_uri}` |
-| `VC_JWT` + generic | `openid-credential-offer://?credential_offer_uri={offer_uri}` |
-
----
+ISO/IEC 18013-5 device engagement is a presentation bootstrap. It MUST NOT be represented as an HTTP issuance endpoint or an OID4VCI compatibility signal.
 
 ## API Surface
 
-### Derivation Endpoints (Read-Only)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/v1/credential-templates/{id}/wallet-compatibility` | Merged wallet profile for a credential template |
-| `GET` | `/v1/trust-profiles/{id}/wallet-compatibility` | Merged wallet profile for a trust profile |
-
-### Override Registry Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/v1/wallet-registry` | List all override entries for the authenticated organisation (merged with derived) |
-| `POST` | `/v1/wallet-registry` | Create a new override entry (`is_override` forced to `true`) |
-| `GET` | `/v1/wallet-registry/{id}` | Get a specific override entry |
-| `PUT` | `/v1/wallet-registry/{id}` | Replace an override entry |
-| `PATCH` | `/v1/wallet-registry/{id}` | Partially update an override entry |
-| `DELETE` | `/v1/wallet-registry/{id}` | Delete an override entry (reverts to derived profile) |
-
-### Response Format Example
-
-```json
-{
-  "derived_from": {
-    "credential_format": "MDOC",
-    "issuance_protocol": "OID4VCI_PRE_AUTH",
-    "compliance_profile_code": "AAMVA_MDL"
-  },
-  "is_override": false,
-  "name": "AAMVA mDL Wallet",
-  "wallet_apps": ["Apple Wallet (mDL)", "Google Wallet (mDL)"],
-  "specifications": ["ISO 18013-5", "ISO 23220-3", "OID4VCI"],
-  "supported_platforms": ["ios", "android"],
-  "deep_link_pattern": "openid-credential-offer://?credential_offer_uri={offer_uri}"
-}
+```text
+GET    /v1/credential-templates/{id}/wallet-compatibility
+GET    /v1/trust-profiles/{id}/wallet-compatibility
+GET    /v1/wallet-registry
+POST   /v1/wallet-registry
+GET    /v1/wallet-registry/{id}
+PUT    /v1/wallet-registry/{id}
+PATCH  /v1/wallet-registry/{id}
+DELETE /v1/wallet-registry/{id}
 ```
 
----
+The compatibility endpoints MUST distinguish an unverified requirement result from a verified named-wallet result. They MUST NOT synthesize named wallets or platforms for an unknown derivation key.
 
 ## See Also
 
-- Root specification: [§13 Wallet Profile](../../SPECIFICATION.md#13-wallet-profile)
+- Root specification: [Section 13 Wallet Profile](../../SPECIFICATION.md#13-wallet-profile)
 - Credential Template: [../credential-template/SPECIFICATION.md](../credential-template/SPECIFICATION.md)
 - Compliance Profile: [../compliance-profile/SPECIFICATION.md](../compliance-profile/SPECIFICATION.md)
-
-
----
-
-## Purpose
-
-A Wallet Profile describes **which wallet applications can receive and hold** a specific credential configuration. It is derived from the combination of credential format, issuance protocol, and compliance profile code — it is **not independently stored or created**.
-
-## Derivation Key
-
-```
-(credential_format, issuance_protocol, compliance_profile_code) → WalletProfile
-```
-
-This key is extracted from a Credential Template's associated Compliance Profile.
-
-## Why Derived, Not Stored
-
-Wallet compatibility is a property of the **format × protocol × compliance framework** combination, not something operators configure. Storing it independently would lead to drift between what the system says is compatible and what is actually compatible. The derivation table is maintained by protocol implementers, not end users.
-
-## Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `name` | string | Human-readable profile name |
-| `description` | string | Capability description |
-| `credential_format` | CredentialFormat | Primary key dimension |
-| `issuance_protocol` | IssuanceProtocol | Primary key dimension |
-| `compliance_profile_code` | string | Optional key dimension; narrows compatibility |
-| `wallet_apps` | string[] | Compatible wallet application names |
-| `specifications` | string[] | Supported standards |
-| `supported_platforms` | Platform[] | `ios`, `android`, `web` |
-| `deep_link_pattern` | string | URI template for credential offer delivery |
-
-## Compatibility Table (Normative)
-
-| `credential_format` | `issuance_protocol` | `compliance_profile_code` | Compatible Wallets | Platforms |
-|--------------------|--------------------|--------------------------|-------------------|-----------|
-| `MDOC` | `OID4VCI_PRE_AUTH` | `AAMVA_MDL` | Apple Wallet (mDL), Google Wallet (mDL), ISO mDL wallets | ios, android |
-| `MDOC` | `OID4VCI_PRE_AUTH` | `ICAO_DTC` | ICAO DTC-compliant wallets | ios, android |
-| `MDOC` | `OID4VCI_PRE_AUTH` | `EUDI_MDL` | EUDI Wallet, eIDAS wallets | ios, android, web |
-| `SD_JWT_VC` | `OID4VCI_PRE_AUTH` | `EUDI_PID` | EUDI Wallet, eIDAS wallets | ios, android, web |
-| `SD_JWT_VC` | `OID4VCI_PRE_AUTH` | null | EUDI Wallet, OID4VCI-compatible wallets | ios, android, web |
-| `VC_JWT` | `OID4VCI_PRE_AUTH` | `OB3_JWT` | 1EdTech Open Badge Passport, Learning Credential Wallet | ios, android, web |
-| `JSON_LD` | `OID4VCI_PRE_AUTH` | `OB3_JSONLD` | 1EdTech Open Badge Passport, DIF Universal Wallet | ios, android, web |
-| `VC_JWT` | `OID4VCI_PRE_AUTH` | `ENTERPRISE_VC` | Organization-managed wallets | ios, android, web |
-
-## Deep Link Pattern
-
-Wallet compatibility includes the credential offer delivery URI format:
-
-| Format | Deep Link Pattern |
-|--------|------------------|
-| `MDOC` + Apple/Google | `openid-credential-offer://?credential_offer_uri={offer_uri}` |
-| `SD_JWT_VC` + EUDI | `openid-credential-offer://?credential_offer_uri={offer_uri}` |
-| `VC_JWT` + generic | `openid-credential-offer://?credential_offer_uri={offer_uri}` |
-
-## API Endpoints (Read-Only)
-
-```
-GET /v1/credential-templates/{id}/wallet-compatibility
-GET /v1/trust-profiles/{id}/wallet-compatibility
-```
-
-### Response Format
-
-```json
-{
-  "derived_from": {
-    "credential_format": "MDOC",
-    "issuance_protocol": "OID4VCI_PRE_AUTH",
-    "compliance_profile_code": "AAMVA_MDL"
-  },
-  "name": "AAMVA mDL Wallet",
-  "wallet_apps": [
-    "Apple Wallet (mDL)",
-    "Google Wallet (mDL)"
-  ],
-  "specifications": [
-    "ISO 18013-5",
-    "ISO 23220-3",
-    "OID4VCI"
-  ],
-  "supported_platforms": ["ios", "android"],
-  "deep_link_pattern": "openid-credential-offer://?credential_offer_uri={offer_uri}"
-}
-```
-
-## See Also
-
-- Root specification: [§13 Wallet Profile](../../SPECIFICATION.md#13-wallet-profile)
-- Credential Template: [../credential-template/SPECIFICATION.md](../credential-template/SPECIFICATION.md)
-- Compliance Profile: [../compliance-profile/SPECIFICATION.md](../compliance-profile/SPECIFICATION.md)
-- Design: [DESIGN.md](./DESIGN.md)
+- Design notes: [DESIGN.md](./DESIGN.md)

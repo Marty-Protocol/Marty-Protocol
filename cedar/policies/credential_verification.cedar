@@ -63,7 +63,7 @@ when {
     context.issuer_trust_level < 10
 };
 
-// ── ICAO DTC: require MDOC format + holder binding ───────────────────────
+// ── ICAO DTC: reject the former mDoc compatibility mapping ──────────────
 
 @id("icao-dtc-format-requirement")
 forbid (
@@ -73,18 +73,7 @@ forbid (
 )
 when {
     context.compliance_code == "ICAO_DTC" &&
-    context.credential_format != "MDOC"
-};
-
-@id("icao-dtc-holder-binding")
-forbid (
-    principal,
-    action == MIP::Action::"credentials:verify",
-    resource
-)
-when {
-    context.compliance_code == "ICAO_DTC" &&
-    !context.holder_binding_present
+    context.credential_format != "ICAO_DTC"
 };
 
 // ── AAMVA mDL: require MDOC format + holder binding ──────────────────────
@@ -98,17 +87,6 @@ forbid (
 when {
     context.compliance_code == "AAMVA_MDL" &&
     context.credential_format != "MDOC"
-};
-
-@id("aamva-mdl-holder-binding")
-forbid (
-    principal,
-    action == MIP::Action::"credentials:verify",
-    resource
-)
-when {
-    context.compliance_code == "AAMVA_MDL" &&
-    !context.holder_binding_present
 };
 
 // ── EUDI PID: require SD_JWT_VC format + holder binding ──────────────────
@@ -157,8 +135,6 @@ forbid (
     resource
 )
 when {
-    (context.compliance_code == "ICAO_DTC" ||
-     context.compliance_code == "AAMVA_MDL" ||
-     context.compliance_code == "EUDI_PID") &&
+    context.compliance_code == "EUDI_PID" &&
     context.credential_age_seconds > 86400
 };

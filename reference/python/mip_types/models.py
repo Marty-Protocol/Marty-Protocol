@@ -124,6 +124,28 @@ evidence, checks, approval policy, and lifecycle state"""
     updated_at: datetime | None = None
 
 
+class AuthorizationDecisionReceipt(BaseModel):
+    """Signed, privacy-safe receipt for an identity-bound authorization decision. External
+systems retain ownership of domain resources and execution behavior."""
+
+    id: str
+    organization_id: str
+    principal_type: Literal["MACHINE_IDENTITY", "USER", "SERVICE_ACCOUNT", "API_KEY"]
+    principal_id: str
+    action: str
+    resource_id: str
+    decision: Literal["PERMIT", "DENY"]
+    policy_set_id: str
+    policy_version_digest: str
+    binding: dict[str, Any]
+    evidence_refs: list[str] | None = None
+    external_context: dict[str, Any] | None = None
+    issued_at: datetime
+    expires_at: datetime
+    signature: dict[str, Any]
+    created_at: datetime | None = None
+
+
 class BiometricEnrollment(BaseModel):
     """A record of a biometric enrollment event for an applicant. Stores only the modality,
 hash of the biometric template, and metadata. Raw biometric data MUST NOT be stored in
@@ -313,6 +335,8 @@ via Lanes."""
     default_policy_id: str | None = None
     site_id: str | None = None
     enabled_flow_ids: list[str] | None = None
+    machine_identity_ids: list[str] | None = None
+    machine_authentication_policy_id: str | None = None
     network_mode: Literal["ONLINE", "OFFLINE", "HYBRID"]
     key_access_mode: Literal["KEY_VAULT", "HSM", "DEVICE_KEYSTORE"] | None = None
     environment_config: dict[str, Any] | None = None
@@ -779,6 +803,49 @@ class Lane(BaseModel):
     metadata: dict[str, Any] | None = None
 
 
+class MachineAuthenticationPolicy(BaseModel):
+    """Identity policy for authenticating a managed machine, validating proof of control, and
+optionally appraising runtime attestation. It does not define domain execution controls."""
+
+    id: str
+    organization_id: str
+    name: str
+    description: str | None = None
+    trust_profile_id: str
+    required_credential_types: list[str]
+    allowed_machine_types: list[str] | None = None
+    machine_binding: dict[str, Any]
+    attestation_requirement: dict[str, Any] | None = None
+    authorization_policy_set_id: str | None = None
+    status: Literal["DRAFT", "ACTIVE", "ARCHIVED"]
+    created_at: datetime
+    updated_at: datetime | None = None
+
+
+class MachineIdentity(BaseModel):
+    """Managed identity and lifecycle record for a non-human secure runtime participating in
+identity or secure-document operations. This entity is not used for ordinary holder
+wallets and does not describe domain resources or execution controls."""
+
+    id: str
+    organization_id: str
+    machine_id: str
+    display_name: str
+    description: str | None = None
+    machine_type: Literal["SECURE_DOCUMENT_PRINTER", "DOCUMENT_PERSONALIZATION_SYSTEM", "VERIFICATION_APPLIANCE", "WALLET_SECURE_ELEMENT", "HSM_WORKLOAD", "SECURE_PROCESSING_RUNTIME", "OTHER"]
+    status: Literal["PROVISIONED", "ACTIVE", "SUSPENDED", "REVOKED", "RETIRED"]
+    identity_keys: list[dict[str, Any]]
+    assignments: dict[str, Any] | None = None
+    credential_ids: list[str] | None = None
+    attestation_identity: dict[str, Any] | None = None
+    created_at: datetime
+    updated_at: datetime | None = None
+    suspended_at: datetime | None = None
+    revoked_at: datetime | None = None
+    retired_at: datetime | None = None
+    status_reason: str | None = None
+
+
 class MipConfigurationDiscoveryDocument(BaseModel):
     """Schema for the /.well-known/mip-configuration endpoint response. This document describes
 the capabilities, endpoints, and supported profiles of a MIP implementation. Analogous
@@ -978,7 +1045,7 @@ match."""
     organization_id: str
     name: str
     description: str | None = None
-    policy_type: Literal["ACCESS_CONTROL", "CREDENTIAL_VERIFICATION", "APPROVAL_RULES", "CUSTOM"]
+    policy_type: Literal["ACCESS_CONTROL", "CREDENTIAL_VERIFICATION", "APPROVAL_RULES", "MACHINE_AUTHORIZATION", "CUSTOM"]
     cedar_policies: list[dict[str, Any]]
     cedar_schema_version: str | None = None
     status: Literal["DRAFT", "ACTIVE", "ARCHIVED"]
@@ -1232,12 +1299,14 @@ OrganizationTrustProfile."""
     description: str | None = None
     status: TrustProfileStatus
     profile_type: Literal["ICAO", "AAMVA", "EUDI", "CUSTOM"]
+    trust_purposes: list[str] | None = None
     trust_sources: list[dict[str, Any]]
     allowed_algorithms: list[str]
     revocation_policy: dict[str, Any] | None = None
     revocation_services: dict[str, Any] | None = None
     time_policy: dict[str, Any] | None = None
-    supported_formats: list[str]
+    supported_formats: list[CredentialFormat] | None = None
+    trusted_assertion_formats: list[str] | None = None
     allowed_issuers: list[str] | None = None
     denied_issuers: list[str] | None = None
     system_issuer_overrides: dict[str, Any] | None = None
@@ -1490,6 +1559,7 @@ ActiveComplianceProfile.model_rebuild()
 ApiKey.model_rebuild()
 ApplicantApplication.model_rebuild()
 ApplicationTemplate.model_rebuild()
+AuthorizationDecisionReceipt.model_rebuild()
 BiometricEnrollment.model_rebuild()
 CascadeRevocationOperation.model_rebuild()
 ClaimBlocker.model_rebuild()
@@ -1527,6 +1597,8 @@ IssuerIdentityResolutionResponse.model_rebuild()
 IssuerIdentity.model_rebuild()
 KeyAttestationPolicy.model_rebuild()
 Lane.model_rebuild()
+MachineAuthenticationPolicy.model_rebuild()
+MachineIdentity.model_rebuild()
 MipConfigurationDiscoveryDocument.model_rebuild()
 NotificationDeliveryResult.model_rebuild()
 NotificationPayload.model_rebuild()

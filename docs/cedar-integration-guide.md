@@ -6,15 +6,16 @@ This guide explains how to integrate [Cedar](https://www.cedarpolicy.com/) polic
 
 ## Overview
 
-MIP uses Cedar for three authorization domains:
+MIP uses Cedar for four authorization domains:
 
 | Domain | `policy_type` | Applied where |
 |--------|--------------|---------------|
 | **Access Control** | `ACCESS_CONTROL` | Gateway / API layer: who can read/write which MIP entities |
 | **Credential Verification** | `CREDENTIAL_VERIFICATION` | Verification flow: whether a credential passes trust rules |
 | **Approval Rules** | `APPROVAL_RULES` | Application approval flow: whether an application can be auto-approved |
+| **Machine Authorization** | `MACHINE_AUTHORIZATION` | Managed-runtime authentication: whether an identified and bound machine may request an opaque external operation |
 
-Cedar provides deny-by-default, statically analyzable policies. The MIP Cedar schema (`cedar/mip.cedarschema`) defines the entity types and actions that all three domains share.
+Cedar provides deny-by-default, statically analyzable policies. The MIP Cedar schema (`cedar/mip.cedarschema`) defines the entity types and actions that all four domains share.
 
 ---
 

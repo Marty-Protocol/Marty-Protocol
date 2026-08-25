@@ -21,7 +21,7 @@
 ## Conformance
 
 - [ ] `scripts/run-conformance.sh` passes
-- [ ] `scripts/validate-schemas.sh` passes (or `pytest tests/`)
+- [ ] `scripts/validate.sh` passes (or `pytest tests/`)
 - [ ] New conformance fixtures added where applicable
 
 ## CHANGELOG

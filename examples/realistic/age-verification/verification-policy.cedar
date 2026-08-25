@@ -5,7 +5,8 @@
 // Scenario: A bar or venue verifies that a patron is over 21 using an
 // AAMVA mobile driver's license. This policy enforces:
 //   - MDOC format required (mDL is always MDOC)
-//   - Holder binding must be present (device authentication)
+//   - Device authentication must be present
+//   - Presenter-to-portrait matching remains a separate deployment control
 //   - Credential must not be revoked
 //   - Only AAMVA-compliant credentials accepted
 // ============================================================================

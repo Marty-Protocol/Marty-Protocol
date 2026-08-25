@@ -181,8 +181,12 @@ pub enum CredentialFormat {
     JsonLd,
     #[serde(rename = "ZK_MDOC")]
     ZkMdoc,
+    #[serde(rename = "ICAO_MRZ")]
+    IcaoMrz,
     #[serde(rename = "ICAO_EMRTD")]
     IcaoEmrtd,
+    #[serde(rename = "ICAO_DTC")]
+    IcaoDtc,
     #[serde(rename = "VDS_NC")]
     VdsNc,
 }

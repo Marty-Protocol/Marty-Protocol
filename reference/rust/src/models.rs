@@ -115,6 +115,31 @@ pub struct ApplicationTemplate {
     pub updated_at: Option<String>,
 }
 
+/// Signed, privacy-safe receipt for an identity-bound authorization decision. External
+/// systems retain ownership of domain resources and execution behavior.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AuthorizationDecisionReceipt {
+    pub id: String,
+    pub organization_id: String,
+    pub principal_type: String,
+    pub principal_id: String,
+    pub action: String,
+    pub resource_id: String,
+    pub decision: String,
+    pub policy_set_id: String,
+    pub policy_version_digest: String,
+    pub binding: serde_json::Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub evidence_refs: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub external_context: Option<serde_json::Value>,
+    pub issued_at: String,
+    pub expires_at: String,
+    pub signature: serde_json::Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
+}
+
 /// A record of a biometric enrollment event for an applicant. Stores only the modality,
 /// hash of the biometric template, and metadata. Raw biometric data MUST NOT be stored in
 /// this record and MUST NOT be transmitted via the MIP API.
@@ -389,6 +414,10 @@ pub struct DeploymentProfile {
     pub site_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled_flow_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub machine_identity_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub machine_authentication_policy_id: Option<String>,
     pub network_mode: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub key_access_mode: Option<String>,
@@ -1005,6 +1034,63 @@ pub struct Lane {
     pub device_ids: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub metadata: Option<serde_json::Value>,
+}
+
+/// Identity policy for authenticating a managed machine, validating proof of control, and
+/// optionally appraising runtime attestation. It does not define domain execution controls.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MachineAuthenticationPolicy {
+    pub id: String,
+    pub organization_id: String,
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub trust_profile_id: String,
+    pub required_credential_types: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub allowed_machine_types: Option<Vec<String>>,
+    pub machine_binding: serde_json::Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub attestation_requirement: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub authorization_policy_set_id: Option<String>,
+    pub status: String,
+    pub created_at: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
+}
+
+/// Managed identity and lifecycle record for a non-human secure runtime participating in
+/// identity or secure-document operations. This entity is not used for ordinary holder
+/// wallets and does not describe domain resources or execution controls.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MachineIdentity {
+    pub id: String,
+    pub organization_id: String,
+    pub machine_id: String,
+    pub display_name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub machine_type: String,
+    pub status: String,
+    pub identity_keys: Vec<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub assignments: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub attestation_identity: Option<serde_json::Value>,
+    pub created_at: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub suspended_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub revoked_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub retired_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status_reason: Option<String>,
 }
 
 /// Schema for the /.well-known/mip-configuration endpoint response. This document describes
@@ -1631,6 +1717,8 @@ pub struct TrustProfile {
     pub description: Option<String>,
     pub status: TrustProfileStatus,
     pub profile_type: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trust_purposes: Option<Vec<String>>,
     pub trust_sources: Vec<serde_json::Value>,
     pub allowed_algorithms: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1639,7 +1727,10 @@ pub struct TrustProfile {
     pub revocation_services: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub time_policy: Option<serde_json::Value>,
-    pub supported_formats: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub supported_formats: Option<Vec<CredentialFormat>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trusted_assertion_formats: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub allowed_issuers: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]

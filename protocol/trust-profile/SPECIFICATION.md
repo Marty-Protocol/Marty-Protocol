@@ -33,11 +33,13 @@ A Trust Profile defines **who is trusted** and **how cryptographic validation oc
 | `description` | string | No | Max 1024 characters |
 | `status` | string | Yes | `draft`, `active`, `suspended`, or `archived`; canonical lowercase |
 | `profile_type` | TrustProfileType | Yes | See enum |
+| `trust_purposes` | TrustPurpose[] | No | Explicit trust roles; absent means `CREDENTIAL_ISSUER` |
 | `trust_sources` | TrustSource[] | Yes | At least one entry required |
 | `allowed_issuers` | string[] | No | Explicit allowlist of issuer DID, HTTPS issuer URL, or issuer domain |
 | `denied_issuers` | string[] | No | Explicit denylist of issuer DID, HTTPS issuer URL, or issuer domain |
 | `allowed_algorithms` | Algorithm[] | Yes | At least one; from `validation-algorithms` enum |
-| `supported_formats` | CredentialFormat[] | Yes | At least one; from `credential-formats` enum |
+| `supported_formats` | CredentialFormat[] | Conditional | Required for credential-issuer trust |
+| `trusted_assertion_formats` | string[] | Conditional | Required for non-credential trust purposes |
 | `compliance_status` | ComplianceStatus | Yes | Default `SETUP_REQUIRED` |
 | `revocation_profile_id` | UUID | No | Must reference existing RevocationProfile |
 | `time_policy` | TimePolicy | No | See below |
@@ -56,6 +58,7 @@ A Trust Profile defines **who is trusted** and **how cryptographic validation oc
 | `organization_id` | UUID/string | No | Organization scope for issuer DID resolution |
 | `verification_method_ids` | DID URL[] | No | Pinned DID verification methods accepted for this issuer |
 | `did_resolution` | DidResolutionPolicy | No | Resolver strategy and cache/fallback policy |
+| `purposes` | TrustPurpose[] | No | Optional narrowing of profile-level purposes |
 | `description` | string | No | Human-readable label |
 | `registry_sync` | object | No | Explicit pull configuration for a source implementing Marty Trust Registry Sync v1 |
 
@@ -94,11 +97,19 @@ silently treating the profile as unrestricted.
 | `require_freshness` | boolean | false | |
 | `freshness_window_seconds` | integer | null | Must be set when `require_freshness` is true |
 
+## Machine and attestation trust purposes
+
+Trust Profiles may separately trust credential issuers, machine identity CAs, manufacturer endorsers, attestation verifiers, deployment authorities, and evidence signers. A trust source accepted for one purpose MUST NOT be reused for another purpose unless both purposes are explicit.
+
+Legacy profiles without `trust_purposes` retain credential-issuer semantics and continue to require `supported_formats`. A profile with any non-credential purpose requires `trusted_assertion_formats`.
+
+This purpose separation permits MIP to verify machine identity and attestation assertions without treating an equipment manufacturer or attestation verifier as a credential issuer.
+
 ## Constraints
 
 1. `trust_sources` MUST NOT be empty.
 2. `allowed_algorithms` MUST NOT be empty.
-3. `supported_formats` MUST NOT be empty.
+3. `supported_formats` MUST NOT be empty when `trust_purposes` is absent or includes `CREDENTIAL_ISSUER`; non-credential trust purposes instead require a non-empty `trusted_assertion_formats` array.
 4. A Trust Profile with `compliance_status: SETUP_REQUIRED` MUST NOT be referenced by an active Flow.
 5. If `revocation_profile_id` is set, the referenced RevocationProfile MUST exist in the same organization.
 6. When `time_policy.require_freshness` is `true`, `time_policy.freshness_window_seconds` MUST be a positive integer.

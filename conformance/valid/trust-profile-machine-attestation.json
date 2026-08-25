@@ -1,0 +1,19 @@
+{
+  "id": "f6666666-6666-4666-8666-666666666666",
+  "organization_id": "b2222222-2222-4222-8222-222222222222",
+  "name": "Machine attestation verifier trust",
+  "status": "active",
+  "profile_type": "CUSTOM",
+  "trust_purposes": ["ATTESTATION_VERIFIER", "MANUFACTURER_ENDORSER"],
+  "trust_sources": [
+    {
+      "source_type": "ROOT_CA",
+      "certificate_pem": "-----BEGIN CERTIFICATE-----\nMIIBexample\n-----END CERTIFICATE-----",
+      "purposes": ["ATTESTATION_VERIFIER", "MANUFACTURER_ENDORSER"]
+    }
+  ],
+  "allowed_algorithms": ["ES256"],
+  "trusted_assertion_formats": ["X509_CERTIFICATE", "EAT"],
+  "compliance_status": "COMPLIANT",
+  "created_at": "2026-07-28T00:00:00Z"
+}

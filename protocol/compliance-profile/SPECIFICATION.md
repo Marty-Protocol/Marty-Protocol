@@ -48,7 +48,7 @@ A Compliance Profile abstracts **credential format complexity** behind complianc
 | `supported_algorithms` | string[] | No | Algorithms accepted by the profile |
 | `key_requirements` | object | No | Format-specific key controls |
 | `revocation_methods` | RevocationMethod[] | No | Supported status mechanisms |
-| `holder_binding_required` | boolean | No | Requires issuance-time key binding and holder-bound presentation |
+| `holder_binding_required` | boolean | No | Requires issuance-time binding to holder-controlled key material; does not by itself establish human presenter identity |
 | `conformance_tests` | ConformanceTest[] | No | Executable evidence for claimed conformance |
 | `is_system` | boolean | Yes | System vs. organization-custom |
 | `created_at` | datetime | Yes | ISO 8601 |
@@ -69,15 +69,16 @@ System profiles are read-only and pre-installed. They cannot be modified or dele
 
 | Profile ID | Code | Format | Protocol | Description |
 |------------|------|--------|----------|-------------|
-| `cp-icao-dtc` | `ICAO_DTC` | `MDOC` | `OID4VCI_PRE_AUTH` | ICAO Digital Travel Credential |
-| `cp-aamva-mdl` | `AAMVA_MDL` | `MDOC` | `OID4VCI_PRE_AUTH` | AAMVA Mobile Driver's License |
+| `cp-icao-dtc` | `ICAO_DTC` | `ICAO_DTC` | — | Draft ICAO DTC virtual-component and PKI mapping; non-discoverable until conformance coverage exists |
+| `cp-icao-mrz` | `ICAO_MRZ` | `ICAO_MRZ` | — | Draft MRZ parsing and check-digit mapping; non-discoverable until conformance coverage exists |
+| `cp-icao-passport` | `ICAO_PASSPORT` | `ICAO_EMRTD` | `PHYSICAL_DOCUMENT` | Draft TD3 ePassport and PKI mapping; non-discoverable until conformance coverage exists |
+| `cp-aamva-mdl` | `AAMVA_MDL` | `MDOC` | — | Draft AAMVA Guidelines 1.6 mapping; non-discoverable pending conformance and transport evidence |
 | `cp-eudi-pid` | `EUDI_PID` | `SD_JWT_VC` | `OID4VCI_PRE_AUTH` | EUDI Personal Identification Data |
-| `cp-eudi-mdl` | `EUDI_MDL` | `MDOC` | `OID4VCI_PRE_AUTH` | EUDI Mobile Driving Licence |
+| `cp-eudi-mdl` | `EUDI_MDL` | `MDOC` | — | Draft current-EUDI mapping placeholder; non-discoverable pending rulebook and conformance work |
 | `cp-ob3-jwt` | `OB3_JWT` | `VC_JWT` | `OID4VCI_PRE_AUTH` | Open Badge v3 (JWT encoding) |
 | `cp-ob3-jsonld` | `OB3_JSONLD` | `JSON_LD` | `OID4VCI_PRE_AUTH` | Open Badge v3 (JSON-LD) |
 | `cp-sd-jwt-vc` | `SD_JWT_VC` | `SD_JWT_VC` | `OID4VCI_PRE_AUTH` | Generic SD-JWT VC |
 | `cp-enterprise-vc` | `ENTERPRISE_VC` | `VC_JWT` | `OID4VCI_PRE_AUTH` | Generic Enterprise VC (JWT) |
-| `cp-icao-mrz` | `ICAO_MRZ` | `MDOC` | — | ICAO Machine Readable Zone (MRZ) |
 | `cp-oid4vc` | `OID4VC` | `SD_JWT_VC` | `OID4VCI_PRE_AUTH` / `OID4VCI_AUTH_CODE` | Generic OpenID4VC Interop (OIDF certification target) |
 | `cp-pex-v2` | `PEX` | `SD_JWT_VC` | — | DIF Presentation Exchange v2 (verifier-side) |
 
@@ -86,17 +87,21 @@ System profiles are read-only and pre-installed. They cannot be modified or dele
 1. System profiles (`is_system: true`) MUST NOT be modified or deleted.
 2. `organization_id` MUST be null for system profiles.
 3. Custom profiles with `compliance_code: CUSTOM` MUST have `organization_id` set.
-4. `credential_format` and `compliance_code` combinations MUST be internally consistent (e.g., `ICAO_DTC` requires `MDOC`).
+4. `credential_format` and `compliance_code` combinations MUST be internally consistent (e.g., `ICAO_DTC` requires `ICAO_DTC`; it MUST NOT be mapped to `MDOC`).
 5. A Compliance Profile is immutable once referenced by an `ACTIVE` Credential Template.
 6. `holder_binding_required: true` requires an issuance proof that binds the credential to holder-controlled key material. A nonce alone never satisfies this requirement.
 7. Verifiers MUST combine the profile requirement with a Presentation Policy that selects an actual binding method, wire proof profile, and freshness checks.
 8. Every bundled system profile MUST validate against `schemas/compliance-profile.json`; undocumented extension fields are prohibited.
+9. For mdoc, device authentication proves control of a credential-bound device key. It MUST NOT be reported as proof that the human presenter is the document holder; portrait comparison or another profile-authorized presenter-match control is separate.
+10. `api_surface` contains HTTP endpoints only. Device engagement and session establishment MUST NOT be modeled as issuance endpoints.
 
 ## Format–Code Compatibility Matrix
 
 | `compliance_code` | Required `credential_format` |
 |-------------------|------------------------------|
-| `ICAO_DTC` | `MDOC` |
+| `ICAO_DTC` | `ICAO_DTC` |
+| `ICAO_MRZ` | `ICAO_MRZ` |
+| `ICAO_PASSPORT` | `ICAO_EMRTD` |
 | `AAMVA_MDL` | `MDOC` |
 | `EUDI_PID` | `SD_JWT_VC` |
 | `EUDI_MDL` | `MDOC` |
@@ -104,14 +109,13 @@ System profiles are read-only and pre-installed. They cannot be modified or dele
 | `OB3_JSONLD` | `JSON_LD` |
 | `SD_JWT_VC` | `SD_JWT_VC` |
 | `ENTERPRISE_VC` | `VC_JWT` or `SD_JWT_VC` |
-| `ICAO_MRZ` | `MDOC` |
 | `OID4VC` | `SD_JWT_VC` (also compatible with `VC_JWT`, `MDOC`) |
 | `PEX` | `SD_JWT_VC` (also compatible with `VC_JWT`, `JSON_LD`, `MDOC`) |
 | `CUSTOM` | Any |
 
 ## API Surface
 
-The `api_surface` property declares the HTTP endpoints that a MIP implementation MUST expose when an organization activates a credential type governed by this profile. This is the mechanism by which OID4VCI well-known metadata, proximity session endpoints, and revocation feed endpoints are derived from the profile rather than hardcoded.
+The `api_surface` property declares the HTTP endpoints that a MIP implementation MUST expose when an organization activates a credential type governed by this profile. This is the mechanism by which OID4VCI well-known metadata and HTTP status endpoints are derived from the profile rather than hardcoded. Proximity device engagement and session establishment are protocol exchanges, not HTTP issuance endpoints, and do not belong in this array.
 
 ### Endpoint Descriptor Fields
 

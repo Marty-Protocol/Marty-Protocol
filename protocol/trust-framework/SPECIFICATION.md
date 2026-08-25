@@ -45,7 +45,7 @@ The following frameworks are system-provided (`is_system: true`) and cannot be m
 
 | Code | Display Name | Primary Use |
 |------|------|------|
-| `ICAO` | ICAO Digital Travel Credentials | Passports, ePassports, travel authority verification |
+| `ICAO` | ICAO machine-readable travel documents and Digital Travel Credentials | Passports, ePassports, DTCs, and travel-authority verification |
 | `AAMVA` | AAMVA Mobile Driver's License | US/CA driver's licenses, state IDs |
 | `EUDI` | European Digital Identity Wallet | EU PID, mDL, and EUDI-compliant credentials |
 

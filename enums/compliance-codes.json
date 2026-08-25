@@ -9,8 +9,8 @@
     "values": {
       "ICAO_DTC": {
         "description": "ICAO Digital Travel Credential",
-        "format": "MDOC",
-        "standard": "ICAO Doc 9303, ICAO DTC Technical Report",
+        "format": "ICAO_DTC",
+        "standard": "ICAO DTC Virtual Component and Physical Component Technical Reports, with ICAO Doc 9303 dependencies",
         "governed_by": "ICAO",
         "compatible_profile_types": ["ICAO", "CUSTOM"]
       },
@@ -68,17 +68,17 @@
         "use_case": "Organization-internal credentials not bound to a public standard"
       },
       "ICAO_MRZ": {
-        "description": "ICAO Machine Readable Travel Document — MRZ extraction and verification",
-        "format": "MDOC",
-        "standard": "ICAO Doc 9303 Parts 1–13 — Machine Readable Travel Documents",
+        "description": "ICAO Machine Readable Zone parsing and check-digit validation",
+        "format": "ICAO_MRZ",
+        "standard": "ICAO Doc 9303 Part 3 and the applicable document-format part",
         "governed_by": "ICAO",
         "doc_types": ["TD1", "TD2", "TD3"],
         "compatible_profile_types": ["ICAO", "CUSTOM"]
       },
       "ICAO_PASSPORT": {
-        "description": "ICAO Physical ePassport — ICAO 9303 Parts 1–12 booklet issuance with chip personalization",
+        "description": "Draft ICAO TD3 ePassport booklet, LDS, security-mechanism, and PKI mapping",
         "format": "ICAO_EMRTD",
-        "standard": "ICAO Doc 9303 Parts 1–12, ISO/IEC 14443",
+        "standard": "ICAO Doc 9303 Parts 4 and 9-12, ISO/IEC 14443",
         "governed_by": "ICAO",
         "compatible_profile_types": ["ICAO", "CUSTOM"],
         "requires_physical_production": true

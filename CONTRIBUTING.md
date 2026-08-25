@@ -53,7 +53,7 @@ For adding valid or invalid fixtures:
 For adding or modifying Cedar policies:
 
 - Open an issue with label `cedar-policy`
-- Provide: the policy domain (`ACCESS_CONTROL`, `CREDENTIAL_VERIFICATION`, `APPROVAL_RULES`), the Cedar policy text, and a description of the authorization rule
+- Provide: the policy domain (`ACCESS_CONTROL`, `CREDENTIAL_VERIFICATION`, `APPROVAL_RULES`, `MACHINE_AUTHORIZATION`), the Cedar policy text, and a description of the authorization rule
 - All Cedar policies MUST validate against the MIP Cedar schema (`cedar/mip.cedarschema`)
 - Include a PolicySet JSON fixture in `examples/` demonstrating the policy in context
 - Reference policies in `cedar/policies/` are normative examples — changes require review
@@ -73,7 +73,7 @@ For adding or updating reference implementations:
 1. Fork the repository and create a branch: `feat/`, `fix/`, `spec/`, `schema/`, `conformance/`
 2. Make your changes with clear commit messages
 3. Run conformance tests: `scripts/run-conformance.sh`
-4. Validate all schemas: `scripts/validate-schemas.sh`
+4. Validate schemas and examples: `scripts/validate.sh`
 5. Update CHANGELOG.md under `[Unreleased]`
 6. Open a PR against `main` with a description of the change and its version impact
 

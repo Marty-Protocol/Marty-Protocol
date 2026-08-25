@@ -41,6 +41,17 @@
       "uniqueItems": true,
       "description": "IDs of Flow entities that are active at this deployment. A Flow can reference multiple DeploymentProfiles via its deployment_profile_ids."
     },
+    "machine_identity_ids": {
+      "type": "array",
+      "items": {"type": "string", "format": "uuid"},
+      "uniqueItems": true,
+      "description": "Managed MachineIdentity records assigned to this identity or secure-document deployment. Ordinary holder wallets are not registered here."
+    },
+    "machine_authentication_policy_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Optional MachineAuthenticationPolicy applied when managed runtimes authenticate at this deployment."
+    },
     "network_mode": {
       "type": "string",
       "enum": ["ONLINE", "OFFLINE", "HYBRID"]

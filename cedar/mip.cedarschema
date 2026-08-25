@@ -58,6 +58,19 @@ namespace MIP {
     auto_issue_eligible?: Bool,
   };
 
+  type MachineAuthorizationContext = {
+    timestamp: Long,
+    nonce: String,
+    audience: String,
+    binding_method: String,
+    principal_key_thumbprint: String,
+    attestation_valid: Bool,
+    identity_key_bound: Bool,
+    external_action: String,
+    external_resource_id: String,
+    attestation_age_seconds?: Long,
+  };
+
   // ========================================================================
   // Principal entity types
   // ========================================================================
@@ -78,6 +91,13 @@ namespace MIP {
   /// A backend service identity (service-to-service calls).
   entity ServiceAccount in [Organization] {
     service_name: String,
+  };
+
+  /// A managed non-human runtime participating in identity or secure-document operations.
+  entity MachineIdentity in [Organization, DeploymentProfile] {
+    machine_type: String,
+    status: String,
+    primary_key_thumbprint: String,
   };
 
   // ========================================================================
@@ -168,6 +188,14 @@ namespace MIP {
   /// Audit log entry (read-only resource).
   entity AuditEvent in [Organization] {};
 
+  /// Signed record of an identity-bound authorization decision.
+  entity AuthorizationDecisionReceipt in [Organization] {
+    decision: String,
+    principal_id: String,
+    external_action: String,
+    external_resource_id: String,
+  };
+
   // ========================================================================
   // Actions — map to API key scope strings
   // ========================================================================
@@ -230,6 +258,50 @@ namespace MIP {
     principal: [User, ApiKey, ServiceAccount],
     resource: [Application],
     context: ApprovalContext,
+  };
+
+  // ── Managed machine identity and authorization ──────────────────────────
+
+  action "machine_identities:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [MachineIdentity, Organization],
+    context: RequestContext,
+  };
+
+  action "machine_identities:write" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [MachineIdentity, Organization],
+    context: RequestContext,
+  };
+
+  action "machine_identities:suspend" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [MachineIdentity],
+    context: RequestContext,
+  };
+
+  action "machine_identities:revoke" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [MachineIdentity],
+    context: RequestContext,
+  };
+
+  action "machines:authenticate" appliesTo {
+    principal: [MachineIdentity],
+    resource: [DeploymentProfile],
+    context: MachineAuthorizationContext,
+  };
+
+  action "authorization_decisions:evaluate" appliesTo {
+    principal: [MachineIdentity],
+    resource: [DeploymentProfile],
+    context: MachineAuthorizationContext,
+  };
+
+  action "authorization_decisions:read" appliesTo {
+    principal: [User, ApiKey, ServiceAccount],
+    resource: [AuthorizationDecisionReceipt, Organization],
+    context: RequestContext,
   };
 
   action "applications:reject" appliesTo {

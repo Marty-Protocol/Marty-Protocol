@@ -25,6 +25,7 @@
 14. [Device Registration](#14-device-registration)
 15. [Notification Target](#15-notification-target)
 16. [Policy Set (Cedar)](#16-policy-set-cedar)
+16A. [Machine Identity and Identity-Bound Authorization](#16a-machine-identity-and-identity-bound-authorization)
 17. [API Surface](#17-api-surface)
 18. [Organization & Identity Governance](#18-organization--identity-governance)
 19. [Validation Rules](#19-validation-rules)
@@ -102,6 +103,15 @@ An entity that signs and issues credentials.
 
 **Lane**
 A logical grouping of devices within a Deployment Profile (e.g., "Gate 12", "Checkpoint North").
+
+**Machine Identity**
+A managed non-human runtime identity with registered keys, credentials, deployment assignments, and an auditable lifecycle. Machine Identity is for managed infrastructure and is not required for ordinary holder wallets.
+
+**Machine Binding**
+Proof that a managed Machine Identity controls an active registered key. Machine binding is distinct from holder binding and transaction freshness.
+
+**Authorization Decision Receipt**
+A signed, immutable record binding an authenticated principal, proof method, challenge, audience, opaque external action and resource identifiers, policy version, and authorization decision.
 
 **Predicate**
 A zero-knowledge proof that a claim satisfies a condition without revealing the raw value (e.g., `age >= 21` without revealing date of birth).
@@ -366,12 +376,14 @@ A Trust Profile defines **who is trusted** and **how cryptographic validation oc
 | `description` | string | No | Optional description |
 | `status` | string | Yes | `draft`, `active`, `suspended`, or `archived`; canonical lowercase |
 | `profile_type` | TrustProfileType | Yes | `ICAO`, `AAMVA`, `EUDI`, `CUSTOM` |
+| `trust_purposes` | TrustPurpose[] | No | Explicit roles for this profile; absent preserves credential-issuer semantics |
 | `trust_sources` | TrustSource[] | Yes | One or more trust anchors |
 | `allowed_algorithms` | Algorithm[] | Yes | Accepted cryptographic algorithms |
 | `revocation_profile_id` | UUID | No | Reference to a RevocationProfile |
 | `verification_policy_set_id` | UUID | No | Reference to a Cedar PolicySet (§16) for conditional trust evaluation |
 | `time_policy` | TimePolicy | No | Clock skew, freshness windows |
-| `supported_formats` | CredentialFormat[] | Yes | Accepted credential formats |
+| `supported_formats` | CredentialFormat[] | Conditional | Required for credential-issuer trust |
+| `trusted_assertion_formats` | string[] | Conditional | Required for machine, attestation, deployment, or evidence trust |
 | `compliance_status` | ComplianceStatus | Yes | `COMPLIANT`, `NEEDS_ATTENTION`, `SETUP_REQUIRED` |
 | `compatible_compliance_codes` | ComplianceCode[] | No | Compliance codes this profile can serve (e.g., `["EUDI_PID", "EUDI_MDL"]`). When absent, inferred from `profile_type`. |
 | `auto_generated` | boolean | No | Whether auto-generated from use-case selection |
@@ -389,6 +401,7 @@ A Trust Profile defines **who is trusted** and **how cryptographic validation oc
 | `organization_id` | UUID/string | No | Organization scope for DID issuer resolution |
 | `verification_method_ids` | string[] | No | Pinned DID verification method IDs accepted for this issuer |
 | `did_resolution` | DidResolutionPolicy | No | Resolver strategy and cache policy for DID-backed issuers |
+| `purposes` | TrustPurpose[] | No | Optional narrowing of profile-level purposes for this source |
 | `description` | string | No | Human-readable label |
 
 Exactly one of `url`, `certificate_pem`, or `issuer_did` MUST be present for each TrustSource.
@@ -418,7 +431,9 @@ Org-scoped DID resolution is fail-closed by default. A verifier MUST NOT accept 
 
 - `trust_sources` MUST contain at least one entry.
 - `allowed_algorithms` MUST contain at least one value from `validation-algorithms` enum.
-- `supported_formats` MUST contain at least one value from `credential-formats` enum.
+- `supported_formats` MUST contain at least one value from `credential-formats` when `trust_purposes` is absent or includes `CREDENTIAL_ISSUER`.
+- `trusted_assertion_formats` MUST be present when `trust_purposes` contains a non-credential trust purpose.
+- Trust granted for one purpose MUST NOT be reused for another purpose unless both are explicit.
 - A Trust Profile with `compliance_status: SETUP_REQUIRED` MUST NOT be used in an active Flow.
 - A Trust Profile lifecycle status MUST be emitted as one of the canonical lowercase values defined by `schemas/trust-profile.json`.
 - `revocation_profile_id` MUST reference an existing RevocationProfile if present.
@@ -480,7 +495,7 @@ If any required lookup, binding check, key match, or signature validation fails,
 
 A verifier MUST execute the following steps before accepting a credential presentation:
 
-1. **Identify credential format** — determine whether the credential is `MDOC`, `SD_JWT_VC`, `VC_JWT`, or `JSON_LD`.
+1. **Identify credential format** — determine whether the credential is `MDOC`, `SD_JWT_VC`, `VC_JWT`, `JSON_LD`, `ZK_MDOC`, `ICAO_MRZ`, `ICAO_EMRTD`, or `ICAO_DTC`.
 2. **Locate trust sources** — retrieve the `trust_sources` array from the Trust Profile linked to the active Presentation Policy.
 3. **Validate issuer identity** — for PKI credentials: verify the issuer certificate chain to a trusted root CA; for DID credentials: resolve the issuer DID using the applicable `did_resolution` policy and match the signing key identifier to an authorized DID Document `verificationMethod`. When an organization scope is present, this step MUST use organization-scoped DID resolution (§5.7.2.1) before public DID resolution.
 4. **Verify credential signature** — validate the credential's cryptographic signature using the issuer's verified public key. The algorithm MUST be in `allowed_algorithms`.
@@ -528,7 +543,7 @@ check set rather than accepted as independent caller assertions.
 Multiple compliance codes MAY share a single Trust Profile when they rely on the same trust registry. For example:
 
 - **EUDI_PID** (SD-JWT-VC) and **EUDI_MDL** (mDoc) both trust the EU List of Trusted Lists (LoTL). A single `profile_type: EUDI` Trust Profile with `supported_formats: ["SD_JWT_VC", "MDOC"]` serves both.
-- **ICAO_DTC** and **ICAO_MRZ** both trust ICAO CSCA certificates. A single `profile_type: ICAO` Trust Profile serves both.
+- **ICAO_DTC** and **ICAO_PASSPORT** both use CSCA trust anchors. A single `profile_type: ICAO` Trust Profile can serve both when its `supported_formats` includes `ICAO_DTC` and `ICAO_EMRTD`.
 
 Sharing is declared via `compatible_compliance_codes` on the Trust Profile. When a CredentialTemplate or PresentationPolicy references a Trust Profile, the implementation MUST verify that the linked ComplianceProfile's `compliance_code` appears in the Trust Profile's `compatible_compliance_codes` array (or, when that array is absent, that the compliance code is consistent with the Trust Profile's `profile_type` per the default mapping in §10.7).
 
@@ -732,7 +747,7 @@ The `/evaluate` endpoints are **stateless** — they do not create a Flow Instan
 
 ### 8.1 Purpose
 
-A Deployment Profile packages trust, policies, and runtime behavior for **real endpoints** (gates, kiosks, mobile apps, web portals). It bridges abstract identity policy to physical reality.
+A Deployment Profile packages trust, policies, and runtime behavior for **real endpoints** (gates, kiosks, mobile apps, web portals, secure document systems). It bridges abstract identity policy to physical reality.
 
 ### 8.2 Properties
 
@@ -746,6 +761,8 @@ A Deployment Profile packages trust, policies, and runtime behavior for **real e
 | `presentation_policy_ids` | UUID[] | Yes | Enabled presentation policies |
 | `credential_template_ids` | UUID[] | No | Enabled credential templates (for issuance-capable deployments) |
 | `default_policy_id` | UUID | No | Default presentation policy |
+| `machine_identity_ids` | UUID[] | No | Managed Machine Identities assigned to this deployment |
+| `machine_authentication_policy_id` | UUID | No | Machine Authentication Policy used by managed runtimes |
 | `network_mode` | NetworkMode | Yes | `ONLINE`, `OFFLINE`, `HYBRID` |
 | `key_access_mode` | KeyAccessMode | No | `KEY_VAULT`, `HSM`, `DEVICE_KEYSTORE` |
 | `environment_config` | EnvironmentConfig | No | UX, language, accessibility settings |
@@ -786,6 +803,9 @@ Organization → Site → Deployment Profile → Lane(s) → Device(s)
 - `presentation_policy_ids` MUST contain at least one entry.
 - `default_policy_id` MUST be in `presentation_policy_ids` if present.
 - `trust_profile_id` MUST reference an existing Trust Profile.
+- Every `machine_identity_ids` entry MUST reference an `ACTIVE` or `PROVISIONED` Machine Identity assigned to the same organization.
+- `machine_authentication_policy_id`, when present, MUST reference an active organization-compatible Machine Authentication Policy.
+- Holder wallets MUST NOT be added to `machine_identity_ids` solely because they use `DEVICE_KEY` holder binding.
 - For `network_mode: OFFLINE`, `environment_config.offline_cache_ttl_seconds` SHOULD be set.
 - All lane `device_ids`, if present, MUST be unique across all lanes in the same Deployment Profile.
 
@@ -848,7 +868,7 @@ A Flow orchestrates the **end-to-end identity lifecycle**: application → appro
 |-------------|----------|----------------|----------------|
 | `oid4vci_pre_authorized` | ISSUANCE | `credential_template_id` | OID4VCI §6.1 |
 | `oid4vci_authorization_code` | ISSUANCE | `credential_template_id` | OID4VCI §6.2 |
-| `mdl_issuance` | ISSUANCE | `credential_template_id` | ISO 18013-5 |
+| `mdl_issuance` | ISSUANCE | `credential_template_id` | MIP orchestration; requires a separately selected external provisioning profile |
 | `application_approval_issuance` | ISSUANCE | `application_template_id` | MIP §11 |
 | `credential_renewal` | RENEWAL | `credential_template_id` | MIP §9 |
 | `credential_revocation` | REVOCATION | `credential_template_id` | MIP §12 |
@@ -1141,10 +1161,10 @@ A Compliance Profile abstracts credential format complexity behind compliance-fo
 |----------|------|----------|-------------|
 | `id` | UUID | Yes | Unique identifier |
 | `organization_id` | UUID | No | Null for system profiles |
-| `compliance_code` | ComplianceCode | Yes | `ICAO_DTC`, `ICAO_MRZ`, `AAMVA_MDL`, `EUDI_PID`, `EUDI_MDL`, `OB3_JWT`, `OB3_JSONLD`, `SD_JWT_VC`, `ENTERPRISE_VC`, `OID4VC`, `PEX`, `CUSTOM` |
+| `compliance_code` | ComplianceCode | Yes | `ICAO_DTC`, `ICAO_MRZ`, `ICAO_PASSPORT`, `AAMVA_MDL`, `EUDI_PID`, `EUDI_MDL`, `OB3_JWT`, `OB3_JSONLD`, `SD_JWT_VC`, `ENTERPRISE_VC`, `OID4VC`, `PEX`, `CUSTOM` |
 | `name` | string | Yes | Human-readable name |
 | `description` | string | No | Optional description |
-| `credential_format` | CredentialFormat | Yes | `MDOC`, `SD_JWT_VC`, `VC_JWT`, `JSON_LD` |
+| `credential_format` | CredentialFormat | Yes | `MDOC`, `SD_JWT_VC`, `VC_JWT`, `JSON_LD`, `ZK_MDOC`, `ICAO_MRZ`, `ICAO_EMRTD`, `ICAO_DTC` |
 | `issuance_protocol` | IssuanceProtocol | No | `OID4VCI_PRE_AUTH`, `OID4VCI_AUTH_CODE`, `DIRECT` |
 | `issuer_artifact_requirements` | ArtifactRequirements | No | Required keys, certs, DIDs |
 | `verification_policy_set_id` | UUID | No | Reference to a Cedar PolicySet (§16) for credential verification rules |
@@ -1167,11 +1187,12 @@ System profiles are pre-defined and cannot be modified:
 
 | Code | Format | Protocol | Description |
 |------|--------|----------|-------------|
-| `ICAO_DTC` | `MDOC` | OID4VCI_PRE_AUTH | ICAO Digital Travel Credential |
-| `ICAO_MRZ` | `MDOC` | — | ICAO Machine Readable Zone extraction and verification |
-| `AAMVA_MDL` | `MDOC` | OID4VCI_PRE_AUTH | AAMVA Mobile Driver's License |
+| `ICAO_DTC` | `ICAO_DTC` | — | Draft mapping for the ICAO DTC virtual component and PKI; not discoverable until conformance coverage exists |
+| `ICAO_MRZ` | `ICAO_MRZ` | — | Draft MRZ parsing and check-digit validation mapping; not an authenticity claim |
+| `ICAO_PASSPORT` | `ICAO_EMRTD` | PHYSICAL_DOCUMENT | Draft TD3 ePassport, LDS, security-mechanism, and PKI mapping |
+| `AAMVA_MDL` | `MDOC` | — | Draft AAMVA Guidelines 1.6 document/profile mapping; non-discoverable until conformance and transport evidence exist |
 | `EUDI_PID` | `SD_JWT_VC` | OID4VCI_PRE_AUTH | EUDI Personal Identification Data |
-| `EUDI_MDL` | `MDOC` | OID4VCI_PRE_AUTH | EUDI Mobile Driving Licence |
+| `EUDI_MDL` | `MDOC` | — | Draft EUDI mDL placeholder; non-discoverable until the current ARF, rulebook, implementing acts, and tests are mapped |
 | `OB3_JWT` | `VC_JWT` | OID4VCI_PRE_AUTH | Open Badge v3 (JWT) |
 | `OB3_JSONLD` | `JSON_LD` | OID4VCI_PRE_AUTH | Open Badge v3 (JSON-LD) |
 | `SD_JWT_VC` | `SD_JWT_VC` | OID4VCI_PRE_AUTH | Generic SD-JWT VC |
@@ -1193,7 +1214,8 @@ Each Compliance Profile declares the Trust Profile configurations it is compatib
 
 | Compliance Code | Compatible Profile Types | Required Source Types |
 |----------------|-------------------------|----------------------|
-| `ICAO_DTC`, `ICAO_MRZ` | `ICAO`, `CUSTOM` | `PKD_URL` or `ROOT_CA` |
+| `ICAO_DTC`, `ICAO_PASSPORT` | `ICAO`, `CUSTOM` | `PKD_URL` or `ROOT_CA` |
+| `ICAO_MRZ` | `ICAO`, `CUSTOM` | — |
 | `AAMVA_MDL` | `AAMVA`, `CUSTOM` | `TRUST_LIST` or `ROOT_CA` |
 | `EUDI_PID`, `EUDI_MDL` | `EUDI`, `CUSTOM` | `TRUST_LIST` |
 | `OB3_JWT`, `OB3_JSONLD` | `CUSTOM` | — |
@@ -1203,7 +1225,7 @@ Implementations MUST validate that a CredentialTemplate does not pair an incompa
 
 ### 10.6 api_surface Declaration
 
-A Compliance Profile MAY declare an `api_surface` array that describes the runtime endpoints an implementation MUST expose when this profile is active. This mechanism allows standards-specific APIs (e.g., OID4VCI well-known metadata, mDL device engagement) to be derived from the compliance profile rather than hardcoded into the implementation.
+A Compliance Profile MAY declare an `api_surface` array that describes the runtime HTTP endpoints an implementation MUST expose when this profile is active. This mechanism allows standards-specific APIs such as OID4VCI well-known metadata to be derived from the compliance profile rather than hardcoded into the implementation. Non-HTTP exchanges such as ISO/IEC 18013-5 device engagement and session establishment are not API-surface entries.
 
 Each entry in `api_surface` has the following fields:
 
@@ -1570,25 +1592,25 @@ DELETE /v1/cascade-revocations/{id}                  Cancel a pending cascade
 
 ### 13.1 Purpose
 
-A Wallet Profile describes **which wallet applications are compatible** with a given credential configuration. The normative semantic is **derivation**: wallet compatibility MUST be computable from `(credential_format, issuance_protocol, compliance_profile_code)` without requiring a stored record. The wallet registry provides an **override table** for custom or non-standard wallet apps not covered by the derivation algorithm.
+A Wallet Profile describes the requirements a wallet must satisfy for a credential configuration and, when supported by evidence, which named wallet applications have been verified for that exact configuration. Derivation computes requirements from `(credential_format, issuance_protocol, compliance_profile_code)`. It MUST NOT manufacture a named-wallet compatibility claim. The wallet registry holds versioned system evidence and organization-scoped overrides.
 
 ### 13.2 Derivation (Normative)
 
 Wallet Profiles MUST be computed from:
 
 ```
-(credential_format, issuance_protocol, compliance_profile_code) → WalletProfile
+(credential_format, issuance_protocol, compliance_profile_code) → WalletRequirements
 ```
 
-This key is extracted from a Credential Template's associated Compliance Profile. The derivation table (§13.4) is maintained by protocol implementers, not end users.
+This key is extracted from a Credential Template's associated Compliance Profile. It identifies required format and protocol capabilities. Named wallets, platforms, and routes require authoritative documentation and interoperability evidence for the exact configuration. An empty `wallet_apps` array means "not verified," not "incompatible."
 
 ### 13.3 Override Semantics
 
 `POST /v1/wallet-registry` creates an override entry for a `(credential_format, issuance_protocol, compliance_profile_code)` combination. Override entries:
 
 - MUST set `override_precedence` (integer 0–100, higher value wins) to supersede a derived entry on conflict; default is `50`
-- SHOULD be used only for custom/organization-specific wallet apps not in the derivation table
-- Are OPTIONAL — their absence does not indicate lack of wallet compatibility
+- SHOULD be used only for evidence-backed custom or organization-specific wallet apps
+- Are OPTIONAL; their absence means named compatibility has not been verified
 
 `GET /v1/wallet-registry` MUST return derived entries merged with stored overrides. When both exist for the same key, the stored entry wins only if the stored override's `override_precedence` exceeds `50`.
 
@@ -1603,25 +1625,18 @@ This key is extracted from a Credential Template's associated Compliance Profile
 | `credential_format` | CredentialFormat | Both | Format used (key dimension) |
 | `issuance_protocol` | IssuanceProtocol | Both | Protocol used (key dimension) |
 | `compliance_profile_code` | string | Both | Optional — narrows compatibility further |
-| `wallet_apps` | string[] | Both | Compatible wallet application names |
-| `specifications` | string[] | Both | Supported standards |
-| `supported_platforms` | Platform[] | Both | `ios`, `android`, `web` |
-| `deep_link_pattern` | string | Both | URI template for credential delivery |
+| `wallet_apps` | string[] | Both | Evidence-backed compatible wallet names; empty when unverified |
+| `specifications` | string[] | Both | Required or tested standards |
+| `supported_platforms` | Platform[] | Both | Evidence-backed `ios`, `android`, or `web` coverage |
+| `deep_link_pattern` | string | Both | Tested URI template for credential delivery, when applicable |
 | `override_precedence` | integer (0–100) | Override only | Numeric precedence; higher value wins on conflict; default `50` |
 | `is_override` | boolean | Response | `true` for stored override entries, `false` for system-derived profiles |
 
-### 13.5 Compatible Wallet Matrix (Normative)
+### 13.5 Compatibility Evidence (Normative)
 
-| Format | Protocol | Compliance | Compatible Wallets |
-|--------|----------|-----------|-------------------|
-| `MDOC` | `OID4VCI_PRE_AUTH` | `AAMVA_MDL` | Apple Wallet (mDL), Google Wallet (mDL), ISO-compliant mDL wallets |
-| `MDOC` | `OID4VCI_PRE_AUTH` | `ICAO_DTC` | ICAO DTC-compatible wallets |
-| `MDOC` | `OID4VCI_PRE_AUTH` | `EUDI_MDL` | EUDI Wallet, eIDAS-compliant wallets |
-| `SD_JWT_VC` | `OID4VCI_PRE_AUTH` | `EUDI_PID` | EUDI Wallet, eIDAS-compliant wallets |
-| `VC_JWT` | `OID4VCI_PRE_AUTH` | `OB3_JWT` | 1EdTech Open Badge Passport, Learning Credentials Wallet |
-| `JSON_LD` | `OID4VCI_PRE_AUTH` | `OB3_JSONLD` | 1EdTech Open Badge Passport, DIF Universal Wallet |
-| `SD_JWT_VC` | `OID4VCI_PRE_AUTH` | null | EUDI Wallet, OID4VCI-compatible wallets |
-| `VC_JWT` | `OID4VCI_PRE_AUTH` | `ENTERPRISE_VC` | Organization-managed wallets |
+The derivation result MUST NOT name Apple Wallet, Google Wallet, an EUDI Wallet, or a generic "any wallet" solely because the tuple contains `MDOC` or OID4VCI. A named mapping requires evidence for the exact wire format, document or credential type, protocol version, wallet and platform version, issuer enrollment requirements, region, and tested operation (issuance, storage, or presentation).
+
+The `openid-credential-offer` URI identifies an OID4VCI offer; it is not proof that a named wallet accepts the credential. ISO/IEC 18013-5 device engagement is a presentation bootstrap and MUST NOT be represented as an HTTP issuance endpoint.
 
 ### 13.6 API
 
@@ -1900,15 +1915,16 @@ GET    /v1/notifications/{id}/delivery-results
 
 ### 16.1 Purpose
 
-A Policy Set stores [Cedar](https://www.cedarpolicy.com/) authorization policies that govern access control, credential verification trust, and approval decisions. Cedar is a deny-by-default policy language that is statically analyzable, formally verifiable, and auditable. MIP 0.3 uses Policy Sets instead of opaque JSON rule objects.
+A Policy Set stores [Cedar](https://www.cedarpolicy.com/) authorization policies that govern access control, credential verification trust, approval decisions, and managed-machine authorization. Cedar is a deny-by-default policy language that is statically analyzable, formally verifiable, and auditable. MIP uses Policy Sets instead of opaque JSON rule objects.
 
-MIP defines three policy domains:
+MIP defines four policy domains:
 
 | Domain | Description | Referenced By |
 |--------|-------------|---------------|
 | **Access Control** | API authorization via RBAC + ABAC | ScimRole (`policy_set_id`) |
 | **Credential Verification** | Trust evaluation rules (issuer trust, format requirements, algorithm restrictions) | TrustProfile, ComplianceProfile (`verification_policy_set_id`) |
 | **Approval Rules** | Application approval decisions (risk scoring, biometric thresholds, evidence requirements) | ApplicationTemplate (`approval_policy_set_id`) |
+| **Machine Authorization** | Identity-bound authorization of a managed runtime for an opaque external operation | MachineAuthenticationPolicy (`authorization_policy_set_id`) |
 
 ### 16.2 Properties
 
@@ -1918,7 +1934,7 @@ MIP defines three policy domains:
 | `organization_id` | UUID | Yes | Owning organization |
 | `name` | string | Yes | Human-readable name |
 | `description` | string | No | Optional description |
-| `policy_type` | PolicyType | Yes | `ACCESS_CONTROL`, `CREDENTIAL_VERIFICATION`, `APPROVAL_RULES`, `CUSTOM` |
+| `policy_type` | PolicyType | Yes | `ACCESS_CONTROL`, `CREDENTIAL_VERIFICATION`, `APPROVAL_RULES`, `MACHINE_AUTHORIZATION`, `CUSTOM` |
 | `cedar_policies` | CedarPolicy[] | Yes | One or more Cedar policy entries |
 | `cedar_schema_version` | string | Yes | Cedar schema namespace and version (e.g., `MIP/1.0`) |
 | `status` | PolicySetStatus | Yes | `DRAFT`, `ACTIVE`, `ARCHIVED` |
@@ -2018,6 +2034,92 @@ See [Cedar Policies Documentation](docs/cedar-policies.md) for detailed architec
 
 ---
 
+## 16A. Machine Identity and Identity-Bound Authorization
+
+### 16A.1 Scope
+
+MIP supports managed non-human actors that participate in identity and secure-document operations. This support consists of:
+
+- Machine Identity lifecycle and registered identity keys
+- Machine credentials and deployment assignments
+- Machine proof-of-control and transaction binding
+- Optional appraisal of externally produced runtime attestation results
+- Cedar `MACHINE_AUTHORIZATION` decisions
+- Signed Authorization Decision Receipts
+
+This feature MUST remain identity-centric. MIP MUST NOT become the owner of external domain resources, key-delivery formats, execution controls, protected output, or forensic investigations.
+
+### 16A.2 Machine Identity
+
+The normative shape is `schemas/machine-identity.json`. Machine Identity is intended for managed infrastructure such as secure document printers, personalization systems, HSM-backed workloads, verifier appliances, inspection kiosks, and secure processing runtimes.
+
+Every identity key MUST have a SHA-256 thumbprint. Credentials, proof of control, and attestation results when required MUST be bound to the same active key or an auditable governed rotation relationship.
+
+Machine Identity MUST NOT be required for a consumer wallet merely because a credential uses `DEVICE_KEY` holder binding.
+
+### 16A.3 Machine Authentication Policy
+
+The normative shape is `schemas/machine-authentication-policy.json`. Authentication evaluates:
+
+1. Machine lifecycle state.
+2. Required machine credentials.
+3. Proof against an active registered key.
+4. Challenge, audience, proof age, and replay state.
+5. Attestation result trust, freshness, and identity-key binding when required.
+6. An active `MACHINE_AUTHORIZATION` PolicySet.
+
+Machine authentication MAY be carried by a versioned custom Flow extension based on credential presentation. Such an extension authenticates the machine but MUST NOT claim conformance to an external domain workflow.
+
+### 16A.4 Machine and holder binding separation
+
+Holder binding remains governed by Presentation Policy and uses `CREDENTIAL_KEY`, `DEVICE_KEY`, or `SESSION_BINDING`. Machine binding is governed by Machine Authentication Policy and may use `MACHINE_KEY`, `CREDENTIAL_KEY`, or `SESSION_BINDING`.
+
+A Verification Session result MUST NOT contain both `holder_binding_evidence` and `machine_binding_evidence`. Stable machine identity disclosure MUST NOT be inferred from ordinary device-bound holder proof.
+
+### 16A.5 Attestation boundary
+
+MIP consumes a signed attestation result from a verifier trusted for `ATTESTATION_VERIFIER`. The attestation system remains responsible for collecting measurements, validating endorsements and reference values, and appraising platform-specific evidence.
+
+An attestation result used for authorization MUST be fresh, bound to the authenticated machine identity key when policy requires it, and retained by digest or privacy-safe reference.
+
+### 16A.6 Authorization Decision Receipt
+
+The normative shape is `schemas/authorization-decision-receipt.json`. A receipt binds the authenticated principal and proof to an exact external `action`, opaque `resource_id`, audience, challenge, policy version, decision, and expiry.
+
+For key-based binding, `principal_key_thumbprint` is mandatory. For attested machine authorization, the receipt MUST record the attestation result digest and whether identity-key binding succeeded.
+
+External systems MUST independently verify the receipt and enforce their domain operation. The receipt MUST NOT contain protected document contents, content keys, domain execution instructions, or raw attestation evidence.
+
+### 16A.7 Trust purposes
+
+Trust Profiles MAY declare:
+
+```text
+CREDENTIAL_ISSUER
+MACHINE_IDENTITY_CA
+MANUFACTURER_ENDORSER
+ATTESTATION_VERIFIER
+DEPLOYMENT_AUTHORITY
+EVIDENCE_SIGNER
+```
+
+Absence of `trust_purposes` preserves legacy `CREDENTIAL_ISSUER` semantics. Non-credential trust purposes require `trusted_assertion_formats`. Trust granted for one purpose MUST NOT be reused for another purpose unless both are explicitly present.
+
+### 16A.8 Domain integration boundary
+
+An external domain MAY supply exact, opaque action, resource, transaction, and result references. MIP authenticates the actor and records its authorization decision. The domain system interprets and enforces the operation.
+
+For secure cinema, cinema systems retain responsibility for content packages, composition metadata, key-delivery messages, playback windows, projection, forensic marking, security logs, and recording investigations. MIP represents only participating identities, identity evidence, and the identity-bound authorization decision.
+
+See:
+
+- `protocol/machine-identity/SPECIFICATION.md`
+- `protocol/machine-authentication-policy/SPECIFICATION.md`
+- `protocol/authorization-decision-receipt/SPECIFICATION.md`
+- `docs/decisions/0001-machine-identity-domain-boundary.md`
+
+---
+
 ## 17. API Surface
 
 All MIP-compliant implementations MUST expose the following resource endpoints. The canonical path prefix for all MIP resources is `/v1/`. There is no `/v1/identity/` sub-prefix.
@@ -2034,6 +2136,7 @@ All MIP-compliant implementations MUST expose the following resource endpoints. 
 | Revocation Profiles | `/v1/revocation-profiles` | Required |
 | Presentation Policies | `/v1/presentation-policies` | Required |
 | Deployment Profiles | `/v1/deployment-profiles` | Required |
+| Machine Authentication Policies | `/v1/machine-authentication-policies` | Required |
 | Policy Sets (Cedar) | `/v1/policy-sets` | Required |
 
 All configuration resources support full CRUD: `GET` (list), `POST` (create), `GET /{id}` (read), `PATCH /{id}` (update), `DELETE /{id}` (delete), `POST /{id}/activate` (lifecycle transition).
@@ -2049,6 +2152,7 @@ All configuration resources support full CRUD: `GET` (list), `POST` (create), `G
 | SCIM Groups | `/v1/organizations/{id}/scim/v2/Groups` | Required |
 | SCIM ServiceProviderConfig | `/v1/organizations/{id}/scim/v2/ServiceProviderConfig` | Required |
 | Permission Catalog | `/v1/organizations/{id}/permissions` | Required |
+| Machine Identities | `/v1/machine-identities` | Required |
 
 See §18 (Organization & Identity Governance) for full SCIM alignment specification.
 
@@ -2073,6 +2177,8 @@ See §18 (Organization & Identity Governance) for full SCIM alignment specificat
 | MRZ Verify | `POST /v1/flows/mrz/verify` | Required |
 | Revocation Batches | `/v1/revocation-batches` | Required |
 | Cascade Revocation Operations | `/v1/cascade-revocations` | Required |
+| Authorization Decision Evaluation | `POST /v1/authorization-decisions/evaluate` | Required |
+| Authorization Decision Receipt | `GET /v1/authorization-decisions/{id}` | Required |
 
 ### 17.4 Wallet-Facing Endpoints (No Auth Required)
 
@@ -2312,6 +2418,16 @@ All UUID references MUST resolve to existing records within the same organizatio
 - Notification payloads MUST NOT contain credential material — only offer URIs and metadata.
 - FCM tokens MUST be treated as sensitive and not logged in plaintext.
 
+### 20.3A Machine Identity
+
+- Machine identity keys MUST be verified by challenge-response or an equivalent authenticated key-establishment procedure before activation.
+- Suspended, revoked, retired, or key-expired machines MUST fail authentication and authorization.
+- Machine credentials, proof of control, and required attestation MUST bind to the same active key or a governed rotation relationship.
+- Machine authentication challenges MUST be single use and bound to the intended audience.
+- Attestation evidence and results MUST be retained only by digest or privacy-safe reference unless operational policy requires protected raw evidence.
+- A stable Machine Identity MUST NOT be required or disclosed for ordinary holder `DEVICE_KEY` binding.
+- Authorization Decision Receipts MUST be signed, audience restricted, expiry checked, and compared using exact action and resource identifiers.
+
 ### 20.4 API Security
 
 - All API endpoints MUST require authentication (OAuth 2.0 bearer token or equivalent).
@@ -2336,6 +2452,8 @@ All UUID references MUST resolve to existing records within the same organizatio
 | Metadata Injection | Attacker modifies or replaces the OID4VCI issuer metadata endpoint response | Capability Discovery |
 | Offline Grace Abuse | Attacker exploits an excessively long offline grace period to present revoked credentials | Revocation Profile |
 | Device Key Rotation Abuse | Attacker races rotation, renews old-key grace, or uses a retiring key for newly initiated work | Device Registration |
+| Machine Credential Substitution | Attacker combines a valid machine credential, proof key, or attestation result from different runtimes | Machine Identity, Machine Authentication |
+| Machine Decision Replay | Attacker reuses an authorization receipt for another audience, resource, action, or validity window | Authorization Decision Receipt |
 
 #### 20.5.2 Normative Mitigations
 
@@ -2352,6 +2470,8 @@ All UUID references MUST resolve to existing records within the same organizatio
 | Metadata Injection | Issuer metadata endpoints MUST be served over HTTPS. Implementations SHOULD validate metadata document integrity via sub-resource integrity or signed metadata JWT. |
 | Offline Grace Abuse | `offline_grace_seconds` values MUST be logged in audit events when applied. A configurable alert threshold SHOULD be set for grace period usage frequency. |
 | Device Key Rotation Abuse | Rotation MUST compare the expected current key version, commit one new current key atomically, derive immutable grace from server policy, and accept a retiring key only for an exact pre-rotation challenge per §14.5. |
+| Machine Credential Substitution | Implementations MUST verify a common active-key binding across machine identity, credentials, proof of control, and attestation when required. |
+| Machine Decision Replay | Relying systems MUST verify receipt signature, audience, exact action and resource identifiers, challenge replay state, and expiry before enforcement. |
 
 ### 20.6 Holder Binding Requirements
 
@@ -2447,7 +2567,13 @@ pairwise_id (base64url): 2YujmCLTz6JvcY3RtYcumcCDrcnLJCdMDYZGCqHQIvc
 
 Implementations MUST document which credential formats they issue and their unlinkability properties in their conformance declaration (§22.3).
 
-### 21.7 Data Retention Restrictions
+### 21.7 Managed machine privacy
+
+Machine Identity is limited to managed infrastructure. Implementations MUST NOT promote a wallet's device-bound holder proof into a stable machine identifier, and MUST NOT disclose machine serial numbers, raw attestation evidence, or manufacturer measurements in Authorization Decision Receipts.
+
+Receipts and audit records SHOULD retain key thumbprints, policy digests, decision metadata, and privacy-safe evidence references rather than raw credentials or attestation payloads.
+
+### 21.8 Data Retention Restrictions
 
 - Verifiers MUST NOT retain raw credential payloads after a verification event is recorded. Audit events MUST contain only claim-level pass/fail results, not raw claim values, unless retention of raw values is required by applicable law.
 - Applicant `application_data` MUST be treated as sensitive personal data. Implementations MUST provide a mechanism to delete applicant records and associated evidence upon request, subject to any legal retention obligations.
@@ -2462,11 +2588,11 @@ Implementations MUST document which credential formats they issue and their unli
 A conformant MIP implementation MUST:
 
 1. Implement all five core primitives (Trust Profile, Credential Template, Presentation Policy, Deployment Profile, Flow) with the required fields and validation rules.
-2. Expose the API endpoints specified in Section 16.
+2. Expose the API endpoints specified in Section 17.
 3. Accept all valid fixtures in `/conformance/valid/`.
 4. Reject all invalid fixtures in `/conformance/invalid/` with the error codes specified in their `.expected.json` sidecars.
 5. Support at least one credential format from `credential-formats` enum.
-6. Enforce all validation rules in Sections 5–15 and 17.
+6. Enforce all validation rules in Sections 5–16A and 19.
 
 ### 22.2 Partial Conformance
 
@@ -2474,7 +2600,7 @@ Implementations MAY claim partial conformance by identifying which entities they
 
 ### 22.3 Implementation Classes
 
-MIP defines four implementation classes. Claiming conformance to a class requires satisfying all MUST requirements for that class.
+MIP defines five implementation classes. Claiming conformance to a class requires satisfying all MUST requirements for that class.
 
 #### Issuer Implementation
 
@@ -2526,39 +2652,51 @@ MIP defines four implementation classes. Claiming conformance to a class require
 | Implement Applicant lifecycle API | SHOULD |
 | Pass all `conformance/valid/` registry fixtures | MUST |
 
+#### Managed Machine Identity Implementation
+
+| Feature | Requirement |
+|---------|-------------|
+| Implement Machine Identity lifecycle and active-key validation | MUST |
+| Verify required machine credentials against purpose-scoped trust | MUST |
+| Validate challenge, audience, proof age, and replay state | MUST |
+| Appraise a trusted attestation result when policy requires it | MUST |
+| Verify machine identity, credential, proof, and attestation key binding | MUST |
+| Evaluate `MACHINE_AUTHORIZATION` Cedar policies | MUST |
+| Issue signed Authorization Decision Receipts for permit and deny results | MUST |
+| Keep external resources and execution controls outside MIP ownership | MUST |
+| Pass machine identity and authorization conformance fixtures | MUST |
+
 ### 22.4 Protocol Conformance Targets
 
-MIP defines five first-class protocol conformance targets. Each target corresponds to a system Compliance Profile and an integration test suite in the `marty-integration-tests` repository.
+MIP defines three active first-class protocol conformance targets. Each target corresponds to an active system Compliance Profile and an integration test suite in the `marty-integration-tests` repository. The reserved `ICAO_DTC`, `ICAO_MRZ`, and `ICAO_PASSPORT` profiles remain draft and non-discoverable until format-native conformance coverage exists.
 
 | Target | Compliance Code | Test Module | Standard Reference |
 |--------|----------------|-------------|--------------------|
-| **DTC** | `ICAO_DTC` | `test_oid4vci_issuer_conformance.py` + ICAODTCConformanceTest | ICAO Doc 9303 Part 13; OID4VCI §8 |
-| **MRZ** | `ICAO_MRZ` | `test_icao_mrz_conformance.py` + MRZExtractionConformanceTest | ICAO Doc 9303 Parts 1–13 |
 | **OpenBadge** | `OB3_JWT`, `OB3_JSONLD` | `test_openbadge_conformance.py` + OB3ConformanceTest | 1EdTech OB3 §8; W3C VCDM v2 |
 | **OID4VC** | `OID4VC` | `test_oid4vci_issuer_conformance.py` + VCIIssuerHappyFlow; `test_oid4vp_verifier_conformance.py` | OID4VCI 1.0 Final; OID4VP 1.0 Final |
 | **PEX** | `PEX` | `test_oid4vp_verifier_conformance.py` + test_verifier_presentation_definition_structure | DIF PE v2.0.0 |
 
-#### 22.4.1 DTC Conformance
+#### 22.4.1 DTC Profile Activation Gate
 
-A conformant DTC implementation MUST:
+The `ICAO_DTC` system profile MUST remain `DRAFT` and `discoverable: false` until an implementation provides format-native conformance evidence. Activation requires tests that:
 
-- Issue ICAO DTC credentials in MDOC format with required namespaces `com.icao.dtc`.
-- Include data group 1 (MRZ mirror), data group 2 (facial biometric), and Document Security Object.
-- Sign with EC key using ES256 or ES384 algorithm.
-- Expose OID4VCI pre-authorized flow endpoints per the `ICAO_DTC` compliance profile `api_surface`.
-- Pass all DTC fixtures in `conformance/valid/` and reject all in `conformance/invalid/`.
+- Parse and validate ASN.1 DER `DTCContentInfo` as defined by the ICAO DTC Virtual Component Technical Report.
+- Enforce the DTC-type-dependent presence rules for `dtcSOD`, `dtcTBS`, and `dtcSignerInfo`.
+- Require `dtcDG1` and `dtcDG2` and validate their encodings against ICAO Doc 9303 Part 10.
+- Validate the DTC Signer certificate, required extended key usage, signature, and data hashes against a CSCA trust anchor.
+- Validate a DTC-PC link and interface against the ICAO DTC Physical Component Technical Report when a physical component is present.
 
-#### 22.4.2 MRZ Conformance
+OID4VCI and ISO mDoc are not part of the ICAO DTC conformance claim. A separate transport adapter MAY carry a DTC, but it MUST use a custom profile and MUST NOT represent that transport as ICAO DTC conformance.
 
-A conformant MRZ implementation MUST:
+#### 22.4.2 MRZ Profile Activation Gate
 
-- Parse TD1, TD2, and TD3 MRZ line formats per ICAO Doc 9303 Part 3.
-- Validate all MRZ check digits using the algorithm in ICAO Doc 9303 Part 3 §4.3.
-- Map parsed MRZ fields to claims in the `com.icao.mrz` namespace.
-- Return structured MRZ verification results at the `/v1/flows/mrz/verify` endpoint.
-- Reject documents where any check digit is invalid.
+The `ICAO_MRZ` system profile MUST remain `DRAFT` and `discoverable: false` until tests parse the applicable TD1, TD2, TD3, MRV-A, and MRV-B layouts, validate all check digits against authoritative vectors, and distinguish parsing integrity from cryptographic document authenticity. MRZ check digits MUST NOT be represented as a signature, credential trust decision, or mDoc verification.
 
-#### 22.4.3 OpenBadge Conformance
+#### 22.4.3 ePassport Profile Activation Gate
+
+The `ICAO_PASSPORT` system profile MUST remain `DRAFT` and `discoverable: false` until format-native tests validate TD3 layout, LDS data-group encodings, EF.SOD construction and passive authentication, CSCA and Document Signer certificate processing, CRLs, the applicable Part 11 access-control mechanisms, and personalization/inspection interoperability. Structural JSON tests and self-generated certificate round trips are not sufficient evidence of ICAO conformance.
+
+#### 22.4.4 OpenBadge Conformance
 
 A conformant OpenBadge implementation MUST:
 
@@ -2568,7 +2706,7 @@ A conformant OpenBadge implementation MUST:
 - Include required claims: `name`, `issuer`, `validFrom`, `credentialSubject` with activity achievement.
 - Expose OID4VCI metadata with `jwt_vc_json` format identifier in `credential_configurations_supported`.
 
-#### 22.4.4 OID4VC Conformance (OIDF Certification Target)
+#### 22.4.5 OID4VC Conformance (OIDF Certification Target)
 
 A conformant OID4VC implementation MUST pass the OIDF conformance suite tests mirrored in
 `test_oid4vci_issuer_conformance.py` and `test_oid4vp_verifier_conformance.py`:
@@ -2583,7 +2721,7 @@ A conformant OID4VC implementation MUST pass the OIDF conformance suite tests mi
 
 Implementations SHOULD target OIDF Certification Program level **Issuer** and **Verifier** classes.
 
-#### 22.4.5 PEX Conformance (DIF Presentation Exchange v2)
+#### 22.4.6 PEX Conformance (DIF Presentation Exchange v2)
 
 A conformant PEX implementation MUST:
 
@@ -2634,8 +2772,7 @@ All CRUD operations on MIP entities (Trust Profile, Credential Template, Present
 |-----------|-------------------|-----------|
 | `oid4vci_pre_authorized` | HTTPS REST per OID4VCI ≥Draft 13 | OID4VCI §6.1 |
 | `oid4vci_authorization_code` | HTTPS REST per OID4VCI + OAuth 2.0 PKCE | OID4VCI §6.2 / RFC 7636 |
-| `mdl_issuance` (online) | HTTPS REST, OID4VCI | ISO 18013-5 + OID4VCI |
-| `mdl_issuance` (proximity) | ISO 18013-5 Part 8 BLE/NFC | ISO 18013-5:2021 §8 |
+| `mdl_issuance` | Deployment-selected provisioning transport; no MIP default | Applicable issuer program and version-pinned provisioning profile |
 | `application_approval_issuance` | HTTPS REST | MIP §11 |
 | `credential_renewal` | HTTPS REST, OID4VCI pre-authorized | OID4VCI §6.1 |
 | `credential_revocation` | HTTPS REST | MIP §12 |
@@ -2649,9 +2786,9 @@ All CRUD operations on MIP entities (Trust Profile, Credential Template, Present
 | `mdl_presentation` (online) | HTTPS REST, OID4VP + ISO 18013-5 | OID4VP + ISO 18013-5 |
 | `mdl_presentation` (proximity) | BLE or NFC per ISO 18013-5:2021 §8 | ISO 18013-5:2021 §8 |
 
-### 24.5 Proximity Transport Requirements
+### 24.5 Proximity Presentation Transport Requirements
 
-For proximity-based mDL flows, implementations MUST:
+For ISO/IEC 18013-5 proximity presentation flows, implementations MUST:
 
 - Implement device engagement per ISO 18013-5:2021 §8.2 (QR code or NFC tap).
 - Implement session encryption per ISO 18013-5:2021 §9 (session keys derived from device and reader ephemeral keys).
@@ -2710,13 +2847,13 @@ Organizations MAY define Trust Profile entries with `source_type: CUSTOM` to int
 Implementations MAY define non-standard orchestration with `flow_type: custom` and a versioned FlowExtension envelope. Extension identifiers MUST be absolute URIs controlled by the extension owner. A custom flow declares the standard operation it extends through `extension.extends_flow_type`, but MUST NOT claim conformance to that standard step sequence.
 
 **Claim Namespace Extensions**
-Credential Templates MAY define claims in custom namespaces. The namespaces `org.iso.18013.5.1`, `org.aamva.16`, `urn:mip:`, and `eu.europa.ec.eudi.*` are reserved. Organizations SHOULD use their reverse-domain namespace for custom claims (e.g., `com.example.employee.*`).
+Credential Templates MAY define claims in custom namespaces. The namespaces `org.iso.18013.5.1`, `org.iso.18013.5.1.aamva`, `urn:mip:`, and `eu.europa.ec.eudi.*` are reserved. Organizations SHOULD use their reverse-domain namespace for custom claims (e.g., `com.example.employee.*`).
 
 **Webhook Event Extensions**
 Implementations MAY emit custom event types prefixed with their reverse-domain namespace (e.g., `com.example.custom_event`). The event types in §15.5 are reserved.
 
 **Custom Cedar Policies**
-Organizations MAY define custom Cedar Policy Sets with `policy_type: CUSTOM` for authorization scenarios not covered by the three standard domains (Access Control, Credential Verification, Approval Rules). Custom policies MUST validate against the MIP Cedar schema (`cedar/mip.cedarschema`). Organizations MAY extend the Cedar schema with custom entity types and actions under their own namespace, but MUST NOT modify the `MIP` namespace.
+Organizations MAY define custom Cedar Policy Sets with `policy_type: CUSTOM` for authorization scenarios not covered by the four standard domains (Access Control, Credential Verification, Approval Rules, Machine Authorization). Custom policies MUST validate against the MIP Cedar schema (`cedar/mip.cedarschema`). Organizations MAY extend the Cedar schema with custom entity types and actions under their own namespace, but MUST NOT modify the `MIP` namespace.
 
 ### 25.3 System Compliance Profile Registry
 
@@ -2724,7 +2861,7 @@ System Compliance Profiles (§10, `is_system: true`) are maintained in the canon
 
 1. A reference implementation with passing conformance fixtures in `/conformance/valid/`.
 2. A normative specification reference (ISO standard, IETF RFC, W3C Recommendation, or government-published rule book).
-3. A complete `api_surface` array with `standard_ref` for each endpoint.
+3. A complete `api_surface` declaration with `standard_ref` for every required HTTP endpoint; profiles with no required HTTP endpoint MAY omit the array.
 4. Approval from the specification maintainers.
 
 System profiles are immutable once merged. Changes that alter `credential_format`, `compliance_code`, or required claims MUST be published as a new profile entry with a new identifier rather than updating the existing entry.

@@ -51,8 +51,8 @@
       },
       "mdl_issuance": {
         "category": "ISSUANCE",
-        "description": "ISO 18013-5 mobile driving licence issuance.",
-        "spec": "ISO/IEC 18013-5:2021",
+        "description": "MIP orchestration for mdoc or mobile driving licence issuance. The issuer program and version-pinned provisioning transport are selected separately; ISO/IEC 18013-5 does not define issuer-to-wallet provisioning.",
+        "spec": "MIP orchestration plus an applicable external provisioning profile",
         "required_references": ["credential_template_id"]
       },
       "oid4vp_presentation": {

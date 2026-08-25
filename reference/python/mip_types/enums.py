@@ -110,7 +110,9 @@ class CredentialFormat(str, Enum):
     VC_JWT = "VC_JWT"
     JSON_LD = "JSON_LD"
     ZK_MDOC = "ZK_MDOC"
+    ICAO_MRZ = "ICAO_MRZ"
     ICAO_EMRTD = "ICAO_EMRTD"
+    ICAO_DTC = "ICAO_DTC"
     VDS_NC = "VDS_NC"
 
 

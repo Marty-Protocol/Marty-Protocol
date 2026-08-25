@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/machine-authentication-policy.json",
+  "title": "MachineAuthenticationPolicy",
+  "description": "Identity policy for authenticating a managed machine, validating proof of control, and optionally appraising runtime attestation. It does not define domain execution controls.",
+  "type": "object",
+  "required": ["id", "organization_id", "name", "trust_profile_id", "required_credential_types", "machine_binding", "status", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string", "maxLength": 1024},
+    "trust_profile_id": {"type": "string", "format": "uuid"},
+    "required_credential_types": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1, "maxLength": 256},
+      "uniqueItems": true
+    },
+    "allowed_machine_types": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "SECURE_DOCUMENT_PRINTER",
+          "DOCUMENT_PERSONALIZATION_SYSTEM",
+          "VERIFICATION_APPLIANCE",
+          "WALLET_SECURE_ELEMENT",
+          "HSM_WORKLOAD",
+          "SECURE_PROCESSING_RUNTIME",
+          "OTHER"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "machine_binding": {
+      "type": "object",
+      "required": ["binding_methods", "proof_profiles", "proof_freshness"],
+      "additionalProperties": false,
+      "properties": {
+        "binding_methods": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "enum": ["MACHINE_KEY", "CREDENTIAL_KEY", "SESSION_BINDING"]},
+          "uniqueItems": true
+        },
+        "proof_profiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["X509_MACHINE_AUTHENTICATION", "SIGNED_CHALLENGE", "OID4VP_VERIFIABLE_PRESENTATION", "CUSTOM"]
+          },
+          "uniqueItems": true
+        },
+        "proof_freshness": {
+          "type": "object",
+          "required": ["challenge_required", "audience_binding_required", "replay_detection_required"],
+          "additionalProperties": false,
+          "properties": {
+            "challenge_required": {"const": true},
+            "audience_binding_required": {"const": true},
+            "replay_detection_required": {"const": true},
+            "max_proof_age_seconds": {"type": ["integer", "null"], "minimum": 1}
+          }
+        }
+      }
+    },
+    "attestation_requirement": {
+      "type": "object",
+      "required": ["required"],
+      "additionalProperties": false,
+      "properties": {
+        "required": {"type": "boolean"},
+        "accepted_formats": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "enum": ["EAT", "TPM_QUOTE", "PLATFORM_ATTESTATION", "CUSTOM"]},
+          "uniqueItems": true
+        },
+        "verifier_trust_profile_id": {"type": "string", "format": "uuid"},
+        "max_age_seconds": {"type": "integer", "minimum": 1},
+        "challenge_required": {"const": true},
+        "identity_key_binding_required": {"const": true}
+      },
+      "if": {"properties": {"required": {"const": true}}, "required": ["required"]},
+      "then": {"required": ["accepted_formats", "verifier_trust_profile_id", "max_age_seconds", "challenge_required", "identity_key_binding_required"]}
+    },
+    "authorization_policy_set_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Optional reference to an active PolicySet with policy_type MACHINE_AUTHORIZATION."
+    },
+    "status": {"type": "string", "enum": ["DRAFT", "ACTIVE", "ARCHIVED"]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}
