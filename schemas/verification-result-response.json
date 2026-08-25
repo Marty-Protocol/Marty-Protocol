@@ -15,16 +15,93 @@
     "verified_claims": {"$ref": "flow-execution.json#/$defs/publicObject"},
     "credential_results": {
       "type": "array",
-      "items": {"$ref": "flow-execution.json#/$defs/publicObject"}
+      "items": {"$ref": "#/$defs/credentialEvaluation"}
     },
     "error_codes": {
       "type": "array",
-      "items": {"type": "string"}
+      "items": {"type": "string", "minLength": 1, "maxLength": 255},
+      "uniqueItems": true
     },
     "warnings": {
       "type": "array",
-      "items": {"type": "string"}
+      "items": {"type": "string", "minLength": 1, "maxLength": 2000}
     },
     "evaluation_timestamp": {"type": ["string", "null"], "format": "date-time"}
+  },
+  "$defs": {
+    "claimEvaluation": {
+      "type": "object",
+      "required": ["claim_name", "satisfied"],
+      "additionalProperties": false,
+      "properties": {
+        "claim_name": {"type": "string", "minLength": 1, "maxLength": 255},
+        "satisfied": {"type": "boolean"},
+        "presented_value": {},
+        "error": {"type": ["string", "null"], "maxLength": 2000}
+      }
+    },
+    "credentialEvaluation": {
+      "type": "object",
+      "required": ["credential_template_id", "satisfied"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "required": ["revocation_status"],
+            "properties": {"revocation_status": {"const": "revoked"}}
+          },
+          "then": {
+            "required": ["revocation_checked", "not_revoked", "error_codes"],
+            "properties": {
+              "satisfied": {"const": false},
+              "revocation_checked": {"const": true},
+              "not_revoked": {"const": false},
+              "error_codes": {"contains": {"const": "credential_revoked"}}
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["revocation_status"],
+            "properties": {"revocation_status": {"const": "valid"}}
+          },
+          "then": {
+            "required": ["revocation_checked", "not_revoked"],
+            "properties": {
+              "revocation_checked": {"const": true},
+              "not_revoked": {"const": true}
+            }
+          }
+        }
+      ],
+      "properties": {
+        "credential_template_id": {"type": "string", "minLength": 1, "maxLength": 255},
+        "satisfied": {"type": "boolean"},
+        "issuer_did": {"type": ["string", "null"], "maxLength": 2048},
+        "claim_results": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/claimEvaluation"}
+        },
+        "trust_check_passed": {"type": "boolean"},
+        "freshness_check_passed": {"type": "boolean"},
+        "signature_valid": {"type": "boolean"},
+        "revocation_checked": {"type": ["boolean", "null"]},
+        "not_revoked": {"type": ["boolean", "null"]},
+        "revocation_status": {"type": ["string", "null"], "maxLength": 255},
+        "error_codes": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1, "maxLength": 255},
+          "uniqueItems": true
+        },
+        "errors": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1, "maxLength": 2000}
+        },
+        "warnings": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1, "maxLength": 2000}
+        }
+      }
+    }
   }
 }

@@ -1,0 +1,21 @@
+{
+  "instance_id": "instance-1",
+  "status": "FAILED",
+  "result": "failed",
+  "decision": "deny",
+  "decision_reason": "Other verification checks failed",
+  "verified_claims": {},
+  "credential_results": [
+    {
+      "credential_template_id": "age-credential",
+      "satisfied": false,
+      "revocation_checked": true,
+      "not_revoked": false,
+      "revocation_status": "valid",
+      "error_codes": ["signature_invalid"],
+      "errors": ["Credential signature is invalid"]
+    }
+  ],
+  "error_codes": ["signature_invalid"],
+  "warnings": []
+}
