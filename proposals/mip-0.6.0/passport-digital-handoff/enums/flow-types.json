@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/enums/flow-types.json",
+  "title": "FlowType",
+  "description": "Protocol-aligned flow types. Standard types map to fixed ordered step sequences. Non-standard orchestration uses the explicit custom extension envelope.",
+  "type": "string",
+  "enum": [
+    "oid4vci_pre_authorized",
+    "oid4vci_authorization_code",
+    "mdl_issuance",
+    "oid4vp_presentation",
+    "mdl_presentation",
+    "application_approval_issuance",
+    "credential_renewal",
+    "credential_revocation",
+    "physical_document_issuance",
+    "passport_digital_handoff",
+    "combined",
+    "siopv2",
+    "custom"
+  ],
+  "$comment": "flow_category derivation: ISSUANCE=[oid4vci_pre_authorized, oid4vci_authorization_code, mdl_issuance, application_approval_issuance, physical_document_issuance, passport_digital_handoff], VERIFICATION=[oid4vp_presentation, mdl_presentation, siopv2], RENEWAL=[credential_renewal], REVOCATION=[credential_revocation], COMBINED=[combined]. custom derives its category from extension.extends_flow_type.",
+  "$defs": {
+    "standard_values": {
+      "type": "string",
+      "enum": [
+        "oid4vci_pre_authorized",
+        "oid4vci_authorization_code",
+        "mdl_issuance",
+        "oid4vp_presentation",
+        "mdl_presentation",
+        "application_approval_issuance",
+        "credential_renewal",
+        "credential_revocation",
+        "physical_document_issuance",
+        "passport_digital_handoff",
+        "combined",
+        "siopv2"
+      ]
+    },
+    "values": {
+      "oid4vci_pre_authorized": {
+        "category": "ISSUANCE",
+        "description": "OID4VCI Pre-Authorized Code issuance.",
+        "spec": "OpenID for Verifiable Credential Issuance 1.0",
+        "required_references": ["credential_template_id"]
+      },
+      "oid4vci_authorization_code": {
+        "category": "ISSUANCE",
+        "description": "OID4VCI Authorization Code issuance.",
+        "spec": "OpenID for Verifiable Credential Issuance 1.0",
+        "required_references": ["credential_template_id"]
+      },
+      "mdl_issuance": {
+        "category": "ISSUANCE",
+        "description": "MIP orchestration for mdoc or mobile driving licence issuance. The issuer program and version-pinned provisioning transport are selected separately; ISO/IEC 18013-5 does not define issuer-to-wallet provisioning.",
+        "spec": "MIP orchestration plus an applicable external provisioning profile",
+        "required_references": ["credential_template_id"]
+      },
+      "oid4vp_presentation": {
+        "category": "VERIFICATION",
+        "description": "OID4VP verifier-initiated presentation.",
+        "spec": "OpenID for Verifiable Presentations 1.0",
+        "required_references": ["presentation_policy_id"]
+      },
+      "mdl_presentation": {
+        "category": "VERIFICATION",
+        "description": "ISO 18013-5 mDL proximity or online presentation.",
+        "spec": "ISO/IEC 18013-5:2021",
+        "required_references": ["presentation_policy_id"]
+      },
+      "application_approval_issuance": {
+        "category": "ISSUANCE",
+        "description": "Application, evidence, approval, and credential issuance.",
+        "required_references": ["application_template_id"]
+      },
+      "credential_renewal": {
+        "category": "RENEWAL",
+        "description": "Renew an existing credential and revoke the superseded credential.",
+        "required_references": ["credential_template_id"]
+      },
+      "credential_revocation": {
+        "category": "REVOCATION",
+        "description": "Revoke an issued credential and notify the holder.",
+        "required_references": ["credential_template_id"]
+      },
+      "physical_document_issuance": {
+        "category": "ISSUANCE",
+        "description": "ICAO 9303 ePassport booklet issuance with chip personalization.",
+        "spec": "ICAO Doc 9303 Parts 1-12; ISO/IEC 14443",
+        "required_references": ["credential_template_id", "application_template_id", "delivery_destination_profile_id"]
+      },
+      "passport_digital_handoff": {
+        "category": "ISSUANCE",
+        "description": "Marty-managed ICAO eMRTD digital package creation and sealed handoff; no booklet or chip personalization claim.",
+        "spec": "MIP passport digital handoff; ICAO Doc 9303 data groups, SOD, and document signing",
+        "required_references": ["credential_template_id", "application_template_id", "delivery_destination_profile_id"]
+      },
+      "combined": {
+        "category": "COMBINED",
+        "description": "Credential issuance followed by a presentation in one orchestration.",
+        "required_references": ["credential_template_id", "presentation_policy_id"]
+      },
+      "siopv2": {
+        "category": "VERIFICATION",
+        "description": "Self-Issued OpenID Provider v2 holder authentication.",
+        "spec": "Self-Issued OpenID Provider v2",
+        "required_references": ["presentation_policy_id"]
+      },
+      "custom": {
+        "category": "DERIVED",
+        "description": "Explicit non-standard orchestration defined by a versioned extension envelope.",
+        "required_references": ["extension"]
+      }
+    },
+    "step_sequences": {
+      "oid4vci_pre_authorized": ["create_offer", "token_exchange", "credential_request", "issue_credential"],
+      "oid4vci_authorization_code": ["create_offer", "authorization", "token_exchange", "credential_request", "issue_credential"],
+      "mdl_issuance": ["application_submit", "validate_evidence", "approval_decision", "issue_mdl", "deliver_credential"],
+      "oid4vp_presentation": ["create_request", "wallet_selection", "presentation_submission", "verify_presentation"],
+      "mdl_presentation": ["device_engagement", "session_establishment", "request_items", "response_items", "session_termination"],
+      "application_approval_issuance": ["accept_application", "validate_evidence", "approval_decision", "issue_credential", "deliver_credential"],
+      "credential_renewal": ["validate_existing", "create_offer", "token_exchange", "credential_request", "issue_renewed_credential", "revoke_old_credential"],
+      "credential_revocation": ["validate_revocation_request", "update_status_list", "notify_holder"],
+      "physical_document_issuance": ["accept_application", "validate_evidence", "approval_decision", "generate_data_groups", "sign_sod", "submit_to_personalization", "track_production", "quality_verify", "activate_credential"],
+      "passport_digital_handoff": ["accept_application", "validate_evidence", "approval_decision", "generate_data_groups", "sign_sod", "verify_digital_package", "seal_handoff_package", "handoff_ready"],
+      "combined": ["accept_application", "approval_decision", "issue_credential", "create_request", "presentation_submission", "verify_presentation"],
+      "siopv2": ["create_request", "authentication_submission", "verify_id_token"]
+    },
+    "extensible_steps": {
+      "mdl_issuance": ["approval_decision", "deliver_credential"],
+      "application_approval_issuance": ["approval_decision", "deliver_credential"],
+      "physical_document_issuance": ["approval_decision", "submit_to_personalization", "quality_verify"],
+      "passport_digital_handoff": ["approval_decision"]
+    }
+  }
+}

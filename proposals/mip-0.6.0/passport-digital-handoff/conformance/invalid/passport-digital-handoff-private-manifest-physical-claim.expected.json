@@ -1,0 +1,5 @@
+{
+  "pointer": "/status",
+  "error_code": "PHYSICAL_CLAIM_FORBIDDEN",
+  "message": "Digital handoff evidence cannot claim physical shipment."
+}

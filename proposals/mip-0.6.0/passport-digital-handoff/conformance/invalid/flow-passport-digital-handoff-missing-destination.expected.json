@@ -1,0 +1,5 @@
+{
+  "pointer": "/delivery_destination_profile_id",
+  "error_code": "REQUIRED_REFERENCE",
+  "message": "Passport digital handoff requires a digital-handoff Delivery Destination Profile."
+}

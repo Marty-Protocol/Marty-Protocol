@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/passport-digital-handoff-package.json",
+  "title": "PassportDigitalHandoffPackage",
+  "description": "Public, minimal, privacy-safe reference to a protected and independently attested private digital handoff manifest. It contains no raw or unkeyed digest of MRZ, data groups, SOD, certificates, source job, or ciphertext artifact.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "handoff_reference", "protected_manifest_sha256", "attestation_sha256", "created_at"],
+  "properties": {
+    "schema": {"const": "mip.passport-digital-handoff-public/v1"},
+    "handoff_reference": {"type": "string", "format": "uuid"},
+    "protected_manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "attestation_sha256": {"$ref": "#/$defs/sha256"},
+    "created_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

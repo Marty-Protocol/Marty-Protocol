@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/passport-digital-handoff-release-attestation.json",
+  "title": "PassportDigitalHandoffReleaseAttestation",
+  "description": "Protected payload of a signed release attestation binding the encrypted private manifest and final Flow completion receipt. The public response carries only the digest of the authenticated signed bytes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "handoff_reference", "protected_manifest_sha256", "artifact_seal_flow_attestation_sha256", "final_flow_completion_receipt_sha256", "signer_id", "signed_at"],
+  "properties": {
+    "schema": {"const": "mip.passport-digital-handoff-release-attestation/v1"},
+    "handoff_reference": {"type": "string", "format": "uuid"},
+    "protected_manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "artifact_seal_flow_attestation_sha256": {"$ref": "#/$defs/sha256"},
+    "final_flow_completion_receipt_sha256": {"$ref": "#/$defs/sha256"},
+    "signer_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "signed_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}
+}
