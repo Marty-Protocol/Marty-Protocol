@@ -1,0 +1,9 @@
+{
+  "organization_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "name": "ICAO ePassport Digital Handoff",
+  "flow_type": "passport_digital_handoff",
+  "credential_template_id": "4bd47e7a-3a4f-4e6b-b8e2-5d7a2bcf1234",
+  "application_template_id": "4bd47e7a-3a4f-4e6b-b8e2-5d7a2bcf5678",
+  "delivery_destination_profile_id": "passport-digital-handoff-1",
+  "approval_strategy": "MANUAL"
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/0.6.0-beta.1/schemas/passport-digital-handoff-private-manifest.json",
+  "title": "PassportDigitalHandoffPrivateManifest",
+  "description": "Authorized private evidence manifest for a Marty-created ICAO eMRTD digital handoff. It is encrypted at rest and never returned as the public handoff response. Actual DG, SOD, certificate-chain, MRZ, encryption, and receipt verification is semantic and must be performed by the implementation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id", "organization_id", "source_job_id", "flow_execution_id", "application_id",
+    "credential_template_id", "application_template_id", "delivery_destination_profile_id", "package_revision", "source_job_sha256", "document_type",
+    "mrz_sha256", "dg1_mrz_sha256", "data_group_sha256",
+    "sod_data_group_sha256", "sod_sha256", "dsc_certificate_sha256",
+    "csca_certificate_sha256", "chain_verification_receipt_sha256",
+    "issuer_profile_bindings", "artifact_seal_flow_attestation_sha256",
+    "secure_artifact_reference", "artifact_sha256", "encryption_receipt_sha256",
+    "quality_verification_receipt_sha256", "quality_checked_at", "created_at"
+  ],
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "source_job_id": {"type": "string", "format": "uuid"},
+    "flow_execution_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "application_id": {"type": "string", "format": "uuid"},
+    "credential_template_id": {"type": "string", "format": "uuid"},
+    "application_template_id": {"type": "string", "format": "uuid"},
+    "delivery_destination_profile_id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]+$"},
+    "package_revision": {"type": "integer", "minimum": 1},
+    "source_job_sha256": {"$ref": "#/$defs/sha256"},
+    "document_type": {"const": "TD3"},
+    "mrz_sha256": {"$ref": "#/$defs/sha256"},
+    "dg1_mrz_sha256": {"$ref": "#/$defs/sha256"},
+    "data_group_sha256": {"$ref": "#/$defs/dataGroupHashes"},
+    "sod_data_group_sha256": {"$ref": "#/$defs/dataGroupHashes"},
+    "sod_sha256": {"$ref": "#/$defs/sha256"},
+    "dsc_certificate_sha256": {"$ref": "#/$defs/sha256"},
+    "csca_certificate_sha256": {"$ref": "#/$defs/sha256"},
+    "chain_verification_receipt_sha256": {"$ref": "#/$defs/sha256"},
+    "issuer_profile_bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["csca", "document_signer"],
+      "properties": {
+        "csca": {"$ref": "#/$defs/issuerProfileBinding"},
+        "document_signer": {"$ref": "#/$defs/issuerProfileBinding"}
+      }
+    },
+    "artifact_seal_flow_attestation_sha256": {"$ref": "#/$defs/sha256"},
+    "secure_artifact_reference": {"type": "string", "minLength": 1, "maxLength": 512},
+    "artifact_sha256": {"$ref": "#/$defs/sha256"},
+    "encryption_receipt_sha256": {"$ref": "#/$defs/sha256"},
+    "quality_verification_receipt_sha256": {"$ref": "#/$defs/sha256"},
+    "quality_checked_at": {"type": "string", "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "issuerProfileBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile_id", "registry_revision", "profile_record_sha256", "kms_key_reference_sha256", "public_key_spki_sha256", "certificate_sha256", "custody_receipt_sha256"],
+      "properties": {
+        "profile_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "registry_revision": {"type": "integer", "minimum": 1},
+        "profile_record_sha256": {"$ref": "#/$defs/sha256"},
+        "kms_key_reference_sha256": {"$ref": "#/$defs/sha256"},
+        "public_key_spki_sha256": {"$ref": "#/$defs/sha256"},
+        "certificate_sha256": {"$ref": "#/$defs/sha256"},
+        "custody_receipt_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "dataGroupHashes": {
+      "type": "object",
+      "required": ["DG1", "DG2"],
+      "minProperties": 2,
+      "propertyNames": {"pattern": "^DG([1-9]|1[0-6])$"},
+      "additionalProperties": {"$ref": "#/$defs/sha256"}
+    }
+  }
+}

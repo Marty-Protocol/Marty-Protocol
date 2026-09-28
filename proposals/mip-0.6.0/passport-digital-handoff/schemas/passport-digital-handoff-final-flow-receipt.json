@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/0.6.0-beta.1/schemas/passport-digital-handoff-final-flow-receipt.json",
+  "title": "PassportDigitalHandoffFinalFlowReceipt",
+  "description": "Protected payload of a trusted signed Flow completion receipt created only after seal_handoff_package and handoff_ready succeed. The schema does not replace signature verification.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "handoff_reference", "private_manifest_id", "organization_id", "source_job_id", "flow_definition_id", "flow_definition_version", "flow_execution_id", "package_revision", "sod_sha256", "artifact_sha256", "artifact_seal_flow_attestation_sha256", "completed_steps", "terminal_status", "completed_at"],
+  "properties": {
+    "schema": {"const": "mip.passport-digital-handoff-final-flow-receipt/v1"},
+    "handoff_reference": {"type": "string", "format": "uuid"},
+    "private_manifest_id": {"type": "string", "format": "uuid"},
+    "organization_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "source_job_id": {"type": "string", "format": "uuid"},
+    "flow_definition_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "flow_definition_version": {"type": "integer", "minimum": 1},
+    "flow_execution_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "package_revision": {"type": "integer", "minimum": 1},
+    "sod_sha256": {"$ref": "#/$defs/sha256"},
+    "artifact_sha256": {"$ref": "#/$defs/sha256"},
+    "artifact_seal_flow_attestation_sha256": {"$ref": "#/$defs/sha256"},
+    "completed_steps": {
+      "type": "array",
+      "prefixItems": [
+        {"const": "accept_application"},
+        {"const": "validate_evidence"},
+        {"const": "approval_decision"},
+        {"const": "generate_data_groups"},
+        {"const": "sign_sod"},
+        {"const": "verify_digital_package"},
+        {"const": "seal_handoff_package"},
+        {"const": "handoff_ready"}
+      ],
+      "minItems": 8,
+      "maxItems": 8
+    },
+    "terminal_status": {"const": "COMPLETED"},
+    "completed_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}
+}

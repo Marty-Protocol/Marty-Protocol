@@ -1,0 +1,9 @@
+{
+  "schema": "mip.passport-digital-handoff-release-attestation/v1",
+  "handoff_reference": "3fa85f64-5717-4562-b3fc-2d7a2bcf9020",
+  "protected_manifest_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+  "artifact_seal_flow_attestation_sha256": "5656565656565656565656565656565656565656565656565656565656565656",
+  "final_flow_completion_receipt_sha256": "7878787878787878787878787878787878787878787878787878787878787878",
+  "signer_id": "marty-flow-release-attestor",
+  "signed_at": "2026-09-27T00:07:00Z"
+}

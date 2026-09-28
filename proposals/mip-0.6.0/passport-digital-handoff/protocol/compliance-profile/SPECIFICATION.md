@@ -1,0 +1,215 @@
+# Compliance Profile — Entity Specification
+
+**Entity:** Compliance Profile
+**Version:** 0.4.0
+**Stability:** Stable (system profiles), Moderate (custom)
+**Section in root spec:** §10
+
+---
+
+## Purpose
+
+A Compliance Profile abstracts **credential format complexity** behind compliance-oriented identifiers. Users choose a compliance framework (`ICAO_DTC`, `AAMVA_MDL`, `EUDI_PID`), not an encoding format (`MDOC`, `SD_JWT_VC`). Compliance Profiles make it possible to compare "does this credential conform to AAMVA?" without understanding mDoc encoding internals.
+
+## What It Contains
+
+| Dimension | Description |
+|-----------|-------------|
+| Compliance Code | The recognized standard or framework |
+| Credential Format | Technical encoding (mdoc, sd_jwt_vc, vc_jwt, json_ld) |
+| Issuance Protocol | How credentials are delivered |
+| Artifact Requirements | What keys, certs, or DIDs are needed |
+| Verification Policy | Cedar PolicySet reference for verification rules |
+| Credential Requirements | Claims, namespaces, proof types, algorithms, key rules, and revocation behavior |
+| Holder Binding | Whether issuance and later presentation require proof of control |
+| Conformance Evidence | Executable suites and fixtures that substantiate the profile |
+
+## Properties
+
+### Core Fields
+
+| Property | Type | Required | Constraint |
+|----------|------|----------|------------|
+| `id` | UUID or `cp-*`/`cpf-*` | Yes | Unique; stable identifiers are permitted for system profiles |
+| `organization_id` | UUID | No | Null for system profiles |
+| `compliance_code` | ComplianceCode | Yes | From `compliance-codes` enum |
+| `name` | string | Yes | 1–128 characters |
+| `description` | string | No | Max 1024 characters |
+| `version` | semver | No | Version of the profile definition |
+| `specification_reference` | string | No | Governing external specification or MIP reference |
+| `credential_format` | CredentialFormat | Yes | From `credential-formats` enum |
+| `issuance_protocol` | IssuanceProtocol | No | From `issuance-protocols` enum |
+| `issuer_artifact_requirements` | ArtifactRequirements | No | See below |
+| `verification_policy_set_id` | UUID | No | Active Cedar PolicySet for credential-verification rules |
+| `trust_profile_constraints` | object | No | Trust requirements for this format |
+| `required_claims` / `optional_claims` | ProfileClaim[] | No | Credential claim contract |
+| `required_namespaces` / `optional_namespaces` | string[] | No | Format namespace contract |
+| `supported_proof_types` | string[] | No | Issuance proof types accepted by the profile |
+| `supported_algorithms` | string[] | No | Algorithms accepted by the profile |
+| `key_requirements` | object | No | Format-specific key controls |
+| `revocation_methods` | RevocationMethod[] | No | Supported status mechanisms |
+| `holder_binding_required` | boolean | No | Requires issuance-time binding to holder-controlled key material; does not by itself establish human presenter identity |
+| `conformance_tests` | ConformanceTest[] | No | Executable evidence for claimed conformance |
+| `is_system` | boolean | Yes | System vs. organization-custom |
+| `created_at` | datetime | Yes | ISO 8601 |
+
+### ArtifactRequirements Fields
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `requires_x509_cert` | boolean | Requires X.509 issuer certificate |
+| `requires_did` | boolean | Requires issuer DID |
+| `requires_jwk` | boolean | Requires JSON Web Key |
+| `cert_key_usage` | string[] | Required X.509 key usages (e.g., `digitalSignature`) |
+| `recommended_algorithms` | Algorithm[] | Recommended signing algorithms |
+
+## System Profiles (Normative)
+
+System profiles are read-only and pre-installed. They cannot be modified or deleted.
+
+| Profile ID | Code | Format | Protocol | Description |
+|------------|------|--------|----------|-------------|
+| `cp-icao-dtc` | `ICAO_DTC` | `ICAO_DTC` | — | Draft ICAO DTC virtual-component and PKI mapping; non-discoverable until conformance coverage exists |
+| `cp-icao-mrz` | `ICAO_MRZ` | `ICAO_MRZ` | — | Draft MRZ parsing and check-digit mapping; non-discoverable until conformance coverage exists |
+| `cp-icao-passport` | `ICAO_PASSPORT` | `ICAO_EMRTD` | `PHYSICAL_DOCUMENT` | Draft TD3 ePassport and PKI mapping; non-discoverable until conformance coverage exists |
+| `cp-icao-passport-digital-handoff` (proposed 0.6.0) | `ICAO_PASSPORT_DIGITAL_HANDOFF` | `ICAO_EMRTD` | `DIGITAL_HANDOFF` | Draft TD3 data-group, SOD, and PKI mapping for a sealed digital handoff; no physical production claim and non-discoverable until executable conformance coverage exists |
+| `cp-aamva-mdl` | `AAMVA_MDL` | `MDOC` | — | Draft AAMVA Guidelines 1.6 mapping; non-discoverable pending conformance and transport evidence |
+| `cp-eudi-pid` | `EUDI_PID` | `SD_JWT_VC` | `OID4VCI_PRE_AUTH` | EUDI Personal Identification Data |
+| `cp-eudi-mdl` | `EUDI_MDL` | `MDOC` | — | Draft current-EUDI mapping placeholder; non-discoverable pending rulebook and conformance work |
+| `cp-ob3-jwt` | `OB3_JWT` | `VC_JWT` | `OID4VCI_PRE_AUTH` | Open Badge v3 (JWT encoding) |
+| `cp-ob3-jsonld` | `OB3_JSONLD` | `JSON_LD` | `OID4VCI_PRE_AUTH` | Open Badge v3 (JSON-LD) |
+| `cp-sd-jwt-vc` | `SD_JWT_VC` | `SD_JWT_VC` | `OID4VCI_PRE_AUTH` | Generic SD-JWT VC |
+| `cp-enterprise-vc` | `ENTERPRISE_VC` | `VC_JWT` | `OID4VCI_PRE_AUTH` | Generic Enterprise VC (JWT) |
+| `cp-oid4vc` | `OID4VC` | `SD_JWT_VC` | `OID4VCI_PRE_AUTH` / `OID4VCI_AUTH_CODE` | Generic OpenID4VC Interop (OIDF certification target) |
+| `cp-pex-v2` | `PEX` | `SD_JWT_VC` | — | DIF Presentation Exchange v2 (verifier-side) |
+
+## Constraints
+
+1. System profiles (`is_system: true`) MUST NOT be modified or deleted.
+2. `organization_id` MUST be null for system profiles.
+3. Custom profiles with `compliance_code: CUSTOM` MUST have `organization_id` set.
+4. `credential_format` and `compliance_code` combinations MUST be internally consistent (e.g., `ICAO_DTC` requires `ICAO_DTC`; it MUST NOT be mapped to `MDOC`).
+5. A Compliance Profile is immutable once referenced by an `ACTIVE` Credential Template.
+6. `holder_binding_required: true` requires an issuance proof that binds the credential to holder-controlled key material. A nonce alone never satisfies this requirement.
+7. Verifiers MUST combine the profile requirement with a Presentation Policy that selects an actual binding method, wire proof profile, and freshness checks.
+8. Every bundled system profile MUST validate against `schemas/compliance-profile.json`; undocumented extension fields are prohibited.
+9. For mdoc, device authentication proves control of a credential-bound device key. It MUST NOT be reported as proof that the human presenter is the document holder; portrait comparison or another profile-authorized presenter-match control is separate.
+10. `api_surface` contains HTTP endpoints only. Device engagement and session establishment MUST NOT be modeled as issuance endpoints.
+
+## Format–Code Compatibility Matrix
+
+| `compliance_code` | Required `credential_format` |
+|-------------------|------------------------------|
+| `ICAO_DTC` | `ICAO_DTC` |
+| `ICAO_MRZ` | `ICAO_MRZ` |
+| `ICAO_PASSPORT` | `ICAO_EMRTD` |
+| `AAMVA_MDL` | `MDOC` |
+| `EUDI_PID` | `SD_JWT_VC` |
+| `EUDI_MDL` | `MDOC` |
+| `OB3_JWT` | `VC_JWT` |
+| `OB3_JSONLD` | `JSON_LD` |
+| `SD_JWT_VC` | `SD_JWT_VC` |
+| `ENTERPRISE_VC` | `VC_JWT` or `SD_JWT_VC` |
+| `OID4VC` | `SD_JWT_VC` (also compatible with `VC_JWT`, `MDOC`) |
+| `PEX` | `SD_JWT_VC` (also compatible with `VC_JWT`, `JSON_LD`, `MDOC`) |
+| `CUSTOM` | Any |
+
+## API Surface
+
+The `api_surface` property declares the HTTP endpoints that a MIP implementation MUST expose when an organization activates a credential type governed by this profile. This is the mechanism by which OID4VCI well-known metadata and HTTP status endpoints are derived from the profile rather than hardcoded. Proximity device engagement and session establishment are protocol exchanges, not HTTP issuance endpoints, and do not belong in this array.
+
+### Endpoint Descriptor Fields
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `rel` | string | Yes | IANA link relation or MIP-defined endpoint identifier |
+| `path_template` | string | No | Global (non-org-scoped) URL path, e.g. `/.well-known/openid-credential-issuer` |
+| `org_scoped_path` | string | No | Per-org variant, e.g. `/org/{org_id}/.well-known/openid-credential-issuer` |
+| `method` | string | Yes | HTTP method: `GET`, `POST`, `PUT`, `PATCH`, or `DELETE` |
+| `auth_required` | boolean | No | Whether the endpoint requires Bearer token auth. Default: `false` |
+| `discoverable` | boolean | No | Whether this endpoint appears in `/.well-known/mip-configuration`. Default: `true` |
+| `standard_ref` | string | No | Human-readable reference to the defining standard and section |
+| `response_schema_ref` | URI | No | URI of the JSON Schema describing the response body |
+
+### Normative Requirements
+
+1. An implementation activating a credential type MUST expose all endpoints declared in `api_surface` for the governing compliance profile.
+2. Endpoints where `discoverable: true` MUST appear in the `/.well-known/mip-configuration` response for the issuer or org.
+3. Global `path_template` endpoints are served at the platform root. Org-scoped `org_scoped_path` endpoints are additionally served per-organization.
+4. If both `path_template` and `org_scoped_path` are present, both MUST be exposed.
+5. System profile `api_surface` arrays are normative and MUST NOT be overridden by implementations.
+
+### Well-Known Discovery: `/.well-known/mip-configuration`
+
+A MIP-compliant deployment MUST expose a `GET /.well-known/mip-configuration` endpoint conforming to `schemas/mip-configuration.json`. Its `active_compliance_profiles` array contains each active profile and only its discoverable `api_surface` declarations. Canonical deployment endpoints remain top-level discovery properties:
+
+```json
+{
+  "mip_version": "0.4.0",
+  "issuer": "https://issuer.example.com",
+  "mip_configuration_endpoint": "https://issuer.example.com/.well-known/mip-configuration",
+  "active_compliance_profiles": [{
+    "compliance_code": "OID4VC",
+    "credential_format": "SD_JWT_VC",
+    "issuance_protocol": "OID4VCI_PRE_AUTH",
+    "api_surface": [{
+      "rel": "token",
+      "path_template": "/v1/issuance/token",
+      "method": "POST",
+      "auth_required": false,
+      "discoverable": true
+    }]
+  }]
+}
+```
+
+For per-organization endpoints, the `/.well-known/mip-configuration` response MAY include an `org_endpoints` array in which each entry has an `org_id` key alongside the resolved URLs.
+
+### Standard `rel` Values
+
+| `rel` | Standard Reference | Meaning |
+|-------|-------------------|---------|
+| `openid-credential-issuer-metadata` | OID4VCI §11.2.3 | OID4VCI issuer metadata document |
+| `token` | RFC 6749 §3.2 / OID4VCI §6 | OAuth2 token endpoint |
+| `credential` | OID4VCI 1.0 Final §8 | Credential issuance endpoint |
+| `nonce` | OID4VCI 1.0 Final §7 | Unauthenticated proof Nonce Endpoint; responses use `Cache-Control: no-store` |
+| `deferred-credential` | OID4VCI 1.0 Final §9 | Deferred credential retrieval |
+| `notification` | OID4VCI 1.0 Final §10 | Holder notification endpoint |
+| `status-list` | IETF Token Status List | Revocation status list endpoint |
+| `device-engagement` | ISO/IEC 18013-5:2021 §8.2.1 | mDoc device engagement (QR/NFC) |
+| `session-establishment` | ISO/IEC 18013-5:2021 §8.3 | mDoc proximity session establishment |
+
+## Cross-References
+
+| Referencing Entity | Reference Field | Behavior |
+|--------------------|-----------------|----------|
+| Credential Template | `compliance_profile_id` | Required — determines format |
+| Wallet Profile | (derivation input) | Used to look up compatible wallets |
+
+## Examples
+
+### Organization Custom Profile
+
+```json
+{
+  "id": "cp-custom-employee",
+  "organization_id": "org-enterprise",
+  "compliance_code": "ENTERPRISE_VC",
+  "name": "Enterprise Employee Badge",
+  "credential_format": "SD_JWT_VC",
+  "issuance_protocol": "OID4VCI_PRE_AUTH",
+  "issuer_artifact_requirements": {
+    "requires_jwk": true,
+    "recommended_algorithms": ["ES256"]
+  },
+  "is_system": false,
+  "created_at": "2026-03-11T00:00:00Z"
+}
+```
+
+## See Also
+
+- Root specification: [§10 Compliance Profile](../../SPECIFICATION.md#10-compliance-profile)
+- Schema: [../../schemas/compliance-profile.json](../../schemas/compliance-profile.json)
+- Enums: [../../enums/compliance-codes.json](../../enums/compliance-codes.json), [../../enums/credential-formats.json](../../enums/credential-formats.json)
+- Design: [DESIGN.md](./DESIGN.md)

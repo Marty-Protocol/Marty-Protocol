@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/0.6.0-beta.1/schemas/compliance-profile.json",
+  "title": "ComplianceProfile",
+  "description": "Abstraction of credential format complexity behind compliance-oriented identifiers",
+  "type": "object",
+  "required": ["id", "compliance_code", "name", "credential_format", "status", "is_system", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|cpf?-[a-z0-9][a-z0-9-]{1,126})$",
+      "description": "UUID for organization profiles or stable cp-*/cpf-* identifier for system profiles."
+    },
+    "organization_id": {"type": ["string", "null"], "format": "uuid"},
+    "compliance_code": {
+      "type": "string",
+      "enum": ["ICAO_DTC", "ICAO_MRZ", "ICAO_PASSPORT", "ICAO_PASSPORT_DIGITAL_HANDOFF", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"]
+    },
+    "name": {"type": "string", "minLength": 1, "maxLength": 128},
+    "description": {"type": "string", "maxLength": 1024},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"},
+    "specification_reference": {"type": "string", "minLength": 1},
+    "credential_format": {
+      "type": "string",
+      "$ref": "../enums/credential-formats.json"
+    },
+    "issuance_protocol": {
+      "type": "string",
+      "$ref": "../enums/issuance-protocols.json"
+    },
+    "issuer_artifact_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requires_x509_cert": {"type": "boolean"},
+        "requires_did": {"type": "boolean"},
+        "requires_jwk": {"type": "boolean"},
+        "cert_key_usage": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "recommended_algorithms": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "verification_policy_set_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Reference to a PolicySet (policy_type=CREDENTIAL_VERIFICATION) containing Cedar policies that define default verification constraints for this compliance profile (e.g., required formats, holder binding, algorithm restrictions)."
+    },
+    "trust_profile_constraints": {
+      "type": "object",
+      "description": "Declares which Trust Profile configurations are compatible with this compliance code. Implementations use these constraints to validate that a CredentialTemplate pairs a compatible ComplianceProfile and TrustProfile.",
+      "additionalProperties": false,
+      "properties": {
+        "compatible_profile_types": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "enum": ["ICAO", "AAMVA", "EUDI", "CUSTOM"]},
+          "uniqueItems": true,
+          "description": "The TrustProfile.profile_type values that provide a trust registry suitable for this compliance code. Example: AAMVA_MDL requires ['AAMVA', 'CUSTOM']; EUDI_PID and EUDI_MDL both accept ['EUDI', 'CUSTOM']. CUSTOM is always a valid fallback."
+        },
+        "required_source_types": {
+          "type": "array",
+          "items": {"type": "string", "enum": ["TRUST_LIST", "PINNED_ISSUER", "ROOT_CA", "PKD_URL"]},
+          "uniqueItems": true,
+          "description": "TrustSource.source_type values that MUST appear in the linked TrustProfile. Example: ICAO_DTC requires at least one PKD_URL or ROOT_CA source."
+        },
+        "required_formats": {
+          "type": "array",
+          "items": {"$ref": "../enums/credential-formats.json"},
+          "uniqueItems": true,
+          "description": "Credential formats that MUST appear in TrustProfile.supported_formats for compatibility."
+        }
+      }
+    },
+    "api_surface": {
+      "type": "array",
+      "description": "Runtime HTTP API endpoints that implementations MUST expose when this compliance profile is active. Non-HTTP exchanges such as ISO/IEC 18013-5 device engagement and session establishment are outside this field.",
+      "items": {
+        "type": "object",
+        "required": ["rel", "path_template", "method", "auth_required"],
+        "additionalProperties": false,
+        "properties": {
+          "rel": {
+            "type": "string",
+            "description": "IANA link relation or MIP-defined HTTP endpoint identifier (e.g., openid-credential-issuer or oauth-authorization-server)"
+          },
+          "path_template": {
+            "type": "string",
+            "description": "Path template using {org_id} and {deployment_id} tokens. May be a well-known path."
+          },
+          "org_scoped_path": {
+            "type": "string",
+            "description": "Org-specific variant of path_template (e.g., /org/{org_id}/.well-known/openid-credential-issuer)"
+          },
+          "method": {
+            "type": "string",
+            "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"]
+          },
+          "auth_required": {
+            "type": "boolean",
+            "description": "Whether this endpoint requires authentication. Wallet-facing endpoints are typically false."
+          },
+          "discoverable": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether this endpoint is included in /.well-known/mip-configuration."
+          },
+          "response_schema_ref": {
+            "type": "string",
+            "description": "JSON Schema $id of the expected response schema"
+          },
+          "standard_ref": {
+            "type": "string",
+            "description": "Standards citation for this endpoint (e.g., OID4VCI §11.2.2, ISO 18013-5 §8.3.1)"
+          }
+        }
+      }
+    },
+    "discoverable": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this compliance profile appears in /.well-known/mip-configuration"
+    },
+    "required_claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "namespace": {"type": "string", "minLength": 1},
+          "description": {"type": "string"},
+          "required": {"type": "boolean"}
+        }
+      }
+    },
+    "optional_claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "namespace": {"type": "string", "minLength": 1},
+          "description": {"type": "string"},
+          "required": {"type": "boolean"}
+        }
+      }
+    },
+    "required_namespaces": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "optional_namespaces": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "required_contexts": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "supported_proof_types": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "supported_algorithms": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "key_requirements": {"type": "object"},
+    "revocation_methods": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "../enums/revocation-methods.json"}
+    },
+    "revocation_required": {"type": "boolean"},
+    "allow_skip_revocation": {"type": "boolean"},
+    "trust_source_types": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "enum": ["TRUST_LIST", "PINNED_ISSUER", "ROOT_CA", "PKD_URL"]}
+    },
+    "holder_binding_required": {
+      "type": "boolean",
+      "description": "Whether credentials governed by this profile require issuance-time holder binding and holder-bound verification."
+    },
+    "selective_disclosure_required": {"type": "boolean"},
+    "immutable": {"type": "boolean"},
+    "oid4vci_features": {"type": "object"},
+    "oid4vp_features": {"type": "object"},
+    "pex_requirements": {"type": "object"},
+    "physical_production": {"type": "object"},
+    "pki_hierarchy": {"type": "object"},
+    "vetting_requirements": {"type": "object"},
+    "conformance_tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["suite", "module", "spec_ref", "test_file"],
+        "additionalProperties": false,
+        "properties": {
+          "suite": {"type": "string", "minLength": 1},
+          "module": {"type": "string", "minLength": 1},
+          "spec_ref": {"type": "string", "minLength": 1},
+          "test_file": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "ACTIVE", "SUSPENDED", "DEPRECATED"]
+    },
+    "is_system": {"type": "boolean"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

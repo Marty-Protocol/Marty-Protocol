@@ -1,0 +1,16 @@
+{
+  "id": "passport-digital-handoff-1",
+  "organization_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "is_system": false,
+  "name": "Marty Passport Digital Handoff",
+  "provider": "marty_managed",
+  "mode": "digital_handoff",
+  "setup_actor": "org_admin",
+  "delivery_target": "secure_artifact",
+  "credential_format": "ICAO_EMRTD",
+  "issuance_protocol": "DIGITAL_HANDOFF",
+  "compliance_profile_code": "ICAO_PASSPORT_DIGITAL_HANDOFF",
+  "requires_consent": false,
+  "is_enabled": true,
+  "created_at": "2026-09-27T00:00:00Z"
+}

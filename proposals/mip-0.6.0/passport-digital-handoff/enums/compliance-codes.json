@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/0.6.0-beta.1/enums/compliance-codes.json",
+  "title": "ComplianceCode",
+  "description": "Recognized compliance frameworks and identity standards for credential format abstraction",
+  "type": "string",
+  "enum": ["ICAO_DTC", "ICAO_MRZ", "ICAO_PASSPORT", "ICAO_PASSPORT_DIGITAL_HANDOFF", "AAMVA_MDL", "EUDI_PID", "EUDI_MDL", "OB3_JWT", "OB3_JSONLD", "OB2_COMPATIBILITY", "SD_JWT_VC", "ENTERPRISE_VC", "OID4VC", "PEX", "CUSTOM"],
+  "$defs": {
+    "values": {
+      "ICAO_DTC": {
+        "description": "ICAO Digital Travel Credential",
+        "format": "ICAO_DTC",
+        "standard": "ICAO DTC Virtual Component and Physical Component Technical Reports, with ICAO Doc 9303 dependencies",
+        "governed_by": "ICAO",
+        "compatible_profile_types": ["ICAO", "CUSTOM"]
+      },
+      "AAMVA_MDL": {
+        "description": "AAMVA Mobile Driver's License",
+        "format": "MDOC",
+        "standard": "ISO/IEC 18013-5:2021, AAMVA mDL Implementation Guidelines",
+        "governed_by": "AAMVA",
+        "compatible_profile_types": ["AAMVA", "CUSTOM"]
+      },
+      "EUDI_PID": {
+        "description": "EU Digital Identity Wallet — Person Identification Data",
+        "format": "SD_JWT_VC",
+        "standard": "EUDI ARF, eIDAS 2.0, ETSI EN-319",
+        "governed_by": "European Commission",
+        "compatible_profile_types": ["EUDI", "CUSTOM"]
+      },
+      "EUDI_MDL": {
+        "description": "EU Digital Identity Wallet — Mobile Driving Licence",
+        "format": "MDOC",
+        "standard": "ISO/IEC 18013-5:2021, EUDI ARF Annex",
+        "governed_by": "European Commission",
+        "compatible_profile_types": ["EUDI", "CUSTOM"]
+      },
+      "OB3_JWT": {
+        "description": "1EdTech Open Badge v3.0 (JWT encoding)",
+        "format": "VC_JWT",
+        "standard": "1EdTech Open Badges 3.0, W3C VC Data Model",
+        "governed_by": "1EdTech"
+      },
+      "OB3_JSONLD": {
+        "description": "1EdTech Open Badge v3.0 (JSON-LD Linked Data Proof)",
+        "format": "JSON_LD",
+        "standard": "1EdTech Open Badges 3.0, W3C VC Data Model, JSON-LD 1.1",
+        "governed_by": "1EdTech"
+      },
+      "OB2_COMPATIBILITY": {
+        "description": "Temporary 1EdTech Open Badges 2.0 compatibility mode",
+        "format": "JSON_LD",
+        "standard": "1EdTech Open Badges 2.0",
+        "governed_by": "1EdTech",
+        "deprecated": true,
+        "migration_target": "OB3_JWT or OB3_JSONLD",
+        "review_date": "2026-09-01",
+        "target_removal_date": "2026-10-01"
+      },
+      "SD_JWT_VC": {
+        "description": "Generic Selective Disclosure JWT Verifiable Credential (no framework binding)",
+        "format": "SD_JWT_VC",
+        "standard": "IETF draft-ietf-oauth-sd-jwt-vc"
+      },
+      "ENTERPRISE_VC": {
+        "description": "Generic enterprise verifiable credential (JWT or SD-JWT-VC)",
+        "format": "VC_JWT or SD_JWT_VC",
+        "use_case": "Organization-internal credentials not bound to a public standard"
+      },
+      "ICAO_MRZ": {
+        "description": "ICAO Machine Readable Zone parsing and check-digit validation",
+        "format": "ICAO_MRZ",
+        "standard": "ICAO Doc 9303 Part 3 and the applicable document-format part",
+        "governed_by": "ICAO",
+        "doc_types": ["TD1", "TD2", "TD3"],
+        "compatible_profile_types": ["ICAO", "CUSTOM"]
+      },
+      "ICAO_PASSPORT": {
+        "description": "Draft ICAO TD3 ePassport booklet, LDS, security-mechanism, and PKI mapping",
+        "format": "ICAO_EMRTD",
+        "standard": "ICAO Doc 9303 Parts 4 and 9-12, ISO/IEC 14443",
+        "governed_by": "ICAO",
+        "compatible_profile_types": ["ICAO", "CUSTOM"],
+        "requires_physical_production": true
+      },
+      "ICAO_PASSPORT_DIGITAL_HANDOFF": {
+        "description": "Draft ICAO TD3 eMRTD data-group, SOD, and PKI mapping for a sealed digital package without booklet or chip production",
+        "format": "ICAO_EMRTD",
+        "standard": "ICAO Doc 9303 Parts 4 and 9-12; MIP digital handoff boundary",
+        "governed_by": "ICAO",
+        "compatible_profile_types": ["ICAO", "CUSTOM"],
+        "requires_physical_production": false
+      },
+      "OID4VC": {
+        "description": "Generic OpenID for Verifiable Credentials interoperability profile (OID4VCI + OID4VP)",
+        "format": "SD_JWT_VC",
+        "standard": "OpenID for Verifiable Credential Issuance 1.0 Final; OpenID for Verifiable Presentations 1.0 Final",
+        "governed_by": "OpenID Foundation",
+        "also_supports": ["VC_JWT", "MDOC"]
+      },
+      "PEX": {
+        "description": "DIF Presentation Exchange v2 — presentation request and submission protocol",
+        "format": "SD_JWT_VC",
+        "standard": "DIF Presentation Exchange 2.0.0",
+        "governed_by": "Decentralized Identity Foundation",
+        "also_supports": ["VC_JWT", "JSON_LD"]
+      },
+      "CUSTOM": {
+        "description": "Organization-defined compliance profile",
+        "requires": "organization_id must be set",
+        "use_case": "Proprietary credential frameworks"
+      }
+    }
+  }
+}

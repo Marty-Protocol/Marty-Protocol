@@ -1,0 +1,5 @@
+{
+  "pointer": "/provider",
+  "error_code": "INVALID_DESTINATION",
+  "message": "A digital handoff destination must be Marty managed."
+}
