@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/passport-digital-handoff-final-flow-receipt.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/0.6.0-beta.1/schemas/passport-digital-handoff-final-flow-receipt.json",
   "title": "PassportDigitalHandoffFinalFlowReceipt",
   "description": "Protected payload of a trusted signed Flow completion receipt created only after seal_handoff_package and handoff_ready succeed. The schema does not replace signature verification.",
   "type": "object",

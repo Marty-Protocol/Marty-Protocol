@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/passport-digital-handoff-private-manifest.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/0.6.0-beta.1/schemas/passport-digital-handoff-private-manifest.json",
   "title": "PassportDigitalHandoffPrivateManifest",
   "description": "Authorized private evidence manifest for a Marty-created ICAO eMRTD digital handoff. It is encrypted at rest and never returned as the public handoff response. Actual DG, SOD, certificate-chain, MRZ, encryption, and receipt verification is semantic and must be performed by the implementation.",
   "type": "object",

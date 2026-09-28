@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/flow.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/0.6.0-beta.1/schemas/flow.json",
   "title": "Flow",
   "description": "End-to-end identity lifecycle orchestration. Standard FlowTypes have fixed protocol sequences; non-standard graphs use flow_type custom with a versioned extension envelope.",
   "type": "object",

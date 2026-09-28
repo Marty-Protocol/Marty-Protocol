@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/delivery-destination-profile.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/0.6.0-beta.1/schemas/delivery-destination-profile.json",
   "title": "DeliveryDestinationProfile",
   "description": "A delivery destination describes where an issued credential can be delivered, opened, imported, or mirrored. Unlike WalletProfile, it can represent holder wallets, learner-owned backpacks, organization-managed mirrors such as Canvas Credentials, or custom delivery channels.",
   "type": "object",

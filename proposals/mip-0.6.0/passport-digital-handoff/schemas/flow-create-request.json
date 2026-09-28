@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/main/schemas/flow-create-request.json",
+  "$id": "https://raw.githubusercontent.com/marty-protocol/marty-protocol/0.6.0-beta.1/schemas/flow-create-request.json",
   "title": "FlowCreateRequest",
   "description": "Create a tenant-scoped orchestration definition through the public API.",
   "type": "object",
