@@ -16,6 +16,7 @@ This project adheres to [Semantic Versioning](VERSIONING.md).
 - Added purpose-scoped Trust Profiles, Cedar machine-authorization entities and actions, separate machine-binding evidence, conformance fixtures, minimal examples, entity specifications, and ADR-0001.
 
 ### Changed
+- Retired the obsolete Phase 1 schema snapshot checker; CI now collects semantic flow-state and revocation-timing regression checks instead. No schema or generated binding changes.
 - Deployment Profiles may assign managed Machine Identities and reference a Machine Authentication Policy.
 - Wallet compatibility now distinguishes derived requirements from evidence-backed named-wallet interoperability instead of asserting product compatibility from a format/protocol tuple alone.
 

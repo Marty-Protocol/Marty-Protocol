@@ -113,3 +113,21 @@ def test_custom_extension_graph_semantics(mutator, message: str) -> None:
 def test_valid_custom_extension_graph_semantics() -> None:
     flow = json.loads((REPO_ROOT / "conformance" / "valid" / "flow-custom.json").read_text())
     _validate_extension_graph(flow["extension"])
+
+
+def test_flow_status_graph_and_terminal_metadata_agree() -> None:
+    statuses = json.loads((REPO_ROOT / "enums" / "flow-statuses.json").read_text())
+    values = set(statuses["enum"])
+    definitions = statuses["$defs"]
+    assert set(definitions["values"]) == values
+    assert set(definitions["transitions"]) == values
+    terminals = set(definitions["terminal_states"])
+    assert terminals == {"COMPLETED", "FAILED", "EXPIRED", "CANCELLED"}
+    assert terminals == {
+        name for name, metadata in definitions["values"].items() if metadata["terminal"]
+    }
+    assert terminals == {
+        name for name, targets in definitions["transitions"].items() if not targets
+    }
+    for targets in definitions["transitions"].values():
+        assert set(targets) <= values
