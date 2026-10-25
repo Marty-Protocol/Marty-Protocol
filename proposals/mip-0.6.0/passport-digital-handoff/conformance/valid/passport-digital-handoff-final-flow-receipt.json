@@ -1,0 +1,17 @@
+{
+  "schema": "mip.passport-digital-handoff-final-flow-receipt/v1",
+  "handoff_reference": "3fa85f64-5717-4562-b3fc-2d7a2bcf9020",
+  "private_manifest_id": "3fa85f64-5717-4562-b3fc-2d7a2bcf9015",
+  "organization_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "source_job_id": "3fa85f64-5717-4562-b3fc-2d7a2bcf9012",
+  "flow_definition_id": "3fa85f64-5717-4562-b3fc-2d7a2bcf5679",
+  "flow_definition_version": 1,
+  "flow_execution_id": "3fa85f64-5717-4562-b3fc-2d7a2bcf9013",
+  "package_revision": 1,
+  "sod_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "artifact_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+  "artifact_seal_flow_attestation_sha256": "5656565656565656565656565656565656565656565656565656565656565656",
+  "completed_steps": ["accept_application", "validate_evidence", "approval_decision", "generate_data_groups", "sign_sod", "verify_digital_package", "seal_handoff_package", "handoff_ready"],
+  "terminal_status": "COMPLETED",
+  "completed_at": "2026-09-27T00:06:00Z"
+}

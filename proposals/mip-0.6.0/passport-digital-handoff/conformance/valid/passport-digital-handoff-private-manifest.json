@@ -1,0 +1,54 @@
+{
+  "id": "3fa85f64-5717-4562-b3fc-2d7a2bcf9015",
+  "organization_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "source_job_id": "3fa85f64-5717-4562-b3fc-2d7a2bcf9012",
+  "flow_execution_id": "3fa85f64-5717-4562-b3fc-2d7a2bcf9013",
+  "application_id": "3fa85f64-5717-4562-b3fc-2d7a2bcf9014",
+  "credential_template_id": "4bd47e7a-3a4f-4e6b-b8e2-5d7a2bcf1234",
+  "application_template_id": "4bd47e7a-3a4f-4e6b-b8e2-5d7a2bcf5678",
+  "delivery_destination_profile_id": "passport-digital-handoff-1",
+  "package_revision": 1,
+  "source_job_sha256": "986e328ba14a2a10e546cf6ca8bb53cc7b030a730c375f1f93409d6e222fb1fc",
+  "document_type": "TD3",
+  "mrz_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "dg1_mrz_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "data_group_sha256": {
+    "DG1": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "DG2": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "sod_data_group_sha256": {
+    "DG1": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "DG2": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "sod_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "dsc_certificate_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "csca_certificate_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "chain_verification_receipt_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "issuer_profile_bindings": {
+    "csca": {
+      "profile_id": "marty-csca-1",
+      "registry_revision": 3,
+      "profile_record_sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+      "kms_key_reference_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+      "public_key_spki_sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+      "certificate_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "custody_receipt_sha256": "abababababababababababababababababababababababababababababababab"
+    },
+    "document_signer": {
+      "profile_id": "marty-dsc-1",
+      "registry_revision": 3,
+      "profile_record_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "kms_key_reference_sha256": "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef",
+      "public_key_spki_sha256": "1212121212121212121212121212121212121212121212121212121212121212",
+      "certificate_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "custody_receipt_sha256": "3434343434343434343434343434343434343434343434343434343434343434"
+    }
+  },
+  "artifact_seal_flow_attestation_sha256": "5656565656565656565656565656565656565656565656565656565656565656",
+  "secure_artifact_reference": "vault://passport-handoffs/package-9015",
+  "artifact_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+  "encryption_receipt_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+  "quality_verification_receipt_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+  "quality_checked_at": "2026-09-27T00:05:00Z",
+  "created_at": "2026-09-27T00:06:00Z"
+}

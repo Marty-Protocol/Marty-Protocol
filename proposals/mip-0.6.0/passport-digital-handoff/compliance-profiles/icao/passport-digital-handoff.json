@@ -1,0 +1,43 @@
+{
+  "id": "cp-icao-passport-digital-handoff",
+  "name": "ICAO Passport Digital Handoff",
+  "compliance_code": "ICAO_PASSPORT_DIGITAL_HANDOFF",
+  "version": "0.1.0",
+  "credential_format": "ICAO_EMRTD",
+  "issuance_protocol": "DIGITAL_HANDOFF",
+  "description": "Draft MIP mapping for a TD3 ICAO eMRTD digital package with LDS data groups, EF.SOD, DSC/CSCA chain verification, and encrypted handoff. Does not claim booklet or chip production.",
+  "specification_reference": "ICAO Doc 9303 Parts 4 and 9-12; MIP passport digital handoff",
+  "required_claims": [
+    {"name": "data_group_1", "namespace": "com.icao.passport", "description": "DG1: TD3 machine-readable-zone data", "required": true},
+    {"name": "data_group_2", "namespace": "com.icao.passport", "description": "DG2: encoded facial biometric", "required": true},
+    {"name": "sod", "namespace": "com.icao.passport", "description": "EF.SOD: CMS SignedData containing the LDS Security Object and data-group hashes", "required": true}
+  ],
+  "required_namespaces": ["com.icao.passport"],
+  "issuer_artifact_requirements": {"requires_x509_cert": true, "cert_key_usage": ["digitalSignature"]},
+  "key_requirements": {
+    "trust_anchor": "CSCA",
+    "document_signer_certificate_required": true,
+    "validation_reference": "ICAO Doc 9303 Part 12"
+  },
+  "pki_hierarchy": {
+    "root": "CSCA",
+    "leaf": "Document Signer Certificate",
+    "csca_key_usage": ["keyCertSign", "cRLSign"],
+    "document_signer_key_usage": ["digitalSignature"]
+  },
+  "trust_profile_constraints": {
+    "compatible_profile_types": ["ICAO", "CUSTOM"],
+    "required_source_types": ["ROOT_CA"],
+    "required_formats": ["ICAO_EMRTD"]
+  },
+  "revocation_methods": ["CRL"],
+  "revocation_required": true,
+  "allow_skip_revocation": false,
+  "trust_source_types": ["ROOT_CA"],
+  "holder_binding_required": false,
+  "is_system": true,
+  "immutable": false,
+  "status": "DRAFT",
+  "discoverable": false,
+  "created_at": "2026-09-27T00:00:00Z"
+}

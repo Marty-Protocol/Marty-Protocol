@@ -1,0 +1,95 @@
+# Flow - Entity Specification
+
+**Entity:** Flow
+**Version:** 0.4.0
+**Stability:** Per use-case
+**Section in root spec:** Section 9
+
+## Purpose
+
+A Flow is the reusable orchestration definition for an identity operation. Standard FlowTypes are protocol-aligned and have fixed ordered sequences. A FlowExecution is one runtime instance.
+
+## Contract
+
+The normative shape is `schemas/flow.json`. FlowType metadata, required references, categories, sequences, and extensible steps are defined once in `enums/flow-types.json`.
+
+Standard flows configure organization, name, a standard FlowType, type-correct object references, approval strategy, trigger, declared hook points, and lifecycle status.
+
+Custom flows configure `flow_type: custom` and a `schemas/flow-extension.json` envelope. A custom flow derives its category and intent from `extension.extends_flow_type`, but does not claim conformance to that standard sequence.
+
+## Lifecycle
+
+```text
+DRAFT -> ACTIVE -> PAUSED -> ACTIVE
+  |         |
+  +---------+---------> ARCHIVED
+```
+
+- Creation MUST produce `DRAFT`.
+- Activation MUST validate schema, references, compatibility, and runtime capabilities.
+- `PAUSED` definitions create no new executions.
+- `ARCHIVED` definitions are immutable and create no new executions.
+
+## Physical Document Issuance
+
+`physical_document_issuance` is normative for ICAO 9303 ePassport production. It requires an active ICAO eMRTD Credential Template, an active Application Template, a physical-production Delivery Destination Profile, and available document-signer and personalization capabilities.
+
+Its fixed sequence is `accept_application`, `validate_evidence`, `approval_decision`, `generate_data_groups`, `sign_sod`, `submit_to_personalization`, `track_production`, `quality_verify`, and `activate_credential`.
+
+## Passport Digital Handoff (proposed for MIP 0.6.0)
+
+`passport_digital_handoff` is a separate standard FlowType for Marty-created ICAO eMRTD data, signing, verification, and encrypted handoff. It requires active, organization-compatible Credential and Application Templates, the `ICAO_PASSPORT_DIGITAL_HANDOFF` Compliance Profile, and a `digital_handoff` Delivery Destination Profile. Its fixed sequence is `accept_application`, `validate_evidence`, `approval_decision`, `generate_data_groups`, `sign_sod`, `verify_digital_package`, `seal_handoff_package`, and `handoff_ready`. It does not claim physical personalization, booklet production, shipment, or activation. See `protocol/passport-digital-handoff/SPECIFICATION.md`.
+
+## Validation
+
+- Standard flows MUST NOT include `extension`.
+- Custom flows MUST include a valid extension and a resolvable entry step.
+- Custom step IDs MUST be unique, transitions MUST resolve, and the graph MUST be acyclic.
+- Standard hooks MUST target only extensible steps declared for the selected FlowType.
+- Active flows MUST reference active, organization-compatible objects and available runtime capabilities.
+- Physical flows MUST fail activation when signing or personalization capabilities are unavailable.
+- Passport digital handoff flows MUST fail activation when managed signing, verification, secure artifact encryption, or a compatible `digital_handoff` destination is unavailable.
+
+## Public request boundary
+
+- Creation uses `schemas/flow-create-request.json`. The authenticated tenant and
+  `organization_id` MUST match.
+- Updates use `PATCH` and `schemas/flow-update-request.json`. A patch MUST include
+  `organization_id` plus at least one mutable field. The service MUST merge the
+  patch with the stored definition and validate the complete result before saving.
+- Starting an execution uses `schemas/flow-execution-start-request.json` and MUST
+  include both `organization_id` and `flow_definition_id`. A definition from a
+  different organization MUST be treated as not found.
+- Public requests and responses MUST NOT contain issuer-profile IDs, signing
+  service IDs, key references, KMS/provider selectors, private keys, bearer
+  tokens, pre-authorized codes, client secrets, or API keys. Those values remain
+  private service state.
+- Standard-flow responses omit `extension`; custom-flow responses include the
+  validated extension envelope.
+
+## API
+
+```text
+GET    /v1/flows/capabilities
+GET    /v1/flows/definitions
+POST   /v1/flows/definitions
+GET    /v1/flows/definitions/{id}
+PATCH  /v1/flows/definitions/{id}
+DELETE /v1/flows/definitions/{id}
+POST   /v1/flows/definitions/{id}/validate
+POST   /v1/flows/definitions/{id}/activate
+POST   /v1/flows/instances
+GET    /v1/flows/instances
+GET    /v1/flows/instances/{id}
+POST   /v1/flows/instances/{id}/advance
+POST   /v1/flows/instances/{id}/cancel
+GET    /v1/flows/instances/{id}/result
+```
+
+## See Also
+
+- Root specification: Section 9
+- Flow schema: `schemas/flow.json`
+- Extension schema: `schemas/flow-extension.json`
+- FlowType manifest: `enums/flow-types.json`
+- Execution specification: `protocol/flow-execution/SPECIFICATION.md`
