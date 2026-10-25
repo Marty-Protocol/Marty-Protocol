@@ -63,6 +63,8 @@ def test_digital_destination_rejects_physical_or_unscoped_configuration(changes:
     {"bureau_job_id": "bureau-1"},
     {"mrz_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
     {"secure_artifact_reference": "vault://private/path"},
+    {"artifact_sha256": "not-a-digest"},
+    {"secure_artifact_reference": ""},
     {"issuer_profile_bindings": {"csca": {}}},
     {"artifact_seal_flow_attestation_sha256": "abababababababababababababababababababababababababababababababab"},
 ])
