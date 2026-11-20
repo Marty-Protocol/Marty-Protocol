@@ -23,7 +23,7 @@
   "setup_requirements": [
     "Canvas Credentials issuer and badgeclass selected by an organization admin",
     "Canvas Credentials API token stored outside MIP and referenced by secret name",
-    "Canvas program binding enabled for wallet plus Canvas mirror delivery"
+    "Independent connector with separately qualified post-issuance mirror support"
   ],
   "capabilities": {
     "holder_wallet": false,
@@ -32,7 +32,7 @@
     "status_sync": true,
     "provenance": true
   },
-  "is_enabled": true,
+  "is_enabled": false,
   "created_at": "2026-05-24T00:00:00Z"
 }
 
